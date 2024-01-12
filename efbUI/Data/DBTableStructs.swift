@@ -26,7 +26,7 @@ struct AirportTable {
   let id: String
 }
 
-struct AirportCommunicationTable {
+struct AirportCommunicationTable: Hashable {
   let areaCode: String
   let icaoCode: String
   let airportIdentifier: String

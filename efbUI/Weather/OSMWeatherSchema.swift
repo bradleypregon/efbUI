@@ -128,5 +128,6 @@ struct Temp: Codable {
 
 // MARK: - Minutely
 struct Minutely: Codable {
-  let dt, precipitation: Int
+  let dt: Int
+  let precipitation: Double
 }

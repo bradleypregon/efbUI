@@ -67,8 +67,13 @@ struct AirportScreen: View {
                   GridRow {
                     Text("Flight category")
                       .font(.subheadline)
-                    Text("VFR")
-                      .fontWeight(.semibold)
+                    if let wx = airportScreenViewModel.airportWx {
+                      Text(airportScreenViewModel.calculateWxCategory(wx: wx).rawValue)
+                        .fontWeight(.semibold)
+                    } else {
+                      Text("N/A")
+                        .fontWeight(.semibold)
+                    }
                   }
                   GridRow {
                     Text("Elevation")
@@ -79,13 +84,13 @@ struct AirportScreen: View {
                   GridRow {
                     Text("Fuel")
                       .font(.subheadline)
-                    Text("Jet A, 100LL")
+                    Text("Placeholder")
                       .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Proc Avail")
                       .font(.subheadline)
-                    Text("ILS, GPS, LOC")
+                    Text("Placeholder")
                       .fontWeight(.semibold)
                   }
                 }
@@ -191,19 +196,19 @@ struct AirportScreenInfoTabBuilder: View {
     switch selectedTab {
     case .freq:
       if airportVM.selectedAirportComms != nil {
-        AirportScreenFreqTab()
+        AirportScreenFreqTab(comms: airportVM.selectedAirportComms)
       } else {
         ContentUnavailableView("Airport Frequencies Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view frequencies."))
       }
     case .wx:
       if airportVM.airportWx != nil {
-        AirportScreenWxTab()
+        AirportScreenWxTab(wx: airportVM.airportWx)
       } else {
         ContentUnavailableView("Airport Weather Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view weather."))
       }
     case .rwy:
       if airportVM.selectedAirportRunways != nil {
-        AirportScreenRwyTab()
+        AirportScreenRwyTab(runway: airportVM.selectedAirportRunways)
       } else {
         ContentUnavailableView("Airport Runways Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view runways."))
       }
@@ -215,7 +220,7 @@ struct AirportScreenInfoTabBuilder: View {
       }
     case .localwx:
       if airportVM.osmWeatherResults != nil {
-        AirportScreenLocalWxTab()
+        AirportScreenLocalWxTab(localwx: airportVM.osmWeatherResults)
       } else {
         ContentUnavailableView("Airport Local Weather Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view local weather."))
       }
@@ -224,20 +229,59 @@ struct AirportScreenInfoTabBuilder: View {
 }
 
 struct AirportScreenFreqTab: View {
+  let comms: [AirportCommunicationTable]?
+  
   var body: some View {
-    Text("Freq")
+    if let comms {
+      ForEach(comms, id:\.self) { comm in
+        VStack {
+          HStack {
+            Text(comm.communicationType)
+            Text("\(comm.communicationFrequency.string)")
+            Text(comm.callsign)
+          }
+        }
+      }
+    }
   }
 }
 
 struct AirportScreenWxTab: View {
+  let wx: AirportMetarInfo?
+  
   var body: some View {
-    Text("Wx")
+    if let wx = wx?.first {
+      VStack {
+        Text("METAR")
+        Text(wx.rawOb ?? "METAR Unavailable")
+        // TODO: Split TAF on each line. Line starts with 'FM[day][hour][minute]' exc. first line
+        Text("TAF")
+        Text(wx.rawTaf ?? "TAF Unavailable")
+      }
+    }
   }
 }
 
 struct AirportScreenRwyTab: View {
+  let runway: [RunwayTable]?
+  
   var body: some View {
-    Text("Rwy")
+    if let runway {
+      ForEach(runway, id:\.runwayIdentifier) { runway in
+        VStack {
+          HStack {
+            // TODO: Convert surfaceCode to something friendly
+            // TODO: formatting
+            Text(runway.runwayIdentifier)
+            Text("\(runway.runwayMagneticBearing)")
+            Text("\(runway.runwayTrueBearing)")
+            Text("\(runway.runwayLength)")
+            Text("\(runway.runwayWidth)")
+            Text("\(runway.surfaceCode)")
+          }
+        }
+      }
+    }
   }
 }
 
@@ -265,15 +309,13 @@ struct AirportScreenChart: View {
             ForEach(charts.general, id: \.chartName) { chart in
               HStack {
                 Button {
-                  // starred.contains(chart) ? remove chart : add chart
-//                  starred.contains(chart) ? print("removeChart") : starred.append(chart)
+                  // TODO: Clicking chart keeps adding it to starred
                   if starred.contains(chart) {
                     starred.removeAll { $0.chartName == chart.chartName }
                   } else {
                     starred.append(chart)
                   }
                 } label: {
-                  // starred.contains(chart) ? star.fill : star
                   if starred.contains(chart) {
                     Image(systemName: "star.fill")
                   } else {
@@ -286,8 +328,6 @@ struct AirportScreenChart: View {
                 } label: {
                   Text(chart.chartName)
                 }
-                .background(.blue)
-                .clipShape(Capsule())
               }
             }
           }
@@ -295,21 +335,85 @@ struct AirportScreenChart: View {
           /// Departure Charts
           DisclosureGroup("Departure") {
             ForEach(charts.dp, id: \.chartName) { chart in
-              Text(chart.chartName)
+              HStack {
+                Button {
+                  // TODO: Clicking chart keeps adding it to starred
+                  if starred.contains(chart) {
+                    starred.removeAll { $0.chartName == chart.chartName }
+                  } else {
+                    starred.append(chart)
+                  }
+                } label: {
+                  if starred.contains(chart) {
+                    Image(systemName: "star.fill")
+                  } else {
+                    Image(systemName: "star")
+                  }
+                }
+                Spacer()
+                Button {
+                  selectedChart = chart
+                } label: {
+                  Text(chart.chartName)
+                }
+              }
             }
           }
           
           /// Arrival Charts
           DisclosureGroup("Arrival") {
             ForEach(charts.star, id: \.chartName) { chart in
-              Text(chart.chartName)
+              HStack {
+                Button {
+                  // TODO: Clicking chart keeps adding it to starred
+                  if starred.contains(chart) {
+                    starred.removeAll { $0.chartName == chart.chartName }
+                  } else {
+                    starred.append(chart)
+                  }
+                } label: {
+                  if starred.contains(chart) {
+                    Image(systemName: "star.fill")
+                  } else {
+                    Image(systemName: "star")
+                  }
+                }
+                
+                Button {
+                  selectedChart = chart
+                } label: {
+                  Text(chart.chartName)
+                }
+              }
             }
           }
           
           /// Approach Charts
           DisclosureGroup("Approach") {
             ForEach(charts.capp, id: \.chartName) { chart in
-              Text(chart.chartName)
+              HStack {
+                Button {
+                  // TODO: Clicking chart keeps adding it to starred
+                  if starred.contains(chart) {
+                    starred.removeAll { $0.chartName == chart.chartName }
+                  } else {
+                    starred.append(chart)
+                  }
+                } label: {
+                  if starred.contains(chart) {
+                    Image(systemName: "star.fill")
+                  } else {
+                    Image(systemName: "star")
+                  }
+                }
+                Spacer()
+                Button {
+                  selectedChart = chart
+                  print("selected chart: \(selectedChart?.chartName)")
+                } label: {
+                  Text(chart.chartName)
+                }
+              }
             }
           }
         }
@@ -329,19 +433,17 @@ struct AirportScreenChart: View {
 }
 
 struct AirportScreenLocalWxTab: View {
+  let localwx: OSMWeatherSchema?
+  
   var body: some View {
-    Text("Local Wx")
+    if let localwx {
+      Text("\(localwx.current.temp.string)")
+      Text("main: \(localwx.current.weather.first?.main ?? "")")
+      Text("desc: \(localwx.current.weather.first?.description ?? "")")
+      
+    }
   }
 }
-
-/*
- AirportChartAPISchema(
- airport: "KDSM",
- general: [EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "70000", chartCode: "APD", chartName: "AIRPORT DIAGRAM", pdfName: "00117AD.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117AD.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "10700", chartCode: "HOT", chartName: "HOT SPOT", pdfName: "NC3HOTSPOT.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/NC3HOTSPOT.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "10100", chartCode: "MIN", chartName: "TAKEOFF MINIMUMS", pdfName: "NC3TO.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/NC3TO.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "10200", chartCode: "MIN", chartName: "ALTERNATE MINIMUMS", pdfName: "NC3ALT.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/NC3ALT.PDF")],
- dp: [EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "90100", chartCode: "DP", chartName: "DES MOINES ONE", pdfName: "00117DESMOINES.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117DESMOINES.PDF")],
- star: [], 
- capp: [EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "50750", chartCode: "IAP", chartName: "ILS OR LOC RWY 05", pdfName: "00117IL5.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117IL5.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "50750", chartCode: "IAP", chartName: "ILS OR LOC RWY 13", pdfName: "00117IL13.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117IL13.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "50750", chartCode: "IAP", chartName: "ILS OR LOC RWY 31", pdfName: "00117IL31.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117IL31.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "51125", chartCode: "IAP", chartName: "ILS RWY 31 (SA CAT I)", pdfName: "00117I31SAC1.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117I31SAC1.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "51600", chartCode: "IAP", chartName: "ILS RWY 31 (CAT II - III)", pdfName: "00117I31C2_3.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117I31C2_3.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "53525", chartCode: "IAP", chartName: "RNAV (GPS) RWY 05", pdfName: "00117R5.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117R5.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "53525", chartCode: "IAP", chartName: "RNAV (GPS) RWY 13", pdfName: "00117R13.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117R13.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "53525", chartCode: "IAP", chartName: "RNAV (GPS) RWY 23", pdfName: "00117R23.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117R23.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "53525", chartCode: "IAP", chartName: "RNAV (GPS) RWY 31", pdfName: "00117R31.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117R31.PDF"), EFB.AirportDetail(state: "IA", stateFull: "IOWA", city: "DES MOINES", volume: "NC-3", airportName: "DES MOINES INTL", military: "N", faaIdent: "DSM", icaoIdent: "KDSM", chartSeq: "55800", chartCode: "IAP", chartName: "VOR RWY 23", pdfName: "00117V23.PDF", pdfPath: "https://charts.aviationapi.com/AIRAC_231228/00117V23.PDF")])
- */
 
 
 #Preview {
