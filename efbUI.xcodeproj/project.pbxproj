@@ -153,7 +153,6 @@
 				A20620252B49DC890034D902 /* AirportDetailViewModel.swift */,
 				3A0111CC2737253C001CFDC5 /* AirportScreen.swift */,
 				A21B02362B5034850041D60B /* PDFKitView.swift */,
-				A2C6ED112B2E226B00856381 /* TestAirportSearchList.swift */,
 			);
 			path = AirportDetails;
 			sourceTree = "<group>";
@@ -265,6 +264,7 @@
 		A2EC6FD72B49AF9A00F31364 /* Deprecated */ = {
 			isa = PBXGroup;
 			children = (
+				A2C6ED112B2E226B00856381 /* TestAirportSearchList.swift */,
 				3A69AF42279BBB8600E29135 /* AirportDBAPI.swift */,
 				3A69AF44279BBBD800E29135 /* AirportDB.swift */,
 				3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */,
