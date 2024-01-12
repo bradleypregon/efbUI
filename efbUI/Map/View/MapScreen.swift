@@ -135,7 +135,7 @@ struct MapScreen: View {
   
   func addRasterRadarSource(_ map: MapboxMap) {
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
-    let jsonPath = "/v2/radar/nowcast_9b48866a7afa"
+    let jsonPath = "/v2/radar/nowcast_c9a0174466e7"
     let stringPaths = "{z}/{x}/{y}"
     let mapColor = "4"
     let options = "0_1"
@@ -146,8 +146,9 @@ struct MapScreen: View {
     rasterSource.tiles = [url]
     rasterSource.tileSize = 256
     
-    let rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
-
+    var rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
+    rasterLayer.rasterOpacity = .constant(0.4)
+    
     do {
       try map.addSource(rasterSource)
       try map.addLayer(rasterLayer)
@@ -234,6 +235,8 @@ struct MapScreen: View {
   
   // MARK: calculateVisibleMapRegion
   func calculateVisibleMapRegion(center: CLLocationCoordinate2D, zoom: CGFloat, geometry: GeometryProxy) -> CoordinateBounds {
+    // TODO: Handle errors when zoomed out and panning to North or South pole
+    // TODO: Fix calculation - not covering all of what is visible on map
     let aspectRatio = Double(geometry.size.width / geometry.size.height)
     // landscape: > 1 | portrait: < 1
     var spanLong = 0.0
