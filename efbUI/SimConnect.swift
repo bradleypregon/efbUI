@@ -10,6 +10,7 @@ import Network
 import CoreLocation
 import MapKit
 import Combine
+import Observation
 
 struct SimConnectShipEvent {
   var coordinate: CLLocationCoordinate2D
@@ -23,13 +24,14 @@ struct SimConnectShipEvent {
 // XATTFlight Events, _, _, _
 // XGPSFlight Events, Longitude, Latitude, Height in meters, Heading, Speed (assume km/s?)
 
-class SimConnect: ObservableObject {
+@Observable
+class SimConnect {
   static let shared = SimConnect()
-  @Published var simConnectShip: SimConnectShipEvent? = nil
+  var simConnectShip: SimConnectShipEvent? = nil
   private var cancellables = Set<AnyCancellable>()
   
   // publisher for changes
-  @State var didChange: Bool = false
+  var didChange: Bool = false
   let publisher = PassthroughSubject<Bool, Never>()
   init() {
     publisher.sink { temp in

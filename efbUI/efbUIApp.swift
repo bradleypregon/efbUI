@@ -6,23 +6,28 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct efbUIApp: App {
-  @StateObject var simConnect = SimConnect()
-  let settings = Settings()
+  @State private var simConnect: SimConnect = SimConnect()
+  @State private var settings: Settings = Settings()
   
   var body: some Scene {
     WindowGroup {
-      
-      VStack {
-        TopBarView()
-          .background(.bar)
+      ZStack {
         TabBar()
+          .frame(maxHeight: .infinity)
+          .padding(.top, 50)
+        VStack {
+          TopBarView()
+            .background(.bar)
+          Spacer()
+        }
       }
-      .environmentObject(simConnect)
-      .environmentObject(settings)
-      
+      .environment(simConnect)
+      .environment(settings)
     }
+    .modelContainer(for: SimBriefUser.self)
   }
 }

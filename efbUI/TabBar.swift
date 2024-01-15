@@ -8,9 +8,7 @@
 import SwiftUI
 
 struct TabBar: View {
-  @State var selectedTab = 1
-  
-  @EnvironmentObject var settings: Settings
+  @State var selectedTab = 0
   
   var body: some View {
     TabView(selection: $selectedTab) {
@@ -35,7 +33,7 @@ struct TabBar: View {
         }
         .tag(2)
       
-      SettingsView(settings: _settings)
+      SettingsView()
         .tabItem {
           Image(systemName: "gear")
           Text("Settings")
