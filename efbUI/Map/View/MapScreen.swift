@@ -8,12 +8,12 @@
 import SwiftUI
 @_spi(Experimental) import MapboxMaps
 
+
 struct MapScreen: View {
   @Binding var selectedTab: Int
-  @EnvironmentObject var simConnect: SimConnect
-  @EnvironmentObject var settings: Settings
+  @Environment(SimConnect.self) private var simConnect
+  @Environment(Settings.self) private var settings
   
-  @State private var prevZoom: CGFloat = 0.0
   @State private var viewport: Viewport = .camera(center: CLLocationCoordinate2D(latitude: 39.5, longitude: -98.0), zoom: 3, bearing: 0, pitch: 0)
   private let ornamentOptions = OrnamentOptions(scaleBar: ScaleBarViewOptions(visibility: .hidden))
   private let style = "mapbox://styles/bradleypregon/clpvnz3y900yn01qmby0f9xn6"
@@ -24,13 +24,22 @@ struct MapScreen: View {
   @State var airports: [Airport] = []
   @State var selectedAirport: AirportTable?
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
-  @State private var displayRadar: Bool = false
+  @State var proxyMap: MapProxy? = nil
+  
+  @State private var displayRadar: Bool = false {
+    didSet {
+      if let proxyMap, let map = proxyMap.map {
+        displayRadar ? addRasterRadarSource(map) : removeRasterRadarSource(map)
+      }
+    }
+  }
   var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
   
   @State var ownshipImage: Image? = nil
   
-  //  var cancelables = Set<AnyCancelable>()
   private let radarSourceID = "radar-source"
+  @State private var rasterRadarAlertVisible: Bool = false
+  
   
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
@@ -86,13 +95,7 @@ struct MapScreen: View {
             }
           })
           .onAppear {
-            if displayRadar {
-              if let map = proxy.map {
-                DispatchQueue.main.async {
-                  addRasterRadarSource(map)
-                }
-              }
-            }
+            proxyMap = proxy
           }
           // Publisher to update ownship image
           .onReceive(simConnect.publisher) { _ in
@@ -101,18 +104,21 @@ struct MapScreen: View {
               updateImageRotation(heading: heading)
             }
           }
+          .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
+            Button("Ok") {
+              // TODO: Handle retrying radar
+              displayRadar.toggle()
+            }
+          }
         }
         .ignoresSafeArea()
         
         // menu
-        Menu("Map Options") {
+        VStack {
           Button {
             displayRadar.toggle()
           } label: {
-            HStack {
-              Text("Wx Radar")
-              Image(systemName: displayRadar ? "cloud.sun.fill" : "cloud.sun")
-            }
+            Image(systemName: displayRadar ? "cloud.sun.fill" : "cloud.sun")
           }
         }
       }
@@ -135,6 +141,8 @@ struct MapScreen: View {
   
   func addRasterRadarSource(_ map: MapboxMap) {
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
+    // TODO: Get current Radar API json string
+    
     let jsonPath = "/v2/radar/nowcast_c9a0174466e7"
     let stringPaths = "{z}/{x}/{y}"
     let mapColor = "4"
@@ -153,9 +161,21 @@ struct MapScreen: View {
       try map.addSource(rasterSource)
       try map.addLayer(rasterLayer)
     } catch {
+      rasterRadarAlertVisible = true
       print("Failed to update style. Error: \(error)")
     }
     
+  }
+  
+  func removeRasterRadarSource(_ map: MapboxMap) {
+    
+    do {
+//      try map.removeSource(withId: radarSourceID)
+      try map.removeLayer(withId: "radar-layer")
+      try map.removeSource(withId: radarSourceID)
+    } catch {
+      print("Failed to remove radar source. Error: \(error)")
+    }
   }
   
   func getAirportIcon(for size: String) -> PointAnnotation.Image? {

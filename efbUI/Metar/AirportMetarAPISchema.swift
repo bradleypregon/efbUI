@@ -8,18 +8,18 @@
 import Foundation
 
 struct AirportMetarInfoElement: Decodable {
-  let metarID: Int
-  let icaoID: String
-  let receiptTime: String
-  let obsTime: Int
-  let reportTime: String
-  let temp: Double
-  let dewp: Double
+  let metarID: Int?
+  let icaoID: String?
+  let receiptTime: String?
+  let obsTime: Int?
+  let reportTime: String?
+  let temp: Double?
+  let dewp: Double?
   let wdir: Int?
   let wspd: Int?
   let wgst: Int?
   let visib: Visib // "10+" or 9, 8, etc.
-  let altim: Double
+  let altim: Double?
   let slp: Double?
   let wxString: String?
   let presTend: Double?
