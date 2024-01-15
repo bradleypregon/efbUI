@@ -7,6 +7,8 @@
 
 import SwiftUI
 import MapKit
+import Observation
+import SwiftData
 
 enum MapStyle: String, CaseIterable {
   case standard = "Standard"
@@ -15,13 +17,22 @@ enum MapStyle: String, CaseIterable {
   case hybrid = "Hybrid"
 }
 
-class Settings: ObservableObject {
-  @Published var mapStyle: MapStyle = .standard
+@Observable
+class Settings {
+  var mapStyle: MapStyle = .standard
+  
+  var simBriefUID: String = ""
 }
 
 struct SettingsView: View {
   
-  @EnvironmentObject var settings: Settings
+  @Environment(Settings.self) private var settings
+  @Environment(\.modelContext) private var modelContext
+  
+  @State var simbriefUserIDString: String = ""
+  
+//  var simbriefUser: SimBriefUser?
+  @Query var simbriefUser: [SimBriefUser]
   
   var body: some View {
     NavigationStack {
@@ -29,18 +40,37 @@ struct SettingsView: View {
         Spacer()
           .frame(height: 400)
         Form {
-          Section(header: Text("MAP"), content: {
+          Section(header: Text("Map"), content: {
             HStack {
               Text("Map Style")
-              Picker("", selection: $settings.mapStyle) {
-                ForEach(MapStyle.allCases, id: \.self) { style in
-                  Text(style.rawValue).tag(style)
-                }
-              }
+//              Picker("", selection: Binding(settings.mapStyle.rawValue)) {
+//                ForEach(MapStyle.allCases, id: \.self) { style in
+//                  Text(style.rawValue).tag(style)
+//                }
+//              }
             }
           })
+          Section(header: Text("Simbrief")) {
+            HStack {
+              Text("SimBrief User ID")
+              TextField("SimBrief ID (123456)", text: $simbriefUserIDString)
+                .onSubmit {
+                  if simbriefUser.isEmpty {
+                    // new
+                    let user = SimBriefUser(userID: simbriefUserIDString)
+                    modelContext.insert(user)
+                  } else {
+                    // edit
+                    simbriefUser.first?.userID = simbriefUserIDString
+                  }
+                }
+            }
+          }
         }
       }
+    }
+    .onAppear {
+      simbriefUserIDString = simbriefUser.first?.userID ?? ""
     }
   }
 }

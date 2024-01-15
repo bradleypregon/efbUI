@@ -31,6 +31,9 @@
 		A20620242B49B6AB0034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A20620232B49B6AB0034D902 /* MapboxMaps */; };
 		A20620262B49DC890034D902 /* AirportDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20620252B49DC890034D902 /* AirportDetailViewModel.swift */; };
 		A21B02372B5034850041D60B /* PDFKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02362B5034850041D60B /* PDFKitView.swift */; };
+		A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02382B55C8760041D60B /* SimBriefUserData.swift */; };
+		A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B023B2B55D4A00041D60B /* SimBriefAPI.swift */; };
+		A21B023E2B55D4EE0041D60B /* SimBriefRouteSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B023D2B55D4EE0041D60B /* SimBriefRouteSchema.swift */; };
 		A22322D52B20B74E001274CA /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22322D42B20B74E001274CA /* Extensions.swift */; };
 		A232CCBC2B250659005C3E2E /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A232CCBB2B250659005C3E2E /* MapboxMaps */; };
 		A232CCBE2B252068005C3E2E /* MapboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A232CCBD2B252068005C3E2E /* MapboxView.swift */; };
@@ -77,6 +80,9 @@
 		A2046B0A2B28E58300E04BEA /* MKViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKViewRepresentable.swift; sourceTree = "<group>"; };
 		A20620252B49DC890034D902 /* AirportDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportDetailViewModel.swift; sourceTree = "<group>"; };
 		A21B02362B5034850041D60B /* PDFKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitView.swift; sourceTree = "<group>"; };
+		A21B02382B55C8760041D60B /* SimBriefUserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimBriefUserData.swift; sourceTree = "<group>"; };
+		A21B023B2B55D4A00041D60B /* SimBriefAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimBriefAPI.swift; sourceTree = "<group>"; };
+		A21B023D2B55D4EE0041D60B /* SimBriefRouteSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimBriefRouteSchema.swift; sourceTree = "<group>"; };
 		A22322D42B20B74E001274CA /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		A232CCBD2B252068005C3E2E /* MapboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapboxView.swift; sourceTree = "<group>"; };
 		A257E1B32B2A75C6003B1859 /* SQLiteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteManager.swift; sourceTree = "<group>"; };
@@ -194,6 +200,7 @@
 		3AE11B2727319450005974E5 /* efbUI */ = {
 			isa = PBXGroup;
 			children = (
+				A21B023A2B55D48D0041D60B /* SimBrief */,
 				A2C6ED1B2B3005BB00856381 /* Charts */,
 				A2C6ED182B30059600856381 /* Metar */,
 				A2C6ED132B2E3D9300856381 /* Weather */,
@@ -224,12 +231,22 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		A21B023A2B55D48D0041D60B /* SimBrief */ = {
+			isa = PBXGroup;
+			children = (
+				A21B023B2B55D4A00041D60B /* SimBriefAPI.swift */,
+				A21B023D2B55D4EE0041D60B /* SimBriefRouteSchema.swift */,
+			);
+			path = SimBrief;
+			sourceTree = "<group>";
+		};
 		A25CB27B2B249215008E9FEF /* Data */ = {
 			isa = PBXGroup;
 			children = (
 				A25CB27C2B249224008E9FEF /* navdata.db */,
 				A257E1B32B2A75C6003B1859 /* SQLiteManager.swift */,
 				A257E1B52B2AB514003B1859 /* DBTableStructs.swift */,
+				A21B02382B55C8760041D60B /* SimBriefUserData.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -402,14 +419,17 @@
 				A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */,
 				3AE11B2927319450005974E5 /* efbUIApp.swift in Sources */,
 				3A24A79227324259000D98E5 /* ScratchPadView.swift in Sources */,
+				A21B023E2B55D4EE0041D60B /* SimBriefRouteSchema.swift in Sources */,
 				3A1BB451278A3FB9001AC228 /* AirportAnnotationCalloutView.swift in Sources */,
 				A2C6ED1A2B3005A700856381 /* FetchAirportWx.swift in Sources */,
 				A2C6ED232B300A8B00856381 /* AirportChartAPISchema.swift in Sources */,
 				A257E1B42B2A75C6003B1859 /* SQLiteManager.swift in Sources */,
+				A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */,
 				A2C6ED1D2B3005C900856381 /* FetchAirportCharts.swift in Sources */,
 				3A69AF45279BBBD800E29135 /* AirportDB.swift in Sources */,
 				3A69AF43279BBB8600E29135 /* AirportDBAPI.swift in Sources */,
 				3A1BB44F278A1849001AC228 /* AirportAnnotation.swift in Sources */,
+				A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */,
 				A2A2436C2B0082A700245A0F /* Airport.swift in Sources */,
 				3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */,
 				A2C6ED172B2E3DCE00856381 /* OSMWeatherSchema.swift in Sources */,
@@ -474,7 +494,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -532,7 +552,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -562,7 +582,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -598,7 +618,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
