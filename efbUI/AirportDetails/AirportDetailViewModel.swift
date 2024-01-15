@@ -107,16 +107,12 @@ class AirportDetailViewModel {
      MVFR: Ceiling 1,000-3,000ft AND/OR Vis 3-5sm
      IFR:  Ceiling 500-1000ft    AND/OR Vis 1-3sm
      LIFR: Ceiling <500ft        AND/OR Vis <1sm
-     
-     ex/ KDSM 311254Z 32016G24KT 4SM -SN OVC006 M02/M04 A3007 RMK AO2 SNE29B48 SLP191 P0000 T10171044 clouds=[cover: "OVC", base: 1300]
-     - MVFR
-     
      */
     guard let wx = wx.first else { return .NA }
     
-    var lowestBase: Int = 5000
+    var lowestBase: Int = 4000
     var visib: Double = 10
-    var currWx: WxCategory = .VFR
+    //    var currWx: WxCategory = .VFR
     
     switch wx.visib {
     case .int(let int):
@@ -141,29 +137,52 @@ class AirportDetailViewModel {
       }
     }
     
-    switch visib {
-    case ...3:
-      currWx = .LIFR
-    case 3...5:
-      currWx = .IFR
-    case 5...10:
-      currWx = .MVFR
-    default:
-      currWx = .VFR
-    }
+    /*
+     switch visib {
+     case ...3:
+     currWx = .LIFR
+     case 3...5:
+     currWx = .IFR
+     case 5...10:
+     currWx = .MVFR
+     default:
+     currWx = .VFR
+     }
+     
+     switch lowestBase {
+     case ...500:
+     currWx = .LIFR
+     case 500...1000:
+     currWx = .IFR
+     case 1000...3000:
+     currWx = .MVFR
+     default:
+     currWx = .VFR
+     }
+     
     
-    switch lowestBase {
-    case ...500:
-      currWx = .LIFR
-    case 500...1000:
-      currWx = .IFR
-    case 1000...3000:
-      currWx = .MVFR
-    default:
-      currWx = .VFR
+    if lowestBase > 3000 && visib > 5 {
+      return .VFR
+    } else if (lowestBase <= 3000 && lowestBase >= 1000) || (visib <= 5 && visib >= 3) {
+      return .MVFR
+    } else if (lowestBase <= 1000 && lowestBase >= 500) || (visib <= 3 && visib >= 1) {
+      return .IFR
+    } else if (lowestBase <= 500) || (visib <= 1) {
+      return .LIFR
+    } else {
+      return .VFR
     }
+     */
     
-    return currWx
+    if lowestBase >= 3000 && visib >= 5 {
+      return .VFR
+    } else if lowestBase >= 1000 && visib >= 3 {
+      return .MVFR
+    } else if lowestBase >= 500 && visib >= 1 {
+      return .IFR
+    } else {
+      return .LIFR
+    }
     
   }
   
