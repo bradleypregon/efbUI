@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import XMLCoder
 
 class SimBriefAPI {
-  func fetchLastFlightPlan(for userID: String) {
+  func fetchLastFlightPlan(for userID: String, completion: @escaping (SimBriefOFP) -> ()) {
     // https://www.simbrief.com/api/xml.fetcher.php?userid=userID
     let url = "https://www.simbrief.com/api/xml.fetcher.php?userid=\(userID)"
     guard let url = URL(string: url) else { return }
@@ -19,9 +20,13 @@ class SimBriefAPI {
       // 
       do {
         // decode XML Data
-        let xmlParser = XMLParser(data: data)
-        let temp = xmlParser.parse()
-        print(temp)
+        let data = try XMLDecoder().decode(SimBriefOFP.self, from: data)
+//        let encodedXML = try? XMLEncoder().encode(data, withRootKey: "OFP")
+        
+        DispatchQueue.main.async {
+          completion(data)
+        }
+        
       } catch let error {
         print("Error fetching SimBrief Route for: \(userID): \(error)")
       }
