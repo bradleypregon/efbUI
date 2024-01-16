@@ -34,6 +34,7 @@
 		A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02382B55C8760041D60B /* SimBriefUserData.swift */; };
 		A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B023B2B55D4A00041D60B /* SimBriefAPI.swift */; };
 		A21B023E2B55D4EE0041D60B /* SimBriefRouteSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B023D2B55D4EE0041D60B /* SimBriefRouteSchema.swift */; };
+		A21B02412B561C780041D60B /* XMLCoder in Frameworks */ = {isa = PBXBuildFile; productRef = A21B02402B561C780041D60B /* XMLCoder */; };
 		A22322D52B20B74E001274CA /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22322D42B20B74E001274CA /* Extensions.swift */; };
 		A232CCBC2B250659005C3E2E /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A232CCBB2B250659005C3E2E /* MapboxMaps */; };
 		A232CCBE2B252068005C3E2E /* MapboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A232CCBD2B252068005C3E2E /* MapboxView.swift */; };
@@ -116,6 +117,7 @@
 				A232CCBC2B250659005C3E2E /* MapboxMaps in Frameworks */,
 				A20620242B49B6AB0034D902 /* MapboxMaps in Frameworks */,
 				A206201E2B49B5E70034D902 /* Neumorphic in Frameworks */,
+				A21B02412B561C780041D60B /* XMLCoder in Frameworks */,
 				A206201A2B49B4E90034D902 /* Neumorphic in Frameworks */,
 				A2AAEBAF2B1CF82C00BEA78E /* Neumorphic in Frameworks */,
 				A20620222B49B61D0034D902 /* SQLite in Frameworks */,
@@ -338,6 +340,7 @@
 				A206201F2B49B6100034D902 /* MapboxMaps */,
 				A20620212B49B61D0034D902 /* SQLite */,
 				A20620232B49B6AB0034D902 /* MapboxMaps */,
+				A21B02402B561C780041D60B /* XMLCoder */,
 			);
 			productName = efbUI;
 			productReference = 3AE11B2527319450005974E5 /* EFB.app */;
@@ -371,6 +374,7 @@
 				A2AAEBAD2B1CF82C00BEA78E /* XCRemoteSwiftPackageReference "neumorphic" */,
 				A25CB27E2B2494E0008E9FEF /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
+				A21B023F2B561C780041D60B /* XCRemoteSwiftPackageReference "XMLCoder" */,
 			);
 			productRefGroup = 3AE11B2627319450005974E5 /* Products */;
 			projectDirPath = "";
@@ -658,6 +662,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		A21B023F2B561C780041D60B /* XCRemoteSwiftPackageReference "XMLCoder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CoreOffice/XMLCoder.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.17.1;
+			};
+		};
 		A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/mapbox/mapbox-maps-ios.git";
@@ -714,6 +726,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
 			productName = MapboxMaps;
+		};
+		A21B02402B561C780041D60B /* XMLCoder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A21B023F2B561C780041D60B /* XCRemoteSwiftPackageReference "XMLCoder" */;
+			productName = XMLCoder;
 		};
 		A232CCBB2B250659005C3E2E /* MapboxMaps */ = {
 			isa = XCSwiftPackageProductDependency;
