@@ -10,8 +10,9 @@ import SwiftData
 
 @main
 struct efbUIApp: App {
-  @State private var simConnect: SimConnect = SimConnect()
+  @State private var simConnect: SimConnectShips = SimConnectShips()
   @State private var settings: Settings = Settings()
+  @State private var airportDetailViewModel: AirportDetailViewModel = AirportDetailViewModel()
   
   var body: some Scene {
     WindowGroup {
@@ -27,6 +28,7 @@ struct efbUIApp: App {
       }
       .environment(simConnect)
       .environment(settings)
+      .environment(airportDetailViewModel)
     }
     .modelContainer(for: SimBriefUser.self)
   }
