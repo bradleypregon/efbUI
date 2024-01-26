@@ -43,7 +43,7 @@ struct SettingsView: View {
           Section(header: Text("Map"), content: {
             HStack {
               Text("Map Style")
-//              Picker("", selection: Binding(settings.mapStyle.rawValue)) {
+//              Picker("", selection: settings.mapStyle.rawValue) {
 //                ForEach(MapStyle.allCases, id: \.self) { style in
 //                  Text(style.rawValue).tag(style)
 //                }
