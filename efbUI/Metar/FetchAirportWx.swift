@@ -8,23 +8,42 @@
 import Foundation
 
 class FetchAirportWx {
-  func fetchMetarTaf(icao: String, completion: @escaping (AirportMetarInfo) -> ()) {
+  func fetchMetar(icao: String, completion: @escaping (AirportMETARSchema) -> ()) {
     // https://aviationweather.gov/cgi-bin/data/metar.php?ids=KDSM&format=json&taf=true
-    let url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=\(icao)&format=json&taf=true"
+    let url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=\(icao)&format=json"
     guard let url = URL(string: url) else { return }
     
     URLSession.shared.dataTask(with: url) { (data, response, error) in
       guard error == nil else { return }
       guard let data = data else { return }
       do {
-        let result = try JSONDecoder().decode(AirportMetarInfo.self, from: data)
+        let result = try JSONDecoder().decode(AirportMETARSchema.self, from: data)
         DispatchQueue.main.async {
           completion(result)
         }
       } catch let error {
-        print("Error fetching \(icao) METAR/TAF: \(error)")
+        print("Error fetching \(icao) METAR: \(error)")
       }
       
+    }.resume()
+  }
+  
+  func fetchTAF(icao: String, completion: @escaping (AirportTAFSchema) -> ()) {
+    let url = "https://aviationweather.gov/cgi-bin/data/taf.php?ids=\(icao)&format=json"
+    guard let url = URL(string: url) else { return }
+    
+    URLSession.shared.dataTask(with: url) { (data, response, error) in
+      guard error == nil else { return }
+      guard let data = data else { return }
+      
+      do {
+        let result = try JSONDecoder().decode(AirportTAFSchema.self, from: data)
+        DispatchQueue.main.async {
+          completion(result)
+        }
+      } catch {
+        print("Error fetching \(icao) TAF: \(error)")
+      }
     }.resume()
   }
   

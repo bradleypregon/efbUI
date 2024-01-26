@@ -15,7 +15,8 @@ struct AirportAnnotationSidebarView: View {
   @Binding var selectedTab: Int
   @Binding var selectedAirport: AirportTable?
   
-  @State private var airportVM = AirportDetailViewModel.shared
+//  @State private var airportVM = AirportDetailViewModel.shared
+  @Environment(AirportDetailViewModel.self) private var airportVM
   
   var body: some View {
     if let selectedAirport {
@@ -76,14 +77,15 @@ struct AirportAnnotationSidebarView: View {
                 ProgressView()
               } else {
                 VStack {
-                  if let wx = airportVM.airportWx {
+                  if let wx = airportVM.airportWxMetar {
                     Text(airportVM.calculateWxCategory(wx: wx).rawValue)
                   }
                   
                   Text("METAR")
-                  Text(airportVM.airportWx?.first?.rawOb ?? "METAR Unavailable")
+                  Text(airportVM.airportWxMetar?.first?.rawOb ?? "METAR Unavailable")
                   DisclosureGroup("TAF") {
-                    Text(airportVM.airportWx?.first?.rawTaf ?? "TAF Unavailable")
+//                    Text(airportVM.airportWx?.first?.rawTaf ?? "TAF Unavailable")
+                    Text("TAF Here")
                   }
                   
                 }
@@ -148,7 +150,8 @@ struct AirportAnnotationSidebarView: View {
           .foregroundStyle(.gray)
           
           Button {
-            AirportDetailViewModel.shared.selectedAirportICAO = selectedAirport.airportIdentifier
+//            AirportDetailViewModel.shared.selectedAirportICAO = selectedAirport.airportIdentifier
+            airportVM.selectedAirportICAO = selectedAirport.airportIdentifier
             selectedTab = 0
           } label: {
             Text("View Airport")

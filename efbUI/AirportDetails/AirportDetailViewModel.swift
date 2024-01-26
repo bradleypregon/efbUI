@@ -4,14 +4,26 @@
 //
 //  Created by Bradley Pregon on 1/6/24.
 //
-
+import Observation
 import CoreLocation
+import SwiftUI
+
+enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
+  case freq = "Freq"
+  case wx = "Wx"
+  case rwy = "Runways"
+//  case chart = "Charts"
+  case localwx = "Local Wx"
+  
+  var id: Self { self }
+}
 
 @Observable
 class AirportDetailViewModel {
   static let shared = AirportDetailViewModel()
   var selectedAirportElement: Airport?
-  var airportWx: AirportMetarInfo? = nil
+  var airportWxMetar: AirportMETARSchema? = nil
+  var airportWxTAF: AirportTAFSchema? = nil
   var loadingAirportWx: Bool = false
   
   var selectedAirportICAO: String = "" {
@@ -63,7 +75,7 @@ class AirportDetailViewModel {
   func getCommunicationType(comms: [AirportCommunicationTable]?, type: String) -> String {
     if comms == nil { return "" }
     var frequency = ""
-    if let freq = comms?.first(where: { $0.communicationType == type} ) {
+    if let freq = comms?.first(where: { $0.communicationType == type && $0.frequencyUnits == "V"} ) {
       frequency = freq.communicationFrequency.string
       return frequency
     } else {
@@ -90,13 +102,17 @@ class AirportDetailViewModel {
     self.loadingAirportWx = false
     self.loadingAirportWx = true
     let airportWx = FetchAirportWx()
-    airportWx.fetchMetarTaf(icao: icao) { weather in
-      self.airportWx = weather
+    airportWx.fetchMetar(icao: icao) { metar in
+      self.airportWxMetar = metar
+      self.loadingAirportWx = false
+    }
+    airportWx.fetchTAF(icao: icao) { taf in
+      self.airportWxTAF = taf
       self.loadingAirportWx = false
     }
   }
   
-  func calculateWxCategory(wx: AirportMetarInfo) -> WxCategory {
+  func calculateWxCategory(wx: AirportMETARSchema) -> WxCategory {
     /*
      Cloud Ceiling Def: Height of the BASE of the LOWEST clouds that cover MORE than HALF of the sky (BKN, OVC)
      FEW: 1/8 to 2/8 | SCT: 3/8 to 4/8 | BKN: 5/8 to 7/8 | OVC: 8/8
@@ -108,7 +124,7 @@ class AirportDetailViewModel {
      IFR:  Ceiling 500-1000ft    AND/OR Vis 1-3sm
      LIFR: Ceiling <500ft        AND/OR Vis <1sm
      */
-    guard let wx = wx.first else { return .NA }
+    guard let wx = wx.first else { return .VFR }
     
     var lowestBase: Int = 4000
     var visib: Double = 10
@@ -137,43 +153,6 @@ class AirportDetailViewModel {
       }
     }
     
-    /*
-     switch visib {
-     case ...3:
-     currWx = .LIFR
-     case 3...5:
-     currWx = .IFR
-     case 5...10:
-     currWx = .MVFR
-     default:
-     currWx = .VFR
-     }
-     
-     switch lowestBase {
-     case ...500:
-     currWx = .LIFR
-     case 500...1000:
-     currWx = .IFR
-     case 1000...3000:
-     currWx = .MVFR
-     default:
-     currWx = .VFR
-     }
-     
-    
-    if lowestBase > 3000 && visib > 5 {
-      return .VFR
-    } else if (lowestBase <= 3000 && lowestBase >= 1000) || (visib <= 5 && visib >= 3) {
-      return .MVFR
-    } else if (lowestBase <= 1000 && lowestBase >= 500) || (visib <= 3 && visib >= 1) {
-      return .IFR
-    } else if (lowestBase <= 500) || (visib <= 1) {
-      return .LIFR
-    } else {
-      return .VFR
-    }
-     */
-    
     if lowestBase >= 3000 && visib >= 5 {
       return .VFR
     } else if lowestBase >= 1000 && visib >= 3 {
@@ -196,5 +175,5 @@ class AirportDetailViewModel {
 }
 
 enum WxCategory: String {
-  case VFR, MVFR, IFR, LIFR, NA
+  case VFR, MVFR, IFR, LIFR
 }

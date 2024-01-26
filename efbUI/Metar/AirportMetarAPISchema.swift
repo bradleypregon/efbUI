@@ -42,12 +42,11 @@ struct AirportMetarInfoElement: Decodable {
   let prior: Int?
   let name: String
   let clouds: [AirportMetarInfoClouds]?
-  let rawTaf: String?
   
   private enum CodingKeys: String, CodingKey {
     case metarID = "metar_id"
     case icaoID = "icaoId"
-    case receiptTime, obsTime, reportTime, temp, dewp, wdir, wspd, wgst, visib, altim, slp, wxString, presTend, maxT, minT, maxT24, minT24, precip, pcp3hr, pcp6hr, pcp24hr, snow, vertVis, metarType, rawOb, mostRecent, lat, lon, elev, prior, name, clouds, rawTaf
+    case receiptTime, obsTime, reportTime, temp, dewp, wdir, wspd, wgst, visib, altim, slp, wxString, presTend, maxT, minT, maxT24, minT24, precip, pcp3hr, pcp6hr, pcp24hr, snow, vertVis, metarType, rawOb, mostRecent, lat, lon, elev, prior, name, clouds
   }
   
   enum Visib: Decodable {
@@ -72,4 +71,4 @@ struct AirportMetarInfoClouds: Decodable {
   let base: Int?
 }
 
-typealias AirportMetarInfo = [AirportMetarInfoElement]
+typealias AirportMETARSchema = [AirportMetarInfoElement]
