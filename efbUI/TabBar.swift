@@ -15,30 +15,34 @@ struct TabBar: View {
       
       AirportScreen()
         .tabItem {
-          Label("Airports", systemImage: "airplane.arrival")
+          Label("Airports", systemImage: "scope")
         }
         .tag(0)
+      
+      ChartsView(selectedTab: $selectedTab)
+        .tabItem {
+          Label("Charts", systemImage: "doc.on.doc")
+        }
+        .tag(1)
       
       MapScreen(selectedTab: $selectedTab)
         .ignoresSafeArea(.all)
         .tabItem {
           Label("Map", systemImage: "map")
         }
-        .tag(1)
+        .tag(2)
       
       ScratchPadView()
         .tabItem {
-          Image(systemName: "square.and.pencil")
-          Text("Scratch Pad")
+          Label("Scratch Pad", systemImage:"square.and.pencil")
         }
-        .tag(2)
+        .tag(3)
       
       SettingsView()
         .tabItem {
-          Image(systemName: "gear")
-          Text("Settings")
+          Label("Settings", systemImage: "gear")
         }
-        .tag(3)
+        .tag(4)
     }
   }
 }
