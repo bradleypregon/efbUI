@@ -9,29 +9,38 @@ import Foundation
 import XMLCoder
 
 class SimBriefAPI {
-  func fetchLastFlightPlan(for userID: String, completion: @escaping (SimBriefOFP) -> ()) {
-    // https://www.simbrief.com/api/xml.fetcher.php?userid=userID
-    let url = "https://www.simbrief.com/api/xml.fetcher.php?userid=\(userID)"
-    guard let url = URL(string: url) else { return }
-    
+  func fetchLastFlightPlan(for userID: String, completion: @escaping (OFPSchema) -> ()) {
+//    let url = "https://www.simbrief.com/api/xml.fetcher.php?userid=\(userID)&json=v2"
+    let url = "https://sb.pregonlabs.us/latest/\(userID)"
+
+    guard let url = URL(string: url) else {
+      print("Bad URL")
+      return
+    }
     
     URLSession.shared.dataTask(with: url) { (data, response, error) in
-      guard error == nil else { return }
-      guard let data = data else { return }
-      // 
+      guard error == nil else {
+        print("Error in URLSession: \(error)")
+        return
+      }
+      guard let data = data else {
+        print("Error in data")
+        return
+      }
+      
       do {
-        // decode XML Data
-        let data = try XMLDecoder().decode(SimBriefOFP.self, from: data)
-//        let encodedXML = try? XMLEncoder().encode(data, withRootKey: "OFP")
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
         
+        let data = try decoder.decode(OFPSchema.self, from: data)
         DispatchQueue.main.async {
           completion(data)
         }
-        
       } catch let error {
-        print("Error fetching SimBrief Route for: \(userID): \(error)")
+        print("Error fetching SimBrief Route: \(error)")
       }
       
     }.resume()
+    
   }
 }
