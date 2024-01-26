@@ -25,8 +25,8 @@ struct SimConnectShipEvent {
 // XGPSFlight Events, Longitude, Latitude, Height in meters, Heading, Speed (assume km/s?)
 
 @Observable
-class SimConnect {
-  static let shared = SimConnect()
+class SimConnectShips {
+  static let shared = SimConnectShips()
   var simConnectShip: SimConnectShipEvent? = nil
   private var cancellables = Set<AnyCancellable>()
   
@@ -43,9 +43,9 @@ class SimConnect {
 }
 
 final class SimConnectConnection {
-  let simConnect: SimConnect
+  let simConnect: SimConnectShips
   
-  init(nwConnection: NWConnection, simConnect: SimConnect) {
+  init(nwConnection: NWConnection, simConnect: SimConnectShips) {
     self.nwConnection = nwConnection
     self.id = SimConnectConnection.nextID
     SimConnectConnection.nextID += 1
@@ -179,13 +179,78 @@ final class SimConnectConnection {
   }
 }
 
+class TestServerListener: ObservableObject {
+  @Published var serverState: ServerState = .stopped
+  
+  enum ServerState {
+    case stopped, waiting, connected
+  }
+}
+
+class TestServer {
+  @StateObject var serverListener: TestServerListener = TestServerListener()
+  
+  func start() {
+    // code to start server
+    serverListener.serverState = .waiting
+    
+    connected()
+  }
+  
+  func connected() {
+    // server is connected to something
+    serverListener.serverState = .connected
+  }
+  
+  func stop() {
+    // stop server
+    serverListener.serverState = .stopped
+  }
+}
+
+struct TestView: View {
+  let server = TestServer()
+  @StateObject var serverListener: TestServerListener = TestServerListener()
+  
+  var body: some View {
+    Button {
+      server.start()
+    } label: {
+      Image(systemName: "target")
+        .foregroundStyle(getServerStatus())
+        .frame(width: 20, height: 20)
+    }
+  }
+  
+  func getServerStatus() -> Color {
+    switch serverListener.serverState {
+    case .stopped:
+      return .red
+    case .waiting:
+      return .blue
+    case .connected:
+      return .green
+    }
+  }
+}
+
+@Observable
+final class SimConnectListener {
+  var serverState: ServerState = .stopped
+  
+  enum ServerState {
+    case connected, heartbeat, stopped
+  }
+}
+
 final class SimConnectServer {
+  @State var isRunning: Bool = false
+  let simConnect: SimConnectShips
+  var simConnListener: SimConnectListener
   
-  var isRunning: Bool = false
-  let simConnect: SimConnect
-  
-  init(simConnect: SimConnect) {
+  init(simConnect: SimConnectShips, simConnListener: SimConnectListener) {
     self.simConnect = simConnect
+    self.simConnListener = simConnListener
     self.listener = try! NWListener(using: .udp, on: 49002)
     self.timer = DispatchSource.makeTimerSource(queue: .main)
   }
@@ -203,6 +268,7 @@ final class SimConnectServer {
     self.timer.schedule(deadline: .now() + 5.0, repeating: 5.0)
     self.timer.activate()
     
+    simConnListener.serverState = .heartbeat
     isRunning = true
   }
   
@@ -234,6 +300,7 @@ final class SimConnectServer {
       self.connectionDidStop(connection)
     }
     connection.start()
+    simConnListener.serverState = .connected
     print("Server opened connection \(connection.id)")
   }
   
@@ -254,6 +321,7 @@ final class SimConnectServer {
     self.connectionsByID.removeAll()
     self.timer.cancel()
     
+    simConnListener.serverState = .stopped
     isRunning = false
   }
   

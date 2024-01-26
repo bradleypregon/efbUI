@@ -14,6 +14,7 @@ class SimBriefAPI {
     let url = "https://www.simbrief.com/api/xml.fetcher.php?userid=\(userID)"
     guard let url = URL(string: url) else { return }
     
+    
     URLSession.shared.dataTask(with: url) { (data, response, error) in
       guard error == nil else { return }
       guard let data = data else { return }

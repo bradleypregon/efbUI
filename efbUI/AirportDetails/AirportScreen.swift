@@ -8,12 +8,6 @@
 import SwiftUI
 import CoreLocation
 
-
-enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
-  case freq, wx, rwy, chart, localwx
-  var id: Self { self }
-}
-
 struct AirportSunriseSunsetView: View {
   var weather: OSMWeatherSchema?
   
@@ -39,11 +33,14 @@ struct AirportSunriseSunsetView: View {
 }
 
 struct AirportScreen: View {
-  @State private var airportDetailViewModel = AirportDetailViewModel.shared
+//  @State private var airportDetailViewModel = AirportDetailViewModel.shared
+  @Environment(AirportDetailViewModel.self) private var airportDetailViewModel
   @State private var textFieldFocused: Bool = false
   private var grid = [GridItem(.flexible()), GridItem(.flexible())]
   
   var body: some View {
+    @Bindable var airportDetailViewModel = airportDetailViewModel
+    
     NavigationStack {
       ZStack {
         VStack(spacing: 30) {
@@ -67,7 +64,7 @@ struct AirportScreen: View {
                   GridRow {
                     Text("Flight category")
                       .font(.subheadline)
-                    if let wx = airportDetailViewModel.airportWx {
+                    if let wx = airportDetailViewModel.airportWxMetar {
                       Text(airportDetailViewModel.calculateWxCategory(wx: wx).rawValue)
                         .fontWeight(.semibold)
                     } else {
@@ -130,8 +127,9 @@ struct AirportScreen: View {
           }
           
           Picker(selection: $airportDetailViewModel.selectedInfoTab, label: Text("Picker")) {
-            ForEach(AirportsScreenInfoTabs.allCases) { tab in
-              Text(tab.rawValue.capitalized)
+            ForEach(AirportsScreenInfoTabs.allCases, id: \.id) { tab in
+              Text(tab.rawValue)
+                .tag(tab)
             }
           }
           .pickerStyle(.segmented)
@@ -193,29 +191,25 @@ struct AirportScreenInfoTabBuilder: View {
   var body: some View {
     switch selectedTab {
     case .freq:
-      if airportVM.selectedAirportComms != nil {
-        AirportScreenFreqTab(comms: airportVM.selectedAirportComms)
+      if let comms = airportVM.selectedAirportComms {
+        AirportScreenFreqTab(comms: comms)
       } else {
         ContentUnavailableView("Airport Frequencies Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view frequencies."))
       }
     case .wx:
-      if airportVM.airportWx != nil {
-        AirportScreenWxTab(wx: airportVM.airportWx)
-      } else {
-        ContentUnavailableView("Airport Weather Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view weather."))
-      }
+      AirportScreenWxTab(metar: airportVM.airportWxMetar, taf: airportVM.airportWxTAF)
     case .rwy:
       if airportVM.selectedAirportRunways != nil {
         AirportScreenRwyTab(runway: airportVM.selectedAirportRunways)
       } else {
         ContentUnavailableView("Airport Runways Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view runways."))
       }
-    case .chart:
-      if airportVM.selectedAirportCharts != nil {
-        AirportScreenChart(charts: airportVM.selectedAirportCharts)
-      } else {
-        ContentUnavailableView("Airport Charts Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view charts."))
-      }
+//    case .chart:
+//      if airportVM.selectedAirportCharts != nil {
+//        AirportScreenChart(charts: airportVM.selectedAirportCharts)
+//      } else {
+//        ContentUnavailableView("Airport Charts Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view charts."))
+//      }
     case .localwx:
       if airportVM.osmWeatherResults != nil {
         AirportScreenLocalWxTab(localwx: airportVM.osmWeatherResults)
@@ -227,43 +221,96 @@ struct AirportScreenInfoTabBuilder: View {
 }
 
 struct AirportScreenFreqTab: View {
-  let comms: [AirportCommunicationTable]?
+  let comms: [AirportCommunicationTable]
   
   var body: some View {
-    if let comms {
-      ScrollView(.vertical) {
-        ForEach(comms, id:\.self) { comm in
-          VStack {
-            HStack {
-              Text(comm.communicationType)
-              Text("\(comm.communicationFrequency.string)")
-              Text(comm.callsign)
+    let groupedItems = Dictionary(grouping: comms, by: { $0.communicationType })
+    
+    ScrollView(.vertical) {
+      Grid(alignment: .leading) {
+        ForEach(groupedItems.keys.sorted(), id:\.self) { commType in
+          Section(commType) {
+            ForEach(groupedItems[commType]?.sorted(by: { $0.communicationFrequency < $1.communicationFrequency }) ?? [], id: \.self) { comm in
+              GridRow {
+                Text(comm.communicationType)
+                if comm.frequencyUnits != "V" {
+                  Text("\(comm.frequencyUnits)-\(comm.communicationFrequency.string)")
+                } else {
+                  Text("\(comm.communicationFrequency.string)")
+                }
+                Text(comm.callsign)
+              }
+              .font(.system(size: 16, design: .default))
             }
           }
+          .font(.title)
+          .fontWeight(.semibold)
         }
       }
+      .frame(idealWidth: 250)
     }
   }
 }
 
 struct AirportScreenWxTab: View {
-  let wx: AirportMetarInfo?
+  let metar: AirportMETARSchema?
+  let taf: AirportTAFSchema?
   
   var body: some View {
-    if let wx = wx?.first {
-      ScrollView(.vertical) {
+    ScrollView {
+      if let metar = metar?.first, let ob = metar.rawOb {
         VStack {
           Text("METAR")
-          Text(wx.rawOb ?? "METAR Unavailable")
-          // TODO: Split TAF on each line. Line starts with 'FM[day][hour][minute]' exc. first line
-          Text("TAF")
-          Text(wx.rawTaf ?? "TAF Unavailable")
+            .font(.largeTitle)
+          Text(ob)
         }
+      } else {
+        ContentUnavailableView("METAR Unavailable", systemImage: "airplane.circle", description: Text("METAR may be unavailable or an internal fault happened."))
+      }
+      if let taf = taf?.first {
+        VStack {
+          Text("TAF")
+            .font(.largeTitle)
+          Text(taf.rawTAF ?? "")
+//          ForEach(splitTAF(taf.rawTAF ?? ""), id:\.self) { taf in
+//            Text(taf)
+//          }
+        }
+      } else {
+        ContentUnavailableView("TAF Unavailable", systemImage: "airplane.circle", description: Text("TAF may be unavailable or an internal fault happened."))
       }
     }
   }
+  
+//  func splitTAF(_ taf: String) -> [String] {
+//    if taf == "" { return [""] }
+//    var substrings: [String] = []
+//    
+//    do {
+//      let pattern = #"(\bTEMPO\b|\bBECMG\b|\bFM\d{6}\b)"#
+//      let regex = try NSRegularExpression(pattern: pattern, options: [])
+//      let matches = regex.matches(in: taf, options: [], range: NSRange(location: 0, length: taf.utf16.count))
+//      
+//      var start = taf.startIndex
+//      for match in matches {
+//        let range = Range(match.range, in: taf)!
+//        let substring = String(taf[start..<range.lowerBound])
+//        let string = "\(substring) \(String(taf[range]))"
+//        substrings.append(string)
+//        start = range.upperBound
+//      }
+//      substrings.append(String(taf[start...]))
+//      return substrings
+//    } catch {
+//      print("Error using RegEx on TAF: \(error)")
+//      return [""]
+//    }
+//  }
 }
 
+// TODO: Organize Runways, build runway model things?
+// TODO: Runway models with wind direction showing?
+// TODO: If RVR is less than length of runway, draw line displaying RVR of runway?
 struct AirportScreenRwyTab: View {
   let runway: [RunwayTable]?
   
@@ -289,152 +336,7 @@ struct AirportScreenRwyTab: View {
   }
 }
 
-struct AirportScreenChart: View {
-  let charts: DecodedArray<AirportChartAPISchema>?
-  @State private var columnVisibility: NavigationSplitViewVisibility = .all
-  @State private var starred: [AirportDetail] = []
-  @State private var selectedChart: AirportDetail?
-  
-  var body: some View {
-    if let charts = charts?.first {
-      NavigationSplitView(columnVisibility: $columnVisibility) {
-        // sidebar
-        List {
-          /// Starred Charts
-          DisclosureGroup("Starred") {
-            ForEach(starred, id: \.chartName) { chart in
-              // TODO: swipe to remove chart
-              Text(chart.chartName)
-            }
-          }
-          
-          /// General Charts
-          DisclosureGroup("General") {
-            ForEach(charts.general, id: \.chartName) { chart in
-              HStack {
-                Button {
-                  // TODO: Clicking chart keeps adding it to starred
-                  if starred.contains(chart) {
-                    starred.removeAll { $0.chartName == chart.chartName }
-                  } else {
-                    starred.append(chart)
-                  }
-                } label: {
-                  if starred.contains(chart) {
-                    Image(systemName: "star.fill")
-                  } else {
-                    Image(systemName: "star")
-                  }
-                }
-                Spacer()
-                Button {
-                  selectedChart = chart
-                } label: {
-                  Text(chart.chartName)
-                }
-              }
-            }
-          }
-          
-          /// Departure Charts
-          DisclosureGroup("Departure") {
-            ForEach(charts.dp, id: \.chartName) { chart in
-              HStack {
-                Button {
-                  // TODO: Clicking chart keeps adding it to starred
-                  if starred.contains(chart) {
-                    starred.removeAll { $0.chartName == chart.chartName }
-                  } else {
-                    starred.append(chart)
-                  }
-                } label: {
-                  if starred.contains(chart) {
-                    Image(systemName: "star.fill")
-                  } else {
-                    Image(systemName: "star")
-                  }
-                }
-                Spacer()
-                Button {
-                  selectedChart = chart
-                } label: {
-                  Text(chart.chartName)
-                }
-              }
-            }
-          }
-          
-          /// Arrival Charts
-          DisclosureGroup("Arrival") {
-            ForEach(charts.star, id: \.chartName) { chart in
-              HStack {
-                Button {
-                  // TODO: Clicking chart keeps adding it to starred
-                  if starred.contains(chart) {
-                    starred.removeAll { $0.chartName == chart.chartName }
-                  } else {
-                    starred.append(chart)
-                  }
-                } label: {
-                  if starred.contains(chart) {
-                    Image(systemName: "star.fill")
-                  } else {
-                    Image(systemName: "star")
-                  }
-                }
-                
-                Button {
-                  selectedChart = chart
-                } label: {
-                  Text(chart.chartName)
-                }
-              }
-            }
-          }
-          
-          /// Approach Charts
-          DisclosureGroup("Approach") {
-            ForEach(charts.capp, id: \.chartName) { chart in
-              HStack {
-                Button {
-                  // TODO: Clicking chart keeps adding it to starred
-                  if starred.contains(chart) {
-                    starred.removeAll { $0.chartName == chart.chartName }
-                  } else {
-                    starred.append(chart)
-                  }
-                } label: {
-                  if starred.contains(chart) {
-                    Image(systemName: "star.fill")
-                  } else {
-                    Image(systemName: "star")
-                  }
-                }
-                Spacer()
-                Button {
-                  selectedChart = chart
-                } label: {
-                  Text(chart.chartName)
-                }
-              }
-            }
-          }
-        }
-        .listStyle(.sidebar)
-      } detail: {
-        // detail
-        // chart viewer
-        if let pdfPath = selectedChart?.pdfPath, let url = URL(string: pdfPath) {
-          PDFKitView(url: url)
-        } else {
-          Text("PDF will show up here")
-        }
-      }
-    }
-    
-  }
-}
-
+// TODO: Lots we can do here to stylize
 struct AirportScreenLocalWxTab: View {
   let localwx: OSMWeatherSchema?
   
