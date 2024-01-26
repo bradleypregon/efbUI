@@ -18,11 +18,12 @@ import SwiftData
 // nodes -> each route component
 // tail -> Airport
 
-class LinkedList<T> {
-  var head: Node<T>?
+class LinkedList {
+  var head: Node?
   
-  func append(value: T) {
+  func append(value: Any) {
     let newNode = Node(value: value)
+    
     if head == nil {
       head = newNode
     } else {
@@ -47,11 +48,11 @@ class LinkedList<T> {
   }
 }
 
-class Node<T> {
-  var value: T
+class Node {
+  var value: Any
   var next: Node?
   
-  init(value: T) {
+  init(value: Any) {
     self.value = value
   }
 }
@@ -60,7 +61,7 @@ struct TopBarView: View {
   private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
   @State private var currentZuluTime24: String = ""
   @State private var currentTime: String = ""
-  @Environment(SimConnect.self) var simConnect
+  @Environment(SimConnectShips.self) var simConnect
   
   @State private var dragOffset: CGFloat = 40
   @State private var expanded: Bool = false
@@ -68,47 +69,8 @@ struct TopBarView: View {
   @Query var simbriefUser: [SimBriefUser]
   @State var route: String = ""
   
-  /*
-   @State var dragOffset: CGFloat = 40
-   @State var expanded: Bool = false
-   var body: some View {
-    VStack {
-      HStack {
-        // a small bit of content here at the top
-      }
-   
-      if expanded {
-        // more content here when the view is expanded
-      }
-   
-      VStack {
-        RoundedRectangle(cornerRadius: 10)
-          .frame(width: 200, height: 5)
-      }
-      .offset(x: 0, y: -5)
-      .gesture(
-        DragGesture()
-          .onChanged { value in
-            dragOffset = value.translation.height
-          }
-          .onEnded { _ in
-            withAnimation {
-              if dragOffset > 75 {
-                dragOffset = 300
-                expanded = true
-              }
-              else {
-                dragOffset = 0
-                expanded = false
-              }
-            }
-          }
-        )
-    }
-    .frame(height: dragOffset)
-   }
-   
-   */
+  var simConnectListener: SimConnectListener = SimConnectListener()
+
   var body: some View {
     VStack {
       HStack {
@@ -116,17 +78,22 @@ struct TopBarView: View {
         
         Text("Connect:")
         Button {
-          let server = SimConnectServer(simConnect: simConnect)
-          
-          do {
-            try server.start()
-          } catch let error {
-            print("Error trying to start SimConnect server: \(error)")
+          // TODO: Instantiate server once. Don't keep reinstantiating
+          let server = SimConnectServer(simConnect: simConnect, simConnListener: simConnectListener)
+          if !server.isRunning {
+            do {
+              try server.start()
+            } catch {
+              print("Error trying to start SimConnect server: \(error)")
+            }
+          } else {
+            server.stop()
           }
         } label: {
           Image(systemName: "target")
             .frame(width: 25, height: 25, alignment: .center)
             .font(.title)
+            .foregroundStyle(getServerState())
         }
         
         Spacer()
@@ -155,7 +122,12 @@ struct TopBarView: View {
                 simbriefAPI.fetchLastFlightPlan(for: simbriefID) { ofp in
                   route = "\(ofp.origin.icaoCode) \(ofp.general.routeNavigraph) \(ofp.destination.icaoCode)"
                   let tempSplit = route.split(separator: " ")
-                  let linkedList = LinkedList<String>()
+                  // TODO: Process split variable -> Construct linked list with each route component
+                  // Query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
+                  // Give error feedback if waypoint not found
+                  // HOW TO: Multiple waypoints in world can have same name - how to differentiate?
+                  
+                  let linkedList = LinkedList()
                   for item in tempSplit {
                     linkedList.append(value: String(item))
                   }
@@ -214,6 +186,18 @@ struct TopBarView: View {
     .onReceive(timer) { _ in
       getCurrentZuluTime24()
     }
+  }
+  
+  func getServerState() -> Color {
+    switch simConnectListener.serverState {
+    case .connected:
+      return .green
+    case .heartbeat:
+      return .blue
+    case .stopped:
+      return .red
+    }
+    
   }
   
   func getCurrentZuluTime24() {
