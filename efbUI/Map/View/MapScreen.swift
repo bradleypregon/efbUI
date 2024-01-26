@@ -11,7 +11,7 @@ import SwiftUI
 
 struct MapScreen: View {
   @Binding var selectedTab: Int
-  @Environment(SimConnect.self) private var simConnect
+  @Environment(SimConnectShips.self) private var simConnect
   @Environment(Settings.self) private var settings
   
   @State private var viewport: Viewport = .camera(center: CLLocationCoordinate2D(latitude: 39.5, longitude: -98.0), zoom: 3, bearing: 0, pitch: 0)

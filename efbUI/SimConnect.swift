@@ -179,61 +179,6 @@ final class SimConnectConnection {
   }
 }
 
-class TestServerListener: ObservableObject {
-  @Published var serverState: ServerState = .stopped
-  
-  enum ServerState {
-    case stopped, waiting, connected
-  }
-}
-
-class TestServer {
-  @StateObject var serverListener: TestServerListener = TestServerListener()
-  
-  func start() {
-    // code to start server
-    serverListener.serverState = .waiting
-    
-    connected()
-  }
-  
-  func connected() {
-    // server is connected to something
-    serverListener.serverState = .connected
-  }
-  
-  func stop() {
-    // stop server
-    serverListener.serverState = .stopped
-  }
-}
-
-struct TestView: View {
-  let server = TestServer()
-  @StateObject var serverListener: TestServerListener = TestServerListener()
-  
-  var body: some View {
-    Button {
-      server.start()
-    } label: {
-      Image(systemName: "target")
-        .foregroundStyle(getServerStatus())
-        .frame(width: 20, height: 20)
-    }
-  }
-  
-  func getServerStatus() -> Color {
-    switch serverListener.serverState {
-    case .stopped:
-      return .red
-    case .waiting:
-      return .blue
-    case .connected:
-      return .green
-    }
-  }
-}
-
 @Observable
 final class SimConnectListener {
   var serverState: ServerState = .stopped
