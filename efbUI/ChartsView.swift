@@ -24,10 +24,27 @@ struct ChartsView: View {
           DisclosureGroup("Starred") {
             ForEach(starred, id: \.chartName) { chart in
               // TODO: swipe to remove chart
-              Text(chart.chartName)
+              HStack {
+                Button {
+                  starred.removeAll { $0.chartName == chart.chartName }
+                } label: {
+                  Image(systemName: "star.fill")
+                }
+                .buttonStyle(PlainButtonStyle())
+                Spacer()
+                Button {
+                  DispatchQueue.main.async {
+                    selectedChart = chart
+                  }
+                } label: {
+                  Text(chart.chartName)
+                }
+                .buttonStyle(BorderedButtonStyle())
+              }
             }
           }
           
+          // TODO: Change to foreach loop to eliminate each disclosure group?
           /// General Charts
           DisclosureGroup("General") {
             ForEach(charts.general, id: \.chartName) { chart in
@@ -46,12 +63,16 @@ struct ChartsView: View {
                     Image(systemName: "star")
                   }
                 }
+                .buttonStyle(PlainButtonStyle())
                 Spacer()
                 Button {
-                  selectedChart = chart
+                  DispatchQueue.main.async {
+                    selectedChart = chart
+                  }
                 } label: {
                   Text(chart.chartName)
                 }
+                .buttonStyle(BorderedButtonStyle())
               }
             }
           }
@@ -74,12 +95,16 @@ struct ChartsView: View {
                     Image(systemName: "star")
                   }
                 }
+                .buttonStyle(PlainButtonStyle())
                 Spacer()
                 Button {
-                  selectedChart = chart
+                  DispatchQueue.main.async {
+                    selectedChart = chart
+                  }
                 } label: {
                   Text(chart.chartName)
                 }
+                .buttonStyle(BorderedButtonStyle())
               }
             }
           }
@@ -102,12 +127,16 @@ struct ChartsView: View {
                     Image(systemName: "star")
                   }
                 }
-                
+                .buttonStyle(PlainButtonStyle())
+                Spacer()
                 Button {
-                  selectedChart = chart
+                  DispatchQueue.main.async {
+                    selectedChart = chart
+                  }
                 } label: {
                   Text(chart.chartName)
                 }
+                .buttonStyle(BorderedButtonStyle())
               }
             }
           }
@@ -130,12 +159,16 @@ struct ChartsView: View {
                     Image(systemName: "star")
                   }
                 }
+                .buttonStyle(PlainButtonStyle())
                 Spacer()
                 Button {
-                  selectedChart = chart
+                  DispatchQueue.main.async {
+                    selectedChart = chart
+                  }
                 } label: {
                   Text(chart.chartName)
                 }
+                .buttonStyle(BorderedButtonStyle())
               }
             }
           }
