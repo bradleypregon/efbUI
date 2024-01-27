@@ -127,6 +127,7 @@ struct MapScreen: View {
     
   }
   
+  // MARK: updateImageRotation
   func updateImageRotation(heading: Double) {
     let img = UIImage(named: "ownship")
     
@@ -139,11 +140,12 @@ struct MapScreen: View {
     }
   }
   
+  // MARK: addRasterRadarSource
   func addRasterRadarSource(_ map: MapboxMap) {
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
     // TODO: Get current Radar API json string
     
-    let jsonPath = "/v2/radar/nowcast_c9a0174466e7"
+    let jsonPath = "/v2/radar/nowcast_de5ed6f4da5d"
     let stringPaths = "{z}/{x}/{y}"
     let mapColor = "4"
     let options = "0_1"
@@ -167,6 +169,7 @@ struct MapScreen: View {
     
   }
   
+  // MARK: removeRasterRadarSource
   func removeRasterRadarSource(_ map: MapboxMap) {
     
     do {
@@ -178,34 +181,50 @@ struct MapScreen: View {
     }
   }
   
+  // MARK: getAirportIcon
   func getAirportIcon(for size: String) -> PointAnnotation.Image? {
     switch size {
     case "Large":
-      let temp = UIImage(named: "lg-airport-default")
-      if let resizedImg = temp?.resize(newWidth: 44) {
-        let img = PointAnnotation.Image(image: resizedImg, name: "lg")
-        return img
+      let temp = UIImage(named: "lg-airport-default-temp")
+      if let temp {
+        return PointAnnotation.Image(image: temp, name: "lg")
       }
-    case "Medium":
-      let temp = UIImage(named: "md-airport-default")
-      if let resizedImg = temp?.resize(newWidth: 40) {
-        let img = PointAnnotation.Image(image: resizedImg, name: "md")
-        return img
-      }
-    default:
-      let temp = UIImage(named: "sm-airport-default")
-      let resizedImg = temp?.resize(newWidth: 32)
       
-      let img = PointAnnotation.Image(image: resizedImg!, name: "sm")
-      return img
+//      if let resizedImg = temp?.resize(newWidth: 44) {
+//        let img = PointAnnotation.Image(image: resizedImg, name: "lg")
+//        return img
+//      }
+    case "Medium":
+      let temp = UIImage(named: "md-airport-default-temp")
+      if let temp {
+        return PointAnnotation.Image(image: temp, name: "md")
+      }
+//      if let resizedImg = temp?.resize(newWidth: 40) {
+//        let img = PointAnnotation.Image(image: resizedImg, name: "md")
+//        return img
+//      }
+    default:
+      let temp = UIImage(named: "sm-airport-default-temp")
+      if let temp {
+        return PointAnnotation.Image(image: temp, name: "sm")
+      }
+//      if let resizedImg = temp?.resize(newWidth: 32) {
+//        let img = PointAnnotation.Image(image: resizedImg, name: "sm")
+//        return img
+//      }
     }
     
-    let temp = UIImage(named: "sm-airport-default")
-    let resizedImg = temp?.resize(newWidth: 32)
-    let img = PointAnnotation.Image(image: resizedImg!, name: "sm")
-    return img
+    let temp = UIImage(named: "sm-airport-default-temp")
+    if let temp {
+      return PointAnnotation.Image(image: temp, name: "sm")
+    }
+    return nil
+//    let resizedImg = temp?.resize(newWidth: 32)
+//    let img = PointAnnotation.Image(image: resizedImg!, name: "sm")
+//    return img
   }
   
+  // MARK: handleCameraChange
   /**
    Handle zoom level changes and load map annotations
    - Large  Airport Threshold: 5.25
@@ -236,10 +255,12 @@ struct MapScreen: View {
     
   }
   
+  // MARK: removeAirports
   func removeAirports(size: String) {
     airports.removeAll(where: { $0.properties.size.rawValue == size })
   }
   
+  // MARK: loadAirports
   func loadAirports(bounds: CoordinateBounds, size: String) {
     let prevVisibleAirports = cacheAirports
     let visibleAirports = airportJSONModel.fetchGeoJSON(size: size, bounds: bounds)
