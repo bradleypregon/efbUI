@@ -6,14 +6,22 @@
 //
 
 import SwiftUI
+import PencilKit
 
 struct ChartsView: View {
   @Binding var selectedTab: Int
   @Environment(AirportDetailViewModel.self) private var airportDetailViewModel
-//  let charts: DecodedArray<AirportChartAPISchema>? = nil
+  //  let charts: DecodedArray<AirportChartAPISchema>? = nil
   @State private var columnVisibility: NavigationSplitViewVisibility = .all
   @State private var starred: [AirportDetail] = []
   @State private var selectedChart: AirportDetail?
+  
+  @State private var rotation: Angle = Angle.zero
+  @GestureState private var twistAngle: Angle = Angle.zero
+  @State private var zoom: CGFloat = 0.75
+  @GestureState private var pinchZoom: CGFloat = 1
+  
+  @State private var canvas = PKCanvasView()
   
   var body: some View {
     if let charts = airportDetailViewModel.selectedAirportCharts?.first {
@@ -178,7 +186,39 @@ struct ChartsView: View {
         // detail
         // chart viewer
         if let pdfPath = selectedChart?.pdfPath, let url = URL(string: pdfPath) {
-          PDFKitView(url: url)
+          
+          ZStack {
+            PDFKitView(url: url)
+            DrawingView(canvas: $canvas)
+          }
+          .scaleEffect(zoom * pinchZoom)
+          .rotationEffect(rotation + twistAngle)
+          .gesture(RotationGesture()
+            .updating($twistAngle, body: { value, state, _ in
+              state = value
+            })
+//            .onEnded { self.rotation += $0 }
+            .onEnded({ value in
+              let nearestAngle = self.calculateNearestCardinalAngle(angle: value.degrees)
+              withAnimation {
+                self.rotation += .degrees(nearestAngle)
+              }
+            })
+            .simultaneously(with: MagnificationGesture()
+              .updating($pinchZoom, body: { value, state, _ in
+                state = value
+              })
+              .onEnded { self.zoom *= $0 }
+            )
+          )
+          //          .gesture(MagnificationGesture()
+          //            .updating($pinchZoom, body: { value, state, _ in
+          //              state = value
+          //            })
+          //              .onEnded({ value in
+          //                self.zoom *= value
+          //              })
+          //          )
         } else {
           Text("PDF will show up here")
         }
@@ -186,6 +226,12 @@ struct ChartsView: View {
     } else {
       Color.clear
     }
+  }
+  
+  private func calculateNearestCardinalAngle(angle: Double) -> Double {
+    let cardinalAngles: [Double] = [0, 90, 180, 270, 360]
+    let nearestAngle = cardinalAngles.min { abs($0 - angle) < abs($1 - angle) } ?? 0
+    return nearestAngle
   }
 }
 

@@ -14,6 +14,9 @@ struct PDFKitView: UIViewRepresentable {
   func makeUIView(context: UIViewRepresentableContext<PDFKitView>) -> PDFView {
     let pdf = PDFView()
     pdf.document = PDFDocument(url: self.url)
+    pdf.displayMode = .singlePageContinuous
+    pdf.autoScales = true
+    pdf.usePageViewController(true)
     return pdf
   }
   
