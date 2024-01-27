@@ -151,7 +151,7 @@
 		3A27F356282F5D1800C4B82A /* Map */ = {
 			isa = PBXGroup;
 			children = (
-				3AA03FC72853C2F20086DBDA /* Map */,
+				3A0E84FB274044F4001BC905 /* AirportData */,
 				3AA03FC52852BAC60086DBDA /* View */,
 			);
 			path = Map;
@@ -175,14 +175,6 @@
 				3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */,
 			);
 			path = View;
-			sourceTree = "<group>";
-		};
-		3AA03FC72853C2F20086DBDA /* Map */ = {
-			isa = PBXGroup;
-			children = (
-				3A0E84FB274044F4001BC905 /* AirportData */,
-			);
-			path = Map;
 			sourceTree = "<group>";
 		};
 		3AE11B1C27319450005974E5 = {
