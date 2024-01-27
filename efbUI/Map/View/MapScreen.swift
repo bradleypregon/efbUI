@@ -25,6 +25,7 @@ struct MapScreen: View {
   @State var selectedAirport: AirportTable?
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
   @State var proxyMap: MapProxy? = nil
+  @State var currentZoom: CGFloat = 3.0
   
   @State private var displayRadar: Bool = false {
     didSet {
@@ -69,7 +70,7 @@ struct MapScreen: View {
                   selectedAirport = SQLiteManager.shared.selectAirport(airport.properties.icao)
                   columnVisibility = .all
                 }
-                .textField(airport.properties.size.rawValue == "Large" || airport.properties.size.rawValue == "Medium" ? airport.properties.icao : "")
+                .textField(airport.properties.size.rawValue == "Large" || airport.properties.size.rawValue == "Medium" || (currentZoom >= 8.0) ? airport.properties.icao : "")
                 .textOffset([0.0, -1.6])
                 .textColor(StyleColor(.white))
                 .textHaloBlur(10)
@@ -89,6 +90,7 @@ struct MapScreen: View {
           .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
           .ornamentOptions(ornamentOptions)
           .onCameraChanged(action: { changed in
+            currentZoom = changed.cameraState.zoom
             coordinateBounds = calculateVisibleMapRegion(center: changed.cameraState.center, zoom: changed.cameraState.zoom, geometry: geometry)
             if let coordinateBounds {
               handleCameraChange(zoom: changed.cameraState.zoom, bounds: coordinateBounds)
@@ -145,16 +147,16 @@ struct MapScreen: View {
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
     // TODO: Get current Radar API json string
     
-    let jsonPath = "/v2/radar/nowcast_de5ed6f4da5d"
+    let jsonPath = "/v2/radar/nowcast_9fba7b92ccab"
     let stringPaths = "{z}/{x}/{y}"
     let mapColor = "4"
-    let options = "0_1"
+    let options = "1_1" // smooth_snow
     
-    let url = String("https://tilecache.rainviewer.com\(jsonPath)/256/\(stringPaths)/\(mapColor)/\(options).png")
+    let url = String("https://tilecache.rainviewer.com\(jsonPath)/512/\(stringPaths)/\(mapColor)/\(options).png")
     
     var rasterSource = RasterSource(id: radarSourceID)
     rasterSource.tiles = [url]
-    rasterSource.tileSize = 256
+    rasterSource.tileSize = 512
     
     var rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
     rasterLayer.rasterOpacity = .constant(0.4)
@@ -185,43 +187,28 @@ struct MapScreen: View {
   func getAirportIcon(for size: String) -> PointAnnotation.Image? {
     switch size {
     case "Large":
-      let temp = UIImage(named: "lg-airport-default-temp")
-      if let temp {
-        return PointAnnotation.Image(image: temp, name: "lg")
-      }
       
-//      if let resizedImg = temp?.resize(newWidth: 44) {
-//        let img = PointAnnotation.Image(image: resizedImg, name: "lg")
-//        return img
-//      }
+      let temp = UIImage(named: "lg-airport-temp")
+      if let resized = temp?.resize(newWidth: 42) {
+        return PointAnnotation.Image(image: resized, name: "lg")
+      }
     case "Medium":
-      let temp = UIImage(named: "md-airport-default-temp")
-      if let temp {
-        return PointAnnotation.Image(image: temp, name: "md")
+      let temp = UIImage(named: "md-airport-temp")
+      if let resized = temp?.resize(newWidth: 48) {
+        return PointAnnotation.Image(image: resized, name: "md")
       }
-//      if let resizedImg = temp?.resize(newWidth: 40) {
-//        let img = PointAnnotation.Image(image: resizedImg, name: "md")
-//        return img
-//      }
     default:
-      let temp = UIImage(named: "sm-airport-default-temp")
-      if let temp {
-        return PointAnnotation.Image(image: temp, name: "sm")
+      let temp = UIImage(named: "sm-airport-temp")
+      if let resized = temp?.resize(newWidth: 32) {
+        return PointAnnotation.Image(image: resized, name: "sm")
       }
-//      if let resizedImg = temp?.resize(newWidth: 32) {
-//        let img = PointAnnotation.Image(image: resizedImg, name: "sm")
-//        return img
-//      }
     }
     
-    let temp = UIImage(named: "sm-airport-default-temp")
-    if let temp {
-      return PointAnnotation.Image(image: temp, name: "sm")
+    let temp = UIImage(named: "sm-airport-temp")
+    if let resized = temp?.resize(newWidth: 32) {
+      return PointAnnotation.Image(image: resized, name: "sm")
     }
     return nil
-//    let resizedImg = temp?.resize(newWidth: 32)
-//    let img = PointAnnotation.Image(image: resizedImg!, name: "sm")
-//    return img
   }
   
   // MARK: handleCameraChange
