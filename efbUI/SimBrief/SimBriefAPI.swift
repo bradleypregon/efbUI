@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import XMLCoder
 
 class SimBriefAPI {
   func fetchLastFlightPlan(for userID: String, completion: @escaping (OFPSchema) -> ()) {
