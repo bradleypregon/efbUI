@@ -8,7 +8,6 @@
 import SwiftUI
 import Network
 import CoreLocation
-import MapKit
 import Combine
 import Observation
 
