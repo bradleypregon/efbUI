@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>AirportDB_Key</key>
-	<string>$(AirportDB_Key)</string>
 	<key>MBXAccessToken</key>
 	<string>$(MBXAccessToken)</string>
 	<key>OSMWeatherAPI_Key</key>
