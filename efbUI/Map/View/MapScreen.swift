@@ -8,7 +8,6 @@
 import SwiftUI
 @_spi(Experimental) import MapboxMaps
 
-
 struct MapScreen: View {
   @Binding var selectedTab: Int
   @Environment(SimConnectShips.self) private var simConnect
@@ -63,6 +62,7 @@ struct MapScreen: View {
       GeometryReader { geometry in
         MapReader { proxy in
           Map(viewport: $viewport) {
+            // MARK: Airport Annotations
             ForEvery(airports, id: \.id) { airport in
               PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), isDraggable: false)
                 .image(getAirportIcon(for: airport.properties.size.rawValue))
@@ -83,6 +83,7 @@ struct MapScreen: View {
 //              .fillColor(StyleColor(UIColor.blue))
 //              .fillOpacity(0.1)
             
+            // MARK: Ownship annotation
             MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: simConnect.simConnectShip?.coordinate.latitude ?? .zero, longitude: simConnect.simConnectShip?.coordinate.longitude ?? .zero)) {
               ownshipImage
             }
@@ -94,7 +95,11 @@ struct MapScreen: View {
             coordinateBounds = calculateVisibleMapRegion(center: changed.cameraState.center, zoom: changed.cameraState.zoom, geometry: geometry)
             if let coordinateBounds {
               handleCameraChange(zoom: changed.cameraState.zoom, bounds: coordinateBounds)
+              
             }
+            
+            print("Annotations loaded: \(airports.count)")
+
           })
           .onAppear {
             proxyMap = proxy
@@ -144,10 +149,11 @@ struct MapScreen: View {
   
   // MARK: addRasterRadarSource
   func addRasterRadarSource(_ map: MapboxMap) {
+    // https://api.rainviewer.com/public/weather-maps.json
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
     // TODO: Get current Radar API json string
     
-    let jsonPath = "/v2/radar/nowcast_9fba7b92ccab"
+    let jsonPath = "/v2/radar/nowcast_1c17624a708f"
     let stringPaths = "{z}/{x}/{y}"
     let mapColor = "4"
     let options = "1_1" // smooth_snow
@@ -187,14 +193,13 @@ struct MapScreen: View {
   func getAirportIcon(for size: String) -> PointAnnotation.Image? {
     switch size {
     case "Large":
-      
       let temp = UIImage(named: "lg-airport-temp")
       if let resized = temp?.resize(newWidth: 42) {
         return PointAnnotation.Image(image: resized, name: "lg")
       }
     case "Medium":
       let temp = UIImage(named: "md-airport-temp")
-      if let resized = temp?.resize(newWidth: 48) {
+      if let resized = temp?.resize(newWidth: 38) {
         return PointAnnotation.Image(image: resized, name: "md")
       }
     default:
@@ -220,6 +225,7 @@ struct MapScreen: View {
    - Airport Gate Threshold: 14.0
    */
   func handleCameraChange(zoom: CGFloat, bounds: CoordinateBounds) {
+    if zoom >= 11.0 { return }
     let lgAirportThreshold: CGFloat = 5.0
     let mdAirportThreshold: CGFloat = 6.0
     let smAirportThreshold: CGFloat = 6.5
