@@ -98,7 +98,7 @@ struct MapScreen: View {
               
             }
             
-            print("Annotations loaded: \(airports.count)")
+//            print("Annotations loaded: \(airports.count)")
 
           })
           .onAppear {
@@ -152,30 +152,36 @@ struct MapScreen: View {
     // https://api.rainviewer.com/public/weather-maps.json
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
     // TODO: Get current Radar API json string
+    let rainviewer = RainviewerAPI()
     
-    let jsonPath = "/v2/radar/nowcast_1c17624a708f"
-    let stringPaths = "{z}/{x}/{y}"
-    let mapColor = "4"
-    let options = "1_1" // smooth_snow
-    
-    let url = String("https://tilecache.rainviewer.com\(jsonPath)/512/\(stringPaths)/\(mapColor)/\(options).png")
-    
-    var rasterSource = RasterSource(id: radarSourceID)
-    rasterSource.tiles = [url]
-    rasterSource.tileSize = 512
-    
-    var rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
-    rasterLayer.rasterOpacity = .constant(0.4)
-    
-    do {
-      try map.addSource(rasterSource)
-      try map.addLayer(rasterLayer)
-    } catch {
-      rasterRadarAlertVisible = true
-      print("Failed to update style. Error: \(error)")
+    rainviewer.fetchRadar { radar in
+      let jsonPath = radar.radar?.nowcast?.first?.path ?? ""
+      
+      let stringPaths = "{z}/{x}/{y}"
+      let mapColor = "4"
+      let options = "1_1" // smooth_snow
+      
+      let url = String("https://tilecache.rainviewer.com\(jsonPath)/512/\(stringPaths)/\(mapColor)/\(options).png")
+      
+      var rasterSource = RasterSource(id: radarSourceID)
+      rasterSource.tiles = [url]
+      rasterSource.tileSize = 512
+      
+      var rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
+      rasterLayer.rasterOpacity = .constant(0.4)
+      
+      do {
+        try map.addSource(rasterSource)
+        try map.addLayer(rasterLayer)
+      } catch {
+        rasterRadarAlertVisible = true
+        print("Failed to update style. Error: \(error)")
+      }
     }
     
   }
+  
+  
   
   // MARK: removeRasterRadarSource
   func removeRasterRadarSource(_ map: MapboxMap) {

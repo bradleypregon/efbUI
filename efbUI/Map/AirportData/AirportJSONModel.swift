@@ -23,7 +23,10 @@ final class AirportJSONModel {
         print("Error decoding Airport JSON from Airports.GeoJSON: \(error)")
       }
     }
-    
+  }
+  
+  func fetchAirports() -> [Airport] {
+    return Array(airports)
   }
   
   func fetchGeoJSON(size: String, bounds: CoordinateBounds) -> [Airport] {

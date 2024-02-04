@@ -59,6 +59,8 @@
 		A2C6ED232B300A8B00856381 /* AirportChartAPISchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED222B300A8B00856381 /* AirportChartAPISchema.swift */; };
 		A2C6ED282B3763D800856381 /* AirportAnnotationSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED272B3763D800856381 /* AirportAnnotationSidebarView.swift */; };
 		A2C9E3F82B5786E1007D667F /* AirportTAFAPISchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C9E3F72B5786E1007D667F /* AirportTAFAPISchema.swift */; };
+		A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */; };
+		A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +107,8 @@
 		A2C6ED222B300A8B00856381 /* AirportChartAPISchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportChartAPISchema.swift; sourceTree = "<group>"; };
 		A2C6ED272B3763D800856381 /* AirportAnnotationSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotationSidebarView.swift; sourceTree = "<group>"; };
 		A2C9E3F72B5786E1007D667F /* AirportTAFAPISchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportTAFAPISchema.swift; sourceTree = "<group>"; };
+		A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerAPI.swift; sourceTree = "<group>"; };
+		A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerSchema.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -196,6 +200,7 @@
 		3AE11B2727319450005974E5 /* efbUI */ = {
 			isa = PBXGroup;
 			children = (
+				A2EF3F942B6FE1B10096933A /* Radar */,
 				A21B023A2B55D48D0041D60B /* SimBrief */,
 				A2C6ED1B2B3005BB00856381 /* Charts */,
 				A2C6ED182B30059600856381 /* Metar */,
@@ -307,6 +312,15 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		A2EF3F942B6FE1B10096933A /* Radar */ = {
+			isa = PBXGroup;
+			children = (
+				A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */,
+				A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */,
+			);
+			path = Radar;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -401,12 +415,14 @@
 				A232CCBE2B252068005C3E2E /* MapboxView.swift in Sources */,
 				3AA03FC92853C4C80086DBDA /* AirportJSONModel.swift in Sources */,
 				A257E1B62B2AB514003B1859 /* DBTableStructs.swift in Sources */,
+				A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */,
 				A2C6ED152B2E3DA400856381 /* OSMWeatherAPI.swift in Sources */,
 				A22322D52B20B74E001274CA /* Extensions.swift in Sources */,
 				3AE11B5327319480005974E5 /* SimConnect.swift in Sources */,
 				3AE11B2B27319450005974E5 /* MapScreen.swift in Sources */,
 				A21B02372B5034850041D60B /* PDFKitView.swift in Sources */,
 				A20620262B49DC890034D902 /* AirportDetailViewModel.swift in Sources */,
+				A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */,
 				A2C6ED282B3763D800856381 /* AirportAnnotationSidebarView.swift in Sources */,
 				A2A243682B00368B00245A0F /* SettingsView.swift in Sources */,
 				3A1BB456278A5A0E001AC228 /* MapCalloutView.swift in Sources */,
