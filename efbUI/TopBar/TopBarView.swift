@@ -70,6 +70,8 @@ struct TopBarView: View {
   @State var route: String = ""
   
   var simConnectListener: SimConnectListener = SimConnectListener()
+  
+  @State private var flightPlan: OFPSchema? = nil
 
   var body: some View {
     VStack {
@@ -111,33 +113,47 @@ struct TopBarView: View {
       if expanded {
         VStack {
           if let simbriefID = simbriefUser.first?.userID {
-            Text("SimBrief OFP")
             HStack {
-              VStack {
-                Text("SimBrief ID")
-                Text(simbriefID)
-              }
+              Text("SimBrief OFP | \(simbriefID)")
               Button {
                 let simbriefAPI = SimBriefAPI()
                 simbriefAPI.fetchLastFlightPlan(for: simbriefID) { ofp in
-                  route = "\(ofp.origin.icaoCode) \(ofp.general.routeNavigraph) \(ofp.destination.icaoCode)"
-                  let tempSplit = route.split(separator: " ")
+                  route = "\(ofp.origin.icaoCode)/\(ofp.origin.planRwy) \(ofp.general.routeNavigraph) \(ofp.destination.icaoCode)/\(ofp.destination.planRwy) | \(ofp.alternate?.first?.icaoCode ?? "")/\(ofp.alternate?.first?.planRwy ?? "")"
+                  flightPlan = ofp
+                  
                   // TODO: Process split variable -> Construct linked list with each route component
                   // Query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
                   // Give error feedback if waypoint not found
                   // HOW TO: Multiple waypoints in world can have same name - how to differentiate?
                   
-                  let linkedList = LinkedList()
-                  for item in tempSplit {
-                    linkedList.append(value: String(item))
-                  }
-                  linkedList.printList()
+//                  let tempSplit = route.split(separator: " ")
+//                  let linkedList = LinkedList()
+//                  for item in tempSplit {
+//                    linkedList.append(value: String(item))
+//                  }
+//                  linkedList.printList()
                 }
               } label: {
                 Text("Fetch Route")
               }
+            }
+            Text(route)
+            if let flightPlan {
+              HStack {
+                VStack {
+                  Text(flightPlan.general.airline + flightPlan.general.flightNumber)
+                  Text(flightPlan.aircraft.reg)
+                  Text("CI: \(flightPlan.general.costIndex)")
+                  Text("FL: \(flightPlan.general.initialAltitude)")
+                }
+                VStack {
+                  Text(flightPlan.aircraft.icaoCode)
+                  Text("ETE: \(flightPlan.times.ete)")
+                  Text("Block: \(flightPlan.fuel.block)")
+                  Text("ZFW: \(flightPlan.weights.estZFW)")
+                }
+              }
               
-              Text(route)
             }
           }
           
