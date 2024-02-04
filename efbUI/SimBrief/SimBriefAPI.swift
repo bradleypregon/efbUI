@@ -19,7 +19,7 @@ class SimBriefAPI {
     
     URLSession.shared.dataTask(with: url) { (data, response, error) in
       guard error == nil else {
-        print("Error in URLSession: \(error)")
+        print("Error in URLSession: \(String(describing: error?.localizedDescription))")
         return
       }
       guard let data = data else {
