@@ -10,7 +10,7 @@ import Foundation
 class SimBriefAPI {
   func fetchLastFlightPlan(for userID: String, completion: @escaping (OFPSchema) -> ()) {
 //    let url = "https://www.simbrief.com/api/xml.fetcher.php?userid=\(userID)&json=v2"
-    let url = "https://sb.pregonlabs.us/latest/\(userID)"
+    let url = "https://sb.pregonlabs.xyz/latest/\(userID)"
 
     guard let url = URL(string: url) else {
       print("Bad URL")
