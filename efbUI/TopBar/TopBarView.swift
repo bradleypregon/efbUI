@@ -62,6 +62,7 @@ struct TopBarView: View {
   @State private var currentZuluTime24: String = ""
   @State private var currentTime: String = ""
   @Environment(SimConnectShips.self) var simConnect
+  @Environment(SimBriefViewModel.self) var simbriefViewModel
   
   @State private var dragOffset: CGFloat = 40
   @State private var expanded: Bool = false
@@ -71,7 +72,7 @@ struct TopBarView: View {
   
   var simConnectListener: SimConnectListener = SimConnectListener()
   
-  @State private var flightPlan: OFPSchema? = nil
+//  @State private var flightPlan: OFPSchema? = nil
 
   var body: some View {
     VStack {
@@ -116,12 +117,17 @@ struct TopBarView: View {
             HStack {
               Text("SimBrief OFP | \(simbriefID)")
               Button {
-                let simbriefAPI = SimBriefAPI()
-                simbriefAPI.fetchLastFlightPlan(for: simbriefID) { ofp in
-                  route = "\(ofp.origin.icaoCode)/\(ofp.origin.planRwy) \(ofp.general.routeNavigraph) \(ofp.destination.icaoCode)/\(ofp.destination.planRwy) | \(ofp.alternate?.first?.icaoCode ?? "")/\(ofp.alternate?.first?.planRwy ?? "")"
-                  flightPlan = ofp
+                simbriefViewModel.fetchOFP(for: simbriefID)
+//                route = "\(simbriefViewModel.ofp?.origin.icaoCode)"
+                
+//                let simbriefAPI = SimBriefAPI()
+//                simbriefAPI.fetchLastFlightPlan(for: simbriefID) { ofp in
+//                  route = "\(ofp.origin.icaoCode)/\(ofp.origin.planRwy) \(ofp.general.routeNavigraph) \(ofp.destination.icaoCode)/\(ofp.destination.planRwy) | \(ofp.alternate?.first?.icaoCode ?? "")/\(ofp.alternate?.first?.planRwy ?? "")"
+//                  flightPlan = ofp
                   
                   // TODO: Process split variable -> Construct linked list with each route component
+                  // TODO: Check airac and compare to current downloaded database
+                  
                   // Query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
                   // Give error feedback if waypoint not found
                   // HOW TO: Multiple waypoints in world can have same name - how to differentiate?
@@ -132,25 +138,41 @@ struct TopBarView: View {
 //                    linkedList.append(value: String(item))
 //                  }
 //                  linkedList.printList()
-                }
               } label: {
                 Text("Fetch Route")
               }
             }
-            Text(route)
-            if let flightPlan {
+//            Text(route)
+            if let temp = simbriefViewModel.ofp {
+              Text("\(temp.origin.icaoCode)/\(temp.origin.planRwy) \(temp.general.routeNavigraph) \(temp.destination.icaoCode)/\(temp.destination.planRwy) | \(temp.alternate?.first?.icaoCode ?? "")/\(temp.alternate?.first?.planRwy ?? "")")
               HStack {
-                VStack {
-                  Text(flightPlan.general.airline + flightPlan.general.flightNumber)
-                  Text(flightPlan.aircraft.reg)
-                  Text("CI: \(flightPlan.general.costIndex)")
-                  Text("FL: \(flightPlan.general.initialAltitude)")
+                ScrollView(.vertical) {
+                  if let atis = temp.origin.atis {
+                    ForEach(atis, id:\.self) { ati in
+                      Text(ati.message)
+                      Divider()
+                    }
+                  }
                 }
                 VStack {
-                  Text(flightPlan.aircraft.icaoCode)
-                  Text("ETE: \(flightPlan.times.ete)")
-                  Text("Block: \(flightPlan.fuel.block)")
-                  Text("ZFW: \(flightPlan.weights.estZFW)")
+                  Text(temp.general.airline + temp.general.flightNumber)
+                  Text(temp.aircraft.reg)
+                  Text("CI: \(temp.general.costIndex)")
+                  Text("FL: \(temp.general.initialAltitude)")
+                }
+                VStack {
+                  Text(temp.aircraft.icaoCode)
+                  Text("ETE: \(temp.times.ete)")
+                  Text("Block: \(temp.fuel.block)")
+                  Text("ZFW: \(temp.weights.estZFW)")
+                }
+                ScrollView(.vertical) {
+                  if let atis = temp.destination.atis {
+                    ForEach(atis, id:\.self) { ati in
+                      Text(ati.message)
+                      Divider()
+                    }
+                  }
                 }
               }
               
