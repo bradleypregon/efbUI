@@ -142,7 +142,7 @@ struct OFPSchema: Decodable {
     let pdf: OFPPDF
   }
   
-  struct OFPATIS: Decodable {
+  struct OFPATIS: Decodable, Hashable {
     let network: String
     let issued: Date
     let letter: String

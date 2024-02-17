@@ -25,7 +25,7 @@ struct SimConnectShipEvent {
 
 @Observable
 class SimConnectShips {
-  static let shared = SimConnectShips()
+//  static let shared = SimConnectShips()
   var simConnectShip: SimConnectShipEvent? = nil
   private var cancellables = Set<AnyCancellable>()
   
