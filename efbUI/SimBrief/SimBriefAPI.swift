@@ -6,6 +6,19 @@
 //
 
 import Foundation
+import Observation
+
+@Observable
+class SimBriefViewModel {
+  var ofp: OFPSchema? = nil
+  let api = SimBriefAPI()
+  
+  func fetchOFP(for id: String) {
+    api.fetchLastFlightPlan(for: id) { schema in
+      self.ofp = schema
+    }
+  }
+}
 
 class SimBriefAPI {
   func fetchLastFlightPlan(for userID: String, completion: @escaping (OFPSchema) -> ()) {
