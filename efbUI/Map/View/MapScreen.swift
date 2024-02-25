@@ -7,24 +7,99 @@
 
 import SwiftUI
 @_spi(Experimental) import MapboxMaps
+import Observation
+
+@Observable
+class MapScreenViewModel {
+  var airportJSONModel = AirportJSONModel()
+  
+  var largeAirports: [Airport] = []
+  var mediumAirports: [Airport] = []
+  var smallAirports: [Airport] = []
+  
+  init() {
+    largeAirports = airportJSONModel.airports.filter { $0.properties.size.rawValue == "Large" }
+    mediumAirports = airportJSONModel.airports.filter { $0.properties.size.rawValue == "Medium" }
+    smallAirports = airportJSONModel.airports.filter { $0.properties.size.rawValue == "Small" }
+  }
+  
+  func fetchLargeAirports(bounds: CoordinateBounds) {
+    for airport in largeAirports {
+      if !airport.visible && bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
+        airport.visible = true
+      } else if airport.visible && !bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
+        airport.visible = false
+      }
+    }
+  }
+  
+  func fetchMediumAirports(bounds: CoordinateBounds) {
+    for airport in mediumAirports {
+      if !airport.visible && bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
+        airport.visible = true
+      } else if airport.visible && !bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
+        airport.visible = false
+      }
+    }
+  }
+  
+  func fetchSmallAirports(bounds: CoordinateBounds) {
+    for airport in smallAirports {
+      if !airport.visible && bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
+        airport.visible = true
+      } else if airport.visible && !bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
+        airport.visible = false
+      }
+    }
+  }
+  
+  func hideLargeAirports() {
+    for airport in largeAirports {
+      if airport.visible {
+        airport.visible = false
+      }
+    }
+  }
+  
+  func hideMediumAirports() {
+    for airport in mediumAirports {
+      if airport.visible {
+        airport.visible = false
+      }
+    }
+  }
+  
+  func hideSmallAirports() {
+    for airport in smallAirports {
+      if airport.visible {
+        airport.visible = false
+      }
+    }
+  }
+}
 
 struct MapScreen: View {
   @Binding var selectedTab: Int
-  @Environment(SimConnectShips.self) private var simConnect
+  @Environment(SimConnectShipObserver.self) private var simConnect
   @Environment(Settings.self) private var settings
+  @Environment(SimBriefViewModel.self) var simbrief
   
-  @State private var viewport: Viewport = .camera(center: CLLocationCoordinate2D(latitude: 39.5, longitude: -98.0), zoom: 3, bearing: 0, pitch: 0)
+  @State private var viewport: Viewport = .camera(center: CLLocationCoordinate2D(latitude: 39.5, longitude: -98.0), zoom: 4, bearing: 0, pitch: 0)
   private let ornamentOptions = OrnamentOptions(scaleBar: ScaleBarViewOptions(visibility: .hidden))
   private let style = "mapbox://styles/bradleypregon/clpvnz3y900yn01qmby0f9xn6"
   @State private var coordinateBounds: CoordinateBounds?
   
-  let airportJSONModel = AirportJSONModel()
-  @State var cacheAirports: [Airport] = []
-  @State var airports: [Airport] = []
+//  var airportJSONModel = AirportJSONModel()
+  @State private var mapViewModel = MapScreenViewModel()
+  
   @State var selectedAirport: AirportTable?
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
   @State var proxyMap: MapProxy? = nil
   @State var currentZoom: CGFloat = 3.0
+  
+  @State var largeAnnotationsVisible: Bool = true
+  @State var mediumAnnotationsVisible: Bool = false
+  @State var smallAnnotationsVisible: Bool = false
   
   @State private var displayRadar: Bool = false {
     didSet {
@@ -35,11 +110,11 @@ struct MapScreen: View {
   }
   var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
   
-  @State var ownshipImage: Image? = nil
+//  @State var ownshipImage: Image = Image("ShipArrow32")
   
   private let radarSourceID = "radar-source"
   @State private var rasterRadarAlertVisible: Bool = false
-  
+  @State private var displayTrafficAltitude: Bool = true
   
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
@@ -62,30 +137,101 @@ struct MapScreen: View {
       GeometryReader { geometry in
         MapReader { proxy in
           Map(viewport: $viewport) {
-            // MARK: Airport Annotations
-            ForEvery(airports, id: \.id) { airport in
-              PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), isDraggable: false)
-                .image(getAirportIcon(for: airport.properties.size.rawValue))
-                .onTapGesture {
-                  selectedAirport = SQLiteManager.shared.selectAirport(airport.properties.icao)
-                  columnVisibility = .all
-                }
-                .textField(airport.properties.size.rawValue == "Large" || airport.properties.size.rawValue == "Medium" || (currentZoom >= 8.0) ? airport.properties.icao : "")
-                .textOffset([0.0, -1.6])
-                .textColor(StyleColor(.white))
-                .textHaloBlur(10)
-                .textHaloWidth(10)
-                .textHaloColor(StyleColor(.black))
-                .textSize(13)
-              
-            }
+            // MARK: Testing Polygon for map bounds
 //            PolygonAnnotation(polygon: testVisiblePolygon)
 //              .fillColor(StyleColor(UIColor.blue))
 //              .fillOpacity(0.1)
             
-            // MARK: Ownship annotation
-            MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: simConnect.simConnectShip?.coordinate.latitude ?? .zero, longitude: simConnect.simConnectShip?.coordinate.longitude ?? .zero)) {
-              ownshipImage
+            // MARK: Airport Annotations
+            
+            // MARK: Large Airports
+            if largeAnnotationsVisible {
+              PointAnnotationGroup(mapViewModel.largeAirports) { airport in
+                PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), isDraggable: false)
+                  .image(PointAnnotation.Image(image: UIImage(named: "lg-airport-default42") ?? UIImage(), name: "Lg"))
+                  .onTapGesture {
+                    selectedAirport = SQLiteManager.shared.selectAirport(airport.properties.icao)
+                    columnVisibility = .all
+                  }
+                  .textField(airport.properties.icao)
+                  .textOffset([0.0, -1.6])
+                  .textColor(StyleColor(.white))
+                  .textHaloWidth(3)
+                  .textHaloColor(StyleColor(.black))
+                  .textSize(14)
+              }
+            }
+            
+            
+            // MARK: Medium Airports
+            if mediumAnnotationsVisible {
+              PointAnnotationGroup(mapViewModel.mediumAirports, id: \.id) { airport in
+                PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), isDraggable: false)
+//                  .image(getAirportIcon(for: airport.properties.size.rawValue))
+                  .onTapGesture {
+                    selectedAirport = SQLiteManager.shared.selectAirport(airport.properties.icao)
+                    columnVisibility = .all
+                  }
+                  .textField(airport.properties.icao)
+                  .textOffset([0.0, -1.6])
+                  .textColor(StyleColor(.white))
+                  .textHaloBlur(10)
+                  .textHaloWidth(10)
+                  .textHaloColor(StyleColor(.black))
+                  .textSize(11)
+              }
+              .clusterOptions(ClusterOptions(clusterRadius: 75.0, clusterMaxZoom: 8.0))
+            }
+            
+            
+            // MARK: Small Airports
+            if smallAnnotationsVisible {
+              PointAnnotationGroup(mapViewModel.smallAirports) { smallAirport in
+                PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: smallAirport.coordinates.lat, longitude: smallAirport.coordinates.long), isDraggable: false)
+//                  .image(getAirportIcon(for: smallAirport.properties.size.rawValue))
+                  .onTapGesture {
+                    selectedAirport = SQLiteManager.shared.selectAirport(smallAirport.properties.icao)
+                    columnVisibility = .all
+                  }
+              }
+              .clusterOptions(ClusterOptions(circleRadius: .constant(25.0), clusterMaxZoom: 8.0))
+            }
+            
+            
+            // MARK: Ownship Annotation
+            MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: simConnect.ship?.coordinate.latitude ?? .zero, longitude: simConnect.ship?.coordinate.longitude ?? .zero)) {
+              VStack(spacing: 0) {
+                Image("ShipArrow")
+                  .resizable()
+                  .frame(width: 32, height: 32)
+                  .rotationEffect(.degrees(simConnect.ship?.heading ?? .zero))
+                Text((simbrief.ofp?.aircraft.reg) ?? "ownship")
+                  .font(.system(size: 10))
+                  .foregroundStyle(.teal)
+                  .glowBorder(color: .black, lineWidth: 4)
+              }
+            }
+            
+            // MARK: Traffic Annotations
+            ForEvery(simConnect.simConnectTraffic, id: \.id) { traffic in
+              MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: traffic.coordinate.latitude, longitude: traffic.coordinate.longitude)) {
+                VStack(spacing: 0) {
+                  if displayTrafficAltitude {
+                    Text(traffic.altitude.string)
+                      .font(.system(size: 9))
+                      .glowBorder(color: .black, lineWidth: 4)
+                      .foregroundStyle(.pink)
+                  }
+                  Image("TrafficArrow")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .rotationEffect(.degrees(traffic.heading))
+                  Text(traffic.registration ?? "Tfc")
+                    .font(.system(size: 9))
+                    .glowBorder(color: .black, lineWidth: 4)
+                    .foregroundStyle(.pink)
+                }
+              }
             }
           }
           .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
@@ -95,21 +241,10 @@ struct MapScreen: View {
             coordinateBounds = calculateVisibleMapRegion(center: changed.cameraState.center, zoom: changed.cameraState.zoom, geometry: geometry)
             if let coordinateBounds {
               handleCameraChange(zoom: changed.cameraState.zoom, bounds: coordinateBounds)
-              
             }
-            
-//            print("Annotations loaded: \(airports.count)")
-
           })
           .onAppear {
             proxyMap = proxy
-          }
-          // Publisher to update ownship image
-          .onReceive(simConnect.publisher) { _ in
-            if let heading = simConnect.simConnectShip?.heading {
-              ownshipImage = nil
-              updateImageRotation(heading: heading)
-            }
           }
           .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
             Button("Ok") {
@@ -121,13 +256,40 @@ struct MapScreen: View {
         .ignoresSafeArea()
         
         // menu
-        VStack {
+        VStack(spacing: 5) {
           Button {
             displayRadar.toggle()
           } label: {
             Image(systemName: displayRadar ? "cloud.sun.fill" : "cloud.sun")
           }
+          Spacer()
+            .frame(height: 15)
+          Button {
+            largeAnnotationsVisible.toggle()
+          } label: {
+            let temp = UIImage(named: "lg-airport-temp")
+            if let resized = temp?.resize(newWidth: 40) {
+              Image(uiImage: resized)
+            }
+          }
+          Button {
+            mediumAnnotationsVisible.toggle()
+          } label: {
+            let temp = UIImage(named: "md-airport-temp")
+            if let resized = temp?.resize(newWidth: 40) {
+              Image(uiImage: resized)
+            }
+          }
+          Button {
+            smallAnnotationsVisible.toggle()
+          } label: {
+            let temp = UIImage(named: "sm-airport-temp")
+            if let resized = temp?.resize(newWidth: 40) {
+              Image(uiImage: resized)
+            }
+          }
         }
+        .padding([.leading], 5)
       }
       
     }
@@ -135,16 +297,22 @@ struct MapScreen: View {
   }
   
   // MARK: updateImageRotation
-  func updateImageRotation(heading: Double) {
-    let img = UIImage(named: "ownship")
-    
-    if let newImg = img?.rotate(angle: .degrees(heading)) {
-      ownshipImage = Image(uiImage: newImg)
-    } else {
-      if let img {
-        ownshipImage = Image(uiImage: img)
-      }
-    }
+  func updateImageRotation(for image: String, to heading: Double, size: CGFloat) {
+//    _ = ownshipImage?.rotationEffect(.degrees(heading))
+//    DispatchQueue.main.async {
+      
+//      if let img = UIImage(named: image), let rotated = img.rotate(angle: .degrees(heading)) {
+//        ownshipImage.rotation
+//      }
+//      let img = UIImage(named: image)
+//      if let resized = img?.resize(newWidth: size), let rotatedImg = resized.rotate(angle: .degrees(heading)) {
+//        ownshipImage = Image(uiImage: rotatedImg)
+//      } else {
+//        if let img {
+//          ownshipImage = Image(uiImage: img)
+//        }
+//      }
+//    }
   }
   
   // MARK: addRasterRadarSource
@@ -199,24 +367,20 @@ struct MapScreen: View {
   func getAirportIcon(for size: String) -> PointAnnotation.Image? {
     switch size {
     case "Large":
-      let temp = UIImage(named: "lg-airport-temp")
-      if let resized = temp?.resize(newWidth: 42) {
+      if let temp = UIImage(named: "lg-airport-default"), let resized = temp.resize(newWidth: 42) {
         return PointAnnotation.Image(image: resized, name: "lg")
       }
     case "Medium":
-      let temp = UIImage(named: "md-airport-temp")
-      if let resized = temp?.resize(newWidth: 38) {
+      if let temp = UIImage(named: "md-airport-default"), let resized = temp.resize(newWidth: 38) {
         return PointAnnotation.Image(image: resized, name: "md")
       }
     default:
-      let temp = UIImage(named: "sm-airport-temp")
-      if let resized = temp?.resize(newWidth: 32) {
+      if let temp = UIImage(named: "sm-airport-default"), let resized = temp.resize(newWidth: 32) {
         return PointAnnotation.Image(image: resized, name: "sm")
       }
     }
     
-    let temp = UIImage(named: "sm-airport-temp")
-    if let resized = temp?.resize(newWidth: 32) {
+    if let temp = UIImage(named: "sm-airport-default"), let resized = temp.resize(newWidth: 32) {
       return PointAnnotation.Image(image: resized, name: "sm")
     }
     return nil
@@ -237,40 +401,58 @@ struct MapScreen: View {
     let smAirportThreshold: CGFloat = 6.5
     
     if zoom >= lgAirportThreshold {
-      loadAirports(bounds: bounds, size: "Large")
+//      loadAirports(bounds: bounds, size: "Large")
+//      airportJSONModel.fetchVisibleAirports(size: "Large", bounds: bounds)
+      mapViewModel.fetchLargeAirports(bounds: bounds)
     } else if zoom < lgAirportThreshold {
-      removeAirports(size: "Large")
+//      removeAirports(size: "Large")
+//      airportJSONModel.hideAirports(size: "Large")
+      mapViewModel.hideLargeAirports()
     }
     if zoom >= mdAirportThreshold {
-      loadAirports(bounds: bounds, size: "Medium")
+//      loadAirports(bounds: bounds, size: "Medium")
+//      airportJSONModel.fetchVisibleAirports(size: "Medium", bounds: bounds)
+//      mapViewModel.fetchMediumAirports(bounds: bounds)
     } else if zoom < mdAirportThreshold {
-      removeAirports(size: "Medium")
+//      removeAirports(size: "Medium")
+//      airportJSONModel.hideAirports(size: "Medium")
+//      mapViewModel.hideMediumAirports()
     }
     if zoom >= smAirportThreshold {
-      loadAirports(bounds: bounds, size: "Small")
+//      loadAirports(bounds: bounds, size: "Small")
+//      airportJSONModel.fetchVisibleAirports(size: "Small", bounds: bounds)
+//      mapViewModel.fetchSmallAirports(bounds: bounds)
     } else if zoom < smAirportThreshold {
-      removeAirports(size: "Small")
+//      removeAirports(size: "Small")
+//      airportJSONModel.hideAirports(size: "Small")
+//      mapViewModel.hideSmallAirports()
     }
     
   }
   
   // MARK: removeAirports
   func removeAirports(size: String) {
-    airports.removeAll(where: { $0.properties.size.rawValue == size })
+//    airports.removeAll(where: { $0.properties.size.rawValue == size })
+    
+//    for airport in airportJSONModel.airports {
+//      if airport.properties.size.rawValue == size {
+//        airport.visible = false
+//      }
+//    }
   }
   
   // MARK: loadAirports
   func loadAirports(bounds: CoordinateBounds, size: String) {
-    let prevVisibleAirports = cacheAirports
-    let visibleAirports = airportJSONModel.fetchGeoJSON(size: size, bounds: bounds)
-    cacheAirports = visibleAirports
-    
-    let removedAirports = prevVisibleAirports.filter { !visibleAirports.contains($0) }
-    let addedAirports = visibleAirports.filter { !prevVisibleAirports.contains($0) }
-    
-    // Modify airports array in place -> Eliminate recreation
-    airports.removeAll(where: { removedAirports.contains($0) })
-    airports.append(contentsOf: addedAirports)
+//    let prevVisibleAirports = cacheAirports
+//    let visibleAirports = airportJSONModel.fetchGeoJSON(size: size, bounds: bounds)
+//    cacheAirports = visibleAirports
+//    
+//    let removedAirports = prevVisibleAirports.filter { !visibleAirports.contains($0) }
+//    let addedAirports = visibleAirports.filter { !prevVisibleAirports.contains($0) }
+//
+//    airports.removeAll(where: { removedAirports.contains($0) })
+//    airports.append(contentsOf: addedAirports)
+//    airportJSONModel.fetchVisibleAirports(size: size, bounds: bounds)
   }
   
   // MARK: calculateVisibleMapRegion
@@ -299,6 +481,6 @@ struct MapScreen: View {
   
 }
 
-//#Preview {
-//  MapScreen(selectedTab: .constant(1))
-//}
+#Preview {
+  MapScreen(selectedTab: .constant(1))
+}
