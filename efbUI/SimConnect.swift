@@ -11,40 +11,40 @@ import CoreLocation
 import Combine
 import Observation
 
-struct SimConnectShipEvent {
+// XTRAFFICMSFS, fs2ff id?, lat, long, altitude, vertical speed, onGround 0 or 1, true heading, ground velocity, flight number or tail number
+
+struct SimConnectShip: Identifiable {
+  let id = UUID()
+  
   var coordinate: CLLocationCoordinate2D
   var altitude: Double
   var heading: Double
   var speed: Double
+  var fs2ffid: Int?
+  var onGround: Bool?
   var registration: String?
 }
 
-// XTRAFFICFLIGHT Events, _, Long, Lat, Height, _, _, Heading, _, Registration
-// XATTFlight Events, _, _, _
-// XGPSFlight Events, Longitude, Latitude, Height in meters, Heading, Speed (assume km/s?)
-
 @Observable
-class SimConnectShips {
-//  static let shared = SimConnectShips()
-  var simConnectShip: SimConnectShipEvent? = nil
-  private var cancellables = Set<AnyCancellable>()
+class SimConnectShipObserver {
+  var ship: SimConnectShip? = nil
+  var simConnectTraffic: [SimConnectShip] = []
   
-  // publisher for changes
-  var didChange: Bool = false
-  let publisher = PassthroughSubject<Bool, Never>()
-  init() {
-    publisher.sink { temp in
-      self.didChange = true
-      self.didChange = false
-    }.store(in: &cancellables)
-  }
+//  var shipPublisher = PassthroughSubject<SimConnectShip, Never>()
+//  private var cancellables = Set<AnyCancellable>()
+//  init() {
+//    shipPublisher
+//      .sink { ship in
+//        self.ship = ship
+//      }.store(in: &cancellables)
+//  }
   
 }
 
 final class SimConnectConnection {
-  let simConnect: SimConnectShips
+  let simConnect: SimConnectShipObserver
   
-  init(nwConnection: NWConnection, simConnect: SimConnectShips) {
+  init(nwConnection: NWConnection, simConnect: SimConnectShipObserver) {
     self.nwConnection = nwConnection
     self.id = SimConnectConnection.nextID
     SimConnectConnection.nextID += 1
@@ -120,7 +120,6 @@ final class SimConnectConnection {
   // MARK: getData()
   func getData() {
     var buffer = Data()
-    var simConnectShip: SimConnectShipEvent = SimConnectShipEvent(coordinate: CLLocationCoordinate2D(latitude: .zero, longitude: .zero), altitude: .zero, heading: .zero, speed: .zero)
     
     self.nwConnection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { (data, _, isComplete, error) in
       
@@ -129,12 +128,17 @@ final class SimConnectConnection {
           buffer.append(receivedData)  // Accumulate incoming data in the buffer
         }
         
+        // isComplete -> Process data
         if isComplete {
-          // Process the accumulated data when a complete message is received
           if let stringData = String(data: buffer, encoding: .utf8) {
             let components = stringData.components(separatedBy: ",")
+//            print("")
+//            print(components)
+//            print("")
             
-            if components[0] == "XGPSFlight Events" {
+            // XGPSMSFS, long, lat, alt, ground track, speed
+            // MARK: Ownship update
+            if components[0] == "XGPSMSFS" {
               let lat = Double(components[2])
               let long = Double(components[1])
               let coordinate = CLLocationCoordinate2D(latitude: lat ?? .zero, longitude: long ?? .zero)
@@ -143,18 +147,44 @@ final class SimConnectConnection {
               let heading = Double(components[4]) ?? .zero
               let speed = Double(components[5]) ?? .zero
               
-              simConnectShip.coordinate = coordinate
-              simConnectShip.altitude = altitude
-              simConnectShip.heading = heading
-              simConnectShip.speed = speed
+              let ship: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed)
               
-              self.simConnect.simConnectShip = simConnectShip
-              self.simConnect.publisher.send(true)
-//              self.simConnect.gpsEvent = setGPSEvent(components: components)
+              self.simConnect.ship = ship
+//              self.simConnect.shipPublisher.send(ship)
+            }
+            
+            // XTRAFFICMSFS, fs2ff id, lat, long, altitude, vertical speed, onGround (0 or 1), true heading, ground velocity, flight number or tail number
+            if components[0] == "XTRAFFICMSFS" {
+              let lat = Double(components[2])
+              let long = Double(components[3])
+              let coordinate = CLLocationCoordinate2D(latitude: lat ?? .zero, longitude: long ?? .zero)
+              
+              let fs2ffID = Int(components[1]) ?? .zero
+              let altitude = Double(components[4]) ?? .zero
+              let heading = Double(components[7]) ?? .zero
+              let speed = Double(components[8]) ?? .zero
+              let callsign = String(components[9])
+              let onGround = components[6] == "1" ? true : false
+              
+              let plane: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: fs2ffID, onGround: onGround, registration: callsign)
+              
+              // if traffic is in array, replace, otherwise, add
+              // TODO: find better way of doing this?
+              // How to handle planes no longer here? If the leave the game, their annotation will persist
+              // Figure some kind of pruning function...
+              //  maybe keep track of the traffic message with a timer
+              //  if timer is x minutes after last message, remove plane
+              for ship in self.simConnect.simConnectTraffic {
+                if ship.fs2ffid == plane.fs2ffid {
+                  self.simConnect.simConnectTraffic.removeAll(where: { $0.fs2ffid == plane.fs2ffid })
+                }
+              }
+              self.simConnect.simConnectTraffic.append(plane)
+//              self.simConnect.publisher.send(true)
             }
           }
-          buffer.removeAll()  // Clear the buffer
           
+          buffer.removeAll()  // Clear the buffer
           self.connectionDidEnd()
         } else if let error = error {
           self.connectionDidFail(error: error)
@@ -163,17 +193,6 @@ final class SimConnectConnection {
         }
       }
     }
-    
-    
-    
-//    func setGPSEvent(components: [String]) -> SimConnectShipEvent {
-//      var gpsEvent = SimConnectShipEvent()
-//      gpsEvent.coordinate = CLLocationCoordinate2D(latitude: Double(components[2]) ?? 41, longitude: Double(components[1]) ?? -90)
-//      gpsEvent.altitude = Double(components[3]) ?? 0.0
-//      gpsEvent.heading = Double(components[4]) ?? 0.0
-//      gpsEvent.speed = Double(components[5]) ?? 0.0
-//      return gpsEvent
-//    }
 
   }
 }
@@ -189,12 +208,13 @@ final class SimConnectListener {
 
 final class SimConnectServer {
   @State var isRunning: Bool = false
-  let simConnect: SimConnectShips
+  let simConnect: SimConnectShipObserver
   var simConnListener: SimConnectListener
   
-  init(simConnect: SimConnectShips, simConnListener: SimConnectListener) {
+  init(simConnect: SimConnectShipObserver, simConnListener: SimConnectListener) {
     self.simConnect = simConnect
     self.simConnListener = simConnListener
+//    self.listener = try! NWListener(using: .udp, on: 4000)
     self.listener = try! NWListener(using: .udp, on: 49002)
     self.timer = DispatchSource.makeTimerSource(queue: .main)
   }
