@@ -8,25 +8,43 @@
 import Foundation
 import SwiftUI
 @_spi(Experimental) import MapboxMaps
+//import Combine
 
+@Observable
 final class AirportJSONModel {
   let path = Bundle.main.path(forResource: "Airports", ofType: "geojson")
-  var airports: Set<Airport> = Set<Airport>()
+  var airports: [Airport] = []
   
   init() {
     if let path {
       do {
         let data = try Data(contentsOf: URL(fileURLWithPath: path))
-        let temp = try JSONDecoder().decode([Airport].self, from: data)
-        airports = Set(temp)
+        airports = try JSONDecoder().decode([Airport].self, from: data)
       } catch {
         print("Error decoding Airport JSON from Airports.GeoJSON: \(error)")
       }
     }
   }
   
-  func fetchAirports() -> [Airport] {
-    return Array(airports)
+  func fetchVisibleAirports(size: String, bounds: CoordinateBounds) {
+    // for airports with size and within bounds, set visible to true
+    
+      for airport in airports {
+        if !airport.visible && airport.properties.size.rawValue == size && bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
+          airport.visible = true
+        } else if airport.visible && !bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
+          airport.visible = false
+        }
+      }
+    
+  }
+  
+  func hideAirports(size: String) {
+      for airport in airports {
+        if airport.visible && airport.properties.size.rawValue == size {
+          airport.visible = false
+        }
+      }
   }
   
   func fetchGeoJSON(size: String, bounds: CoordinateBounds) -> [Airport] {
@@ -42,27 +60,6 @@ final class AirportJSONModel {
         )
       }
     return Array(filter)
-//    if let path {
-//      do {
-//        let data = try Data(contentsOf: URL(fileURLWithPath: path))
-//        let filteredAirports = try JSONDecoder().decode([Airport].self, from: data)
-//          .filter { airport in
-//            let airportSize = airport.properties.size.rawValue
-//            return airportSize == size || AirportSize(rawValue: airportSize)! < AirportSize(rawValue: size)!
-//          }
-//          .filter { airport in
-//            bounds.contains(
-//              forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long),
-//              wrappedCoordinates: true
-//            )
-//          }
-//        return filteredAirports
-//      } catch let error {
-//        print("Error decoding Airport JSON from Airport.GeoJSON: \(error)")
-//        return []
-//      }
-//    }
-//    return []
   }
   
   enum AirportSize: String, Comparable {
