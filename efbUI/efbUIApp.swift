@@ -10,7 +10,7 @@ import SwiftData
 
 @main
 struct efbUIApp: App {
-  @State private var simConnect: SimConnectShips = SimConnectShips()
+  @State private var simConnect: SimConnectShipObserver = SimConnectShipObserver()
   @State private var settings: Settings = Settings()
   @State private var airportDetailViewModel: AirportDetailViewModel = AirportDetailViewModel()
   @State private var simbrief: SimBriefViewModel = SimBriefViewModel()
