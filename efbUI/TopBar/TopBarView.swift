@@ -61,7 +61,7 @@ struct TopBarView: View {
   private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
   @State private var currentZuluTime24: String = ""
   @State private var currentTime: String = ""
-  @Environment(SimConnectShips.self) var simConnect
+  @Environment(SimConnectShipObserver.self) var simConnect
   @Environment(SimBriefViewModel.self) var simbriefViewModel
   
   @State private var dragOffset: CGFloat = 40
@@ -101,9 +101,9 @@ struct TopBarView: View {
         
         Spacer()
           .frame(width: 40)
-        Text("Hdg: \(simConnect.simConnectShip?.heading.string ?? "")")
-        Text("Alt: \(simConnect.simConnectShip?.altitude.string ?? "")")
-        Text("Spd: \(simConnect.simConnectShip?.speed.string ?? "")")
+        Text("Hdg: \(simConnect.ship?.heading.string ?? "")")
+        Text("Alt: \(simConnect.ship?.altitude.string ?? "")")
+        Text("Spd: \(simConnect.ship?.speed.string ?? "")")
         Spacer()
         Text(currentZuluTime24)
         Spacer()
@@ -149,6 +149,7 @@ struct TopBarView: View {
                 ScrollView(.vertical) {
                   if let atis = temp.origin.atis {
                     ForEach(atis, id:\.self) { ati in
+                      Text(ati.network)
                       Text(ati.message)
                       Divider()
                     }
@@ -169,6 +170,7 @@ struct TopBarView: View {
                 ScrollView(.vertical) {
                   if let atis = temp.destination.atis {
                     ForEach(atis, id:\.self) { ati in
+                      Text(ati.network)
                       Text(ati.message)
                       Divider()
                     }
