@@ -200,7 +200,7 @@ struct AirportScreenInfoTabBuilder: View {
       AirportScreenWxTab(metar: airportVM.airportWxMetar, taf: airportVM.airportWxTAF)
     case .rwy:
       if airportVM.selectedAirportRunways != nil {
-        AirportScreenRwyTab(runway: airportVM.selectedAirportRunways)
+        AirportScreenRwyTab(runway: airportVM.selectedAirportRunways, wx: airportVM.airportWxMetar)
       } else {
         ContentUnavailableView("Airport Runways Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view runways."))
       }
@@ -313,26 +313,67 @@ struct AirportScreenWxTab: View {
 // TODO: If RVR is less than length of runway, draw line displaying RVR of runway?
 struct AirportScreenRwyTab: View {
   let runway: [RunwayTable]?
+  let wx: AirportMETARSchema?
   
   var body: some View {
     if let runway {
       ScrollView(.vertical) {
         ForEach(runway, id:\.runwayIdentifier) { runway in
-          VStack {
-            HStack {
-              // TODO: Convert surfaceCode to something friendly
-              // TODO: formatting
-              Text(runway.runwayIdentifier)
-              Text("\(runway.runwayMagneticBearing)")
-              Text("\(runway.runwayTrueBearing)")
-              Text("\(runway.runwayLength)")
-              Text("\(runway.runwayWidth)")
-              Text("\(runway.surfaceCode)")
-            }
-          }
+          AirportRunway(runway: runway, weather: wx)
+//          VStack {
+//            HStack {
+//              Text(runway.runwayIdentifier)
+//              Text("\(runway.runwayMagneticBearing)")
+//              Text("\(runway.runwayTrueBearing)")
+//              Text("\(runway.runwayLength)")
+//              Text("\(runway.runwayWidth)")
+//              Text("\(runway.surfaceCode)")
+//            }
+//          }
         }
       }
     }
+  }
+}
+
+struct AirportRunway: View {
+  let runway: RunwayTable
+  let weather: AirportMETARSchema?
+  
+  var body: some View {
+    ZStack {
+      RoundedRectangle(cornerRadius: 8)
+        .background(.gray)
+      VStack {
+        Text(runway.runwayIdentifier)
+        ZStack {
+          Rectangle()
+            .stroke(.white)
+            .fill(.asphalt)
+            .rotationEffect(.degrees(getRunwayHeading(heading: runway.runwayMagneticBearing)-90.0), anchor: .center)
+//          if weather != nil, let dir = weather?.first?.wdir {
+//            Image("")
+//              .foregroundStyle(.blue)
+//              .rotationEffect(.degrees(Double(dir)))
+//          }
+        }
+        .frame(maxWidth: 75)
+        Text(runway.runwayLength.string)
+      }
+    }
+  }
+  
+  func getRunwaySurface() {
+    
+  }
+  
+  func getRunwaySurfaceColor() {
+    
+  }
+  
+  func getRunwayHeading(heading: Double) -> Double {
+    if heading < 180 { return heading }
+    return heading-180
   }
 }
 
