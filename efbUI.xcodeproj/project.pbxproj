@@ -38,6 +38,7 @@
 		A232CCBE2B252068005C3E2E /* MapboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A232CCBD2B252068005C3E2E /* MapboxView.swift */; };
 		A237AF802B5C7F3B00646AAF /* OFPSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A237AF7F2B5C7F3B00646AAF /* OFPSchema.swift */; };
 		A237AF822B63490300646AAF /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A237AF812B63490300646AAF /* ChartsView.swift */; };
+		A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A24692F22B8E3A6B00A10A7F /* DrawingView.swift */; };
 		A257E1B42B2A75C6003B1859 /* SQLiteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A257E1B32B2A75C6003B1859 /* SQLiteManager.swift */; };
 		A257E1B62B2AB514003B1859 /* DBTableStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A257E1B52B2AB514003B1859 /* DBTableStructs.swift */; };
 		A25CB27D2B249224008E9FEF /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = A25CB27C2B249224008E9FEF /* navdata.db */; };
@@ -90,6 +91,7 @@
 		A232CCBD2B252068005C3E2E /* MapboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapboxView.swift; sourceTree = "<group>"; };
 		A237AF7F2B5C7F3B00646AAF /* OFPSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OFPSchema.swift; sourceTree = "<group>"; };
 		A237AF812B63490300646AAF /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
+		A24692F22B8E3A6B00A10A7F /* DrawingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingView.swift; sourceTree = "<group>"; };
 		A257E1B32B2A75C6003B1859 /* SQLiteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteManager.swift; sourceTree = "<group>"; };
 		A257E1B52B2AB514003B1859 /* DBTableStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBTableStructs.swift; sourceTree = "<group>"; };
 		A25CB27C2B249224008E9FEF /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = navdata.db; sourceTree = "<group>"; };
@@ -221,6 +223,7 @@
 				A22322D42B20B74E001274CA /* Extensions.swift */,
 				3AE11B2E27319452005974E5 /* Preview Content */,
 				A2EC6FD72B49AF9A00F31364 /* Deprecated */,
+				A24692F22B8E3A6B00A10A7F /* DrawingView.swift */,
 			);
 			path = efbUI;
 			sourceTree = "<group>";
@@ -430,6 +433,7 @@
 				3A24A78D27321C15000D98E5 /* TabBar.swift in Sources */,
 				3A81763F27339AA100445CDA /* TopBarView.swift in Sources */,
 				A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */,
+				A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */,
 				A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */,
 				3AE11B2927319450005974E5 /* efbUIApp.swift in Sources */,
 				A237AF802B5C7F3B00646AAF /* OFPSchema.swift in Sources */,
