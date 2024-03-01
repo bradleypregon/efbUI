@@ -60,6 +60,9 @@
 		A2C6ED232B300A8B00856381 /* AirportChartAPISchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED222B300A8B00856381 /* AirportChartAPISchema.swift */; };
 		A2C6ED282B3763D800856381 /* AirportAnnotationSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED272B3763D800856381 /* AirportAnnotationSidebarView.swift */; };
 		A2C9E3F82B5786E1007D667F /* AirportTAFAPISchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C9E3F72B5786E1007D667F /* AirportTAFAPISchema.swift */; };
+		A2DE93D82B9237390065FEF6 /* ScratchPadATIS.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D72B9237390065FEF6 /* ScratchPadATIS.swift */; };
+		A2DE93DA2B925E340065FEF6 /* ScratchPadCRAFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D92B925E340065FEF6 /* ScratchPadCRAFT.swift */; };
+		A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */; };
 		A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */; };
 		A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */; };
 /* End PBXBuildFile section */
@@ -109,6 +112,9 @@
 		A2C6ED222B300A8B00856381 /* AirportChartAPISchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportChartAPISchema.swift; sourceTree = "<group>"; };
 		A2C6ED272B3763D800856381 /* AirportAnnotationSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotationSidebarView.swift; sourceTree = "<group>"; };
 		A2C9E3F72B5786E1007D667F /* AirportTAFAPISchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportTAFAPISchema.swift; sourceTree = "<group>"; };
+		A2DE93D72B9237390065FEF6 /* ScratchPadATIS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadATIS.swift; sourceTree = "<group>"; };
+		A2DE93D92B925E340065FEF6 /* ScratchPadCRAFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadCRAFT.swift; sourceTree = "<group>"; };
+		A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportIcon.swift; sourceTree = "<group>"; };
 		A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerAPI.swift; sourceTree = "<group>"; };
 		A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerSchema.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -150,6 +156,8 @@
 			isa = PBXGroup;
 			children = (
 				3A24A79127324259000D98E5 /* ScratchPadView.swift */,
+				A2DE93D72B9237390065FEF6 /* ScratchPadATIS.swift */,
+				A2DE93D92B925E340065FEF6 /* ScratchPadCRAFT.swift */,
 			);
 			path = ScratchPad;
 			sourceTree = "<group>";
@@ -159,6 +167,7 @@
 			children = (
 				3A0E84FB274044F4001BC905 /* AirportData */,
 				3AA03FC52852BAC60086DBDA /* View */,
+				A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */,
 			);
 			path = Map;
 			sourceTree = "<group>";
@@ -445,6 +454,7 @@
 				A2C6ED232B300A8B00856381 /* AirportChartAPISchema.swift in Sources */,
 				A257E1B42B2A75C6003B1859 /* SQLiteManager.swift in Sources */,
 				A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */,
+				A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */,
 				A2C6ED1D2B3005C900856381 /* FetchAirportCharts.swift in Sources */,
 				3A69AF45279BBBD800E29135 /* AirportDB.swift in Sources */,
 				3A69AF43279BBB8600E29135 /* AirportDBAPI.swift in Sources */,
@@ -452,7 +462,9 @@
 				A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */,
 				A2A2436C2B0082A700245A0F /* Airport.swift in Sources */,
 				3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */,
+				A2DE93D82B9237390065FEF6 /* ScratchPadATIS.swift in Sources */,
 				A2C6ED172B2E3DCE00856381 /* OSMWeatherSchema.swift in Sources */,
+				A2DE93DA2B925E340065FEF6 /* ScratchPadCRAFT.swift in Sources */,
 				A2C6ED1F2B30068300856381 /* AirportMetarAPISchema.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
