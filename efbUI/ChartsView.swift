@@ -13,10 +13,8 @@ struct ChartsView: View {
   @Environment(AirportDetailViewModel.self) private var airportDetailViewModel
   @Environment(SimBriefViewModel.self) private var sbViewModel
   
-  //  let charts: DecodedArray<AirportChartAPISchema>? = nil
   @State private var columnVisibility: NavigationSplitViewVisibility = .all
   @State private var starred: [AirportDetail] = []
-//  @State private var selectedChart: AirportDetail?
   @State private var selectedChartURL: String = ""
   
   @State private var rotation: Angle = Angle.zero
@@ -26,13 +24,32 @@ struct ChartsView: View {
   
   @State private var canvas = PKCanvasView()
   
+  private enum AirportChart: String, CaseIterable, Identifiable {
+    case Star, Curr, To, From, Altn, OFP
+    var id: Self { self }
+  }
+  
+  @State private var airportSelection: AirportChart = .Curr
+  
   var body: some View {
     NavigationSplitView(columnVisibility: $columnVisibility) {
+      // include OFP
+      Picker("Airport", selection: $airportSelection) {
+        ForEach(AirportChart.allCases) { airport in
+          if airport.rawValue == AirportChart.Star.rawValue {
+            Image(systemName: "star.fill")
+              .resizable()
+          } else {
+            Text(airport.rawValue)
+          }
+        }
+      }
+      .pickerStyle(.segmented)
+      
       List {
         if let ofp = sbViewModel.ofp {
           Button {
             selectedChartURL = "\(ofp.files.directory)\(ofp.files.pdf.link)"
-            print(selectedChartURL)
           } label: {
             Text("OFP")
           }
