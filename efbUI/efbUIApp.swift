@@ -24,6 +24,7 @@ struct efbUIApp: App {
         VStack {
           TopBarView()
             .background(.bar)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
           Spacer()
         }
       }
