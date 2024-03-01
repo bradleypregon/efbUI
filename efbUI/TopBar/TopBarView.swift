@@ -64,18 +64,26 @@ struct TopBarView: View {
   @Environment(SimConnectShipObserver.self) var simConnect
   @Environment(SimBriefViewModel.self) var simbriefViewModel
   
-  @State private var dragOffset: CGFloat = 40
-  @State private var expanded: Bool = false
+  let topOffset: CGFloat = 50
+  let middleOffset: CGFloat = 300
+  let bottomOffset: CGFloat = 600
+  
+  @State private var dragOffset: CGSize = .zero
+  @State private var position: CGFloat = 50
+  @State private var halfExpanded: Bool = false
+  @State private var fullExpanded: Bool = false
   
   @Query var simbriefUser: [SimBriefUser]
   @State var route: String = ""
   
   var simConnectListener: SimConnectListener = SimConnectListener()
   
-//  @State private var flightPlan: OFPSchema? = nil
-
+  //  @State private var flightPlan: OFPSchema? = nil
+  
   var body: some View {
     VStack {
+      Spacer()
+        .frame(height: 10)
       HStack {
         Spacer()
         
@@ -108,41 +116,35 @@ struct TopBarView: View {
         Text(currentZuluTime24)
         Spacer()
       }
-//      .fixedSize(horizontal: false, vertical: true)
       Spacer()
-      // hidden content here
-      if expanded {
+      
+      // Half -> ATIS, general Sim Brief details
+      if halfExpanded {
         VStack {
           if let simbriefID = simbriefUser.first?.userID {
             HStack {
               Text("SimBrief OFP | \(simbriefID)")
               Button {
                 simbriefViewModel.fetchOFP(for: simbriefID)
-//                route = "\(simbriefViewModel.ofp?.origin.icaoCode)"
                 
-//                let simbriefAPI = SimBriefAPI()
-//                simbriefAPI.fetchLastFlightPlan(for: simbriefID) { ofp in
-//                  route = "\(ofp.origin.icaoCode)/\(ofp.origin.planRwy) \(ofp.general.routeNavigraph) \(ofp.destination.icaoCode)/\(ofp.destination.planRwy) | \(ofp.alternate?.first?.icaoCode ?? "")/\(ofp.alternate?.first?.planRwy ?? "")"
-//                  flightPlan = ofp
-                  
-                  // TODO: Process split variable -> Construct linked list with each route component
-                  // TODO: Check airac and compare to current downloaded database
-                  
-                  // Query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
-                  // Give error feedback if waypoint not found
-                  // HOW TO: Multiple waypoints in world can have same name - how to differentiate?
-                  
-//                  let tempSplit = route.split(separator: " ")
-//                  let linkedList = LinkedList()
-//                  for item in tempSplit {
-//                    linkedList.append(value: String(item))
-//                  }
-//                  linkedList.printList()
+                // TODO: Process split variable -> Construct linked list with each route component
+                // TODO: Check airac and compare to current downloaded database
+                
+                // Query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
+                // Give error feedback if waypoint not found
+                // HOW TO: Multiple waypoints in world can have same name - how to differentiate?
+                
+                //                  let tempSplit = route.split(separator: " ")
+                //                  let linkedList = LinkedList()
+                //                  for item in tempSplit {
+                //                    linkedList.append(value: String(item))
+                //                  }
+                //                  linkedList.printList()
               } label: {
                 Text("Fetch Route")
               }
             }
-//            Text(route)
+            
             if let temp = simbriefViewModel.ofp {
               Text("\(temp.origin.icaoCode)/\(temp.origin.planRwy) \(temp.general.routeNavigraph) \(temp.destination.icaoCode)/\(temp.destination.planRwy) | \(temp.alternate?.first?.icaoCode ?? "")/\(temp.alternate?.first?.planRwy ?? "")")
               HStack {
@@ -183,6 +185,12 @@ struct TopBarView: View {
           
         }
       }
+      
+      // Full -> OFP
+      if fullExpanded {
+        Text("perhaps another view here")
+      }
+      
       Spacer()
       VStack {
         RoundedRectangle(cornerRadius: 10)
@@ -190,39 +198,90 @@ struct TopBarView: View {
           .foregroundStyle(.gray)
       }
       .offset(x: 0, y: -5)
-      .onTapGesture {
-        withAnimation {
-          if !expanded {
-            dragOffset = 300
-            expanded = true
-          } else {
-            dragOffset = 40
-            expanded = false
+      .gesture(
+        DragGesture()
+          .onChanged { self.dragOffset = $0.translation }
+          .onEnded { value in
+            withAnimation {
+              // bar is at top (40)
+              if self.position == topOffset {
+                
+                // minimal change -> snap to top
+                if value.translation.height < 0 && value.translation.height < 50 {
+                  self.position = topOffset
+                  halfExpanded = false
+                  fullExpanded = false
+                }
+                
+                //                   pulled down a little -> middle
+                else if value.translation.height >= 50 && value.translation.height <= 100 {
+                  self.position = middleOffset
+                  halfExpanded = true
+                  fullExpanded = false
+                }
+                
+                // pulled a lot -> bottom
+                else if value.translation.height > 100 {
+                  self.position = bottomOffset
+                  halfExpanded = true
+                  fullExpanded = true
+                }
+              }
+              
+              // bar is at middle (300)
+              else if self.position == middleOffset {
+                // minimal change -> snap to middle
+                if value.translation.height > -50 && value.translation.height < 50 {
+                  self.position = middleOffset
+                  halfExpanded = true
+                  fullExpanded = false
+                }
+                
+                // pushed a little -> top
+                else if value.translation.height <= -50 {
+                  self.position = topOffset
+                  halfExpanded = false
+                  fullExpanded = false
+                }
+                
+                // pulled a little -> bottom
+                else if value.translation.height >= 50 {
+                  self.position = bottomOffset
+                  halfExpanded = true
+                  fullExpanded = true
+                }
+              }
+              
+              // bar is at bottom (500)
+              else {
+                // minimal change -> snap to bottom
+                if value.translation.height > 0 && value.translation.height > -50 {
+                  self.position = bottomOffset
+                  halfExpanded = true
+                  fullExpanded = true
+                }
+                
+                // pushed up slightly -> middle
+                else if value.translation.height <= -50 && value.translation.height <= -100 {
+                  self.position = middleOffset
+                  halfExpanded = true
+                  fullExpanded = false
+                }
+                
+                // pushed up enough -> top
+                else if value.translation.height < -100 {
+                  self.position = topOffset
+                  halfExpanded = false
+                  fullExpanded = false
+                }
+              }
+              
+              self.dragOffset = .zero
+            }
           }
-        }
-      }
-      // MARK: TODO
-      // TODO: Fix drag gesture. Pulling down works ok, pushing up is funky
-//      .gesture(
-//        DragGesture()
-//          .onChanged { value in
-//            dragOffset = value.translation.height
-//          }
-//          .onEnded { _ in
-//            withAnimation {
-//              if dragOffset > 75 {
-//                dragOffset = 300
-//                expanded = true
-//              }
-//              else {
-//                dragOffset = 40
-//                expanded = false
-//              }
-//            }
-//          }
-//      )
+      )
     }
-    .frame(height: dragOffset)
+    .frame(height: dragOffset.height + position)
     .onReceive(timer) { _ in
       getCurrentZuluTime24()
     }
@@ -251,6 +310,6 @@ struct TopBarView: View {
   
 }
 
-#Preview {
-  TopBarView()
-}
+//#Preview {
+//  TopBarView()
+//}
