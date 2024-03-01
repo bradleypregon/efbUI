@@ -118,7 +118,7 @@ struct MapScreen: View {
   @State private var rasterRadarAlertVisible: Bool = false
   @State private var displayTrafficAltitude: Bool = true
   
-  @State private var drawingEnabled: Bool = true
+  @State private var drawingEnabled: Bool = false
   @State private var canvas = PKCanvasView()
   
   var body: some View {
@@ -367,7 +367,6 @@ struct MapScreen: View {
   func removeRasterRadarSource(_ map: MapboxMap) {
     
     do {
-//      try map.removeSource(withId: radarSourceID)
       try map.removeLayer(withId: "radar-layer")
       try map.removeSource(withId: radarSourceID)
     } catch {
