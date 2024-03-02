@@ -406,7 +406,15 @@ struct ChartsView: View {
   }
   
   func ofp() -> some View {
-    Text("OFP Charts")
+    List {
+      if let ofp = sbViewModel.ofp {
+        Button {
+          selectedChartURL = "\(ofp.files.directory)\(ofp.files.pdf.link)"
+        } label: {
+          Text("OFP")
+        }
+      }
+    }
   }
   
   private func calculateNearestCardinalAngle(angle: Double) -> Double {
