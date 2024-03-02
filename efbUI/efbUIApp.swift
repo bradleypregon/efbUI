@@ -20,7 +20,7 @@ struct efbUIApp: App {
       ZStack {
         TabBar()
           .frame(maxHeight: .infinity)
-          .padding(.top, 50)
+          .padding(.top, 65)
         VStack {
           TopBarView()
             .background(.bar)

@@ -64,12 +64,12 @@ struct TopBarView: View {
   @Environment(SimConnectShipObserver.self) var simConnect
   @Environment(SimBriefViewModel.self) var simbriefViewModel
   
-  let topOffset: CGFloat = 50
+  let topOffset: CGFloat = 65
   let middleOffset: CGFloat = 300
   let bottomOffset: CGFloat = 600
   
   @State private var dragOffset: CGSize = .zero
-  @State private var position: CGFloat = 50
+  @State private var position: CGFloat = 65
   @State private var halfExpanded: Bool = false
   @State private var fullExpanded: Bool = false
   
@@ -82,15 +82,11 @@ struct TopBarView: View {
   
   var body: some View {
     VStack {
-      Spacer()
-        .frame(height: 10)
-      HStack {
+      HStack(alignment: .center) {
         Spacer()
-        
-        Text("Connect:")
         Button {
           // TODO: Instantiate server once. Don't keep reinstantiating
-          let server = SimConnectServer(simConnect: simConnect, simConnListener: simConnectListener)
+          var server = SimConnectServer(simConnect: simConnect, simConnListener: simConnectListener)
           if !server.isRunning {
             do {
               try server.start()
@@ -109,13 +105,28 @@ struct TopBarView: View {
         
         Spacer()
           .frame(width: 40)
-        Text("Hdg: \(simConnect.ship?.heading.string ?? "")")
-        Text("Alt: \(simConnect.ship?.altitude.string ?? "")")
-        Text("Spd: \(simConnect.ship?.speed.string ?? "")")
+        HStack(spacing: 20) {
+          VStack {
+            Text("Heading")
+              .font(.caption)
+            Text(roundToTenths(simConnect.ship?.heading ?? .zero))
+          }
+          VStack {
+            Text("GPS Altitude")
+              .font(.caption)
+            Text(roundToTenths(simConnect.ship?.altitude ?? .zero))
+          }
+          VStack {
+            Text("Speed")
+              .font(.caption)
+            Text(roundToTenths(simConnect.ship?.altitude ?? .zero))
+          }
+        }
         Spacer()
         Text(currentZuluTime24)
         Spacer()
       }
+      .padding([.top], 15)
       Spacer()
       
       // Half -> ATIS, general Sim Brief details
@@ -162,12 +173,18 @@ struct TopBarView: View {
                   Text(temp.aircraft.reg)
                   Text("CI: \(temp.general.costIndex)")
                   Text("FL: \(temp.general.initialAltitude)")
+                  Text("ETE: \(temp.times.ete)")
+                  Text("Dep: \(convertDate(temp.times.schedDep))z")
+                  Text("Arr: \(convertDate(temp.times.schedArr))z")
                 }
                 VStack {
                   Text(temp.aircraft.icaoCode)
-                  Text("ETE: \(temp.times.ete)")
+                  Text("Pax: \(temp.weights.paxCountActual)")
+                  Text("Cargo: \(temp.weights.cargo)")
                   Text("Block: \(temp.fuel.block)")
-                  Text("ZFW: \(temp.weights.estZFW)")
+                  Text("eZFW: \(temp.weights.estZFW)")
+                  Text("eTOW: \(temp.weights.estTOW)")
+                  Text("eLDW: \(temp.weights.estLDW)")
                 }
                 ScrollView(.vertical) {
                   if let atis = temp.destination.atis {
@@ -194,10 +211,10 @@ struct TopBarView: View {
       Spacer()
       VStack {
         RoundedRectangle(cornerRadius: 10)
-          .frame(width: 200, height: 5)
+          .frame(width: 200, height: 8)
           .foregroundStyle(.gray)
       }
-      .offset(x: 0, y: -5)
+      .offset(x: 0, y: -10)
       .gesture(
         DragGesture()
           .onChanged { self.dragOffset = $0.translation }
@@ -296,7 +313,13 @@ struct TopBarView: View {
     case .stopped:
       return .red
     }
-    
+  }
+  
+  func convertDate(_ date: Date) -> String {
+    let df = DateFormatter()
+    df.dateFormat = "HH:mm"
+    df.timeZone = TimeZone(identifier: "UTC")
+    return df.string(from: date)
   }
   
   func getCurrentZuluTime24() {
@@ -306,6 +329,14 @@ struct TopBarView: View {
     let currentDate = Date()
     let zulu = df.string(from: currentDate)
     currentZuluTime24 = "\(zulu)z"
+  }
+  
+  func roundToTenths(_ number: Double) -> String {
+    let roundedNumber = number.rounded(toPlaces: 0)
+    let nf = NumberFormatter()
+    nf.minimumFractionDigits = 0
+    nf.maximumFractionDigits = 0
+    return nf.string(from: NSNumber(value: roundedNumber)) ?? ""
   }
   
 }
