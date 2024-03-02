@@ -86,7 +86,7 @@ struct TopBarView: View {
         Spacer()
         Button {
           // TODO: Instantiate server once. Don't keep reinstantiating
-          var server = SimConnectServer(simConnect: simConnect, simConnListener: simConnectListener)
+          let server = SimConnectServer(simConnect: simConnect, simConnListener: simConnectListener)
           if !server.isRunning {
             do {
               try server.start()
