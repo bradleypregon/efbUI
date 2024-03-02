@@ -32,7 +32,8 @@ struct AirportChartAPISchema: Decodable {
   }
 }
 
-struct AirportDetail: Decodable, Equatable {
+struct AirportDetail: Decodable, Equatable, Identifiable {
+  var id: String = UUID().uuidString
   let state: String
   let stateFull: String
   let city: String
