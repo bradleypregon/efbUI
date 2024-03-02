@@ -263,38 +263,38 @@ struct MapScreen: View {
           }
           .ignoresSafeArea()
           
-          // menu
+          // MARK: Menu
           VStack(spacing: 5) {
             Button {
               displayRadar.toggle()
             } label: {
               Image(systemName: displayRadar ? "cloud.sun.fill" : "cloud.sun")
             }
+            .buttonStyle(.bordered)
+            
             Spacer()
               .frame(height: 15)
+            
             Button {
               largeAnnotationsVisible.toggle()
             } label: {
-              let temp = UIImage(named: "lg-airport-temp")
-              if let resized = temp?.resize(newWidth: 40) {
-                Image(uiImage: resized)
-              }
+              Image("lg-airport-temp")
+                .resizable()
+                .frame(width: 38, height: 38)
             }
             Button {
               mediumAnnotationsVisible.toggle()
             } label: {
-              let temp = UIImage(named: "md-airport-temp")
-              if let resized = temp?.resize(newWidth: 40) {
-                Image(uiImage: resized)
-              }
+              Image("md-airport-temp")
+                .resizable()
+                .frame(width: 38, height: 38)
             }
             Button {
               smallAnnotationsVisible.toggle()
             } label: {
-              let temp = UIImage(named: "sm-airport-temp")
-              if let resized = temp?.resize(newWidth: 40) {
-                Image(uiImage: resized)
-              }
+              Image("sm-airport-temp")
+                .resizable()
+                .frame(width: 38, height: 38)
             }
           }
           .padding([.leading], 5)
