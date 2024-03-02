@@ -13,7 +13,7 @@ struct TabBar: View {
   var body: some View {
     TabView(selection: $selectedTab) {
       
-      AirportScreen()
+      AirportScreen(selectedTab: $selectedTab)
         .tabItem {
           Label("Airports", systemImage: "scope")
         }
