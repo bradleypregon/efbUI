@@ -52,6 +52,7 @@ class AirportDetailViewModel {
   var cityServed = ""
   var selectedInfoTab: AirportsScreenInfoTabs = .freq
   var selectedAirportCharts: DecodedArray<AirportChartAPISchema>?
+  var wxCategory: WxCategory = .VFR
   
   private func queryAirportData(airport: AirportTable) {
     /**
@@ -63,6 +64,10 @@ class AirportDetailViewModel {
     fetchCityState(lat: airport.airportRefLat, long: airport.airportRefLong)
     fetchAirportCharts(icao: airport.airportIdentifier)
     selectedAirportRunways = SQLiteManager.shared.getAirportRunways(airport.airportIdentifier)
+    
+    if let wx = self.airportWxMetar {
+      wxCategory = calculateWxCategory(wx: wx)
+    }
   }
   
   func fetchWeather(lat: Double, long: Double) {
