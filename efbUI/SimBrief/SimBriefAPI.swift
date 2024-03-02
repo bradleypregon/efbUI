@@ -10,12 +10,43 @@ import Observation
 
 @Observable
 class SimBriefViewModel {
-  var ofp: OFPSchema? = nil
+  var ofp: OFPSchema? {
+    didSet {
+      if let ofp {
+        fetchOriginCharts(icao: ofp.origin.icaoCode)
+        fetchDestCharts(icao: ofp.destination.icaoCode)
+        if let altn = ofp.alternate?.first {
+          fetchAltnCharts(icao: altn.icaoCode)
+        }
+      }
+    }
+  }
   let api = SimBriefAPI()
+  let chartsAPI = FetchAirportCharts()
+  
+  var depCharts: DecodedArray<AirportChartAPISchema>?
+  var arrCharts: DecodedArray<AirportChartAPISchema>?
+  var altnCharts: DecodedArray<AirportChartAPISchema>?
   
   func fetchOFP(for id: String) {
     api.fetchLastFlightPlan(for: id) { schema in
       self.ofp = schema
+    }
+  }
+  
+  func fetchOriginCharts(icao: String) {
+    chartsAPI.fetchCharts(icao: icao) { charts in
+      self.depCharts = charts
+    }
+  }
+  func fetchDestCharts(icao: String) {
+    chartsAPI.fetchCharts(icao: icao) { charts in
+      self.arrCharts = charts
+    }
+  }
+  func fetchAltnCharts(icao: String) {
+    chartsAPI.fetchCharts(icao: icao) { charts in
+      self.altnCharts = charts
     }
   }
 }
