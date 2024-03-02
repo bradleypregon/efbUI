@@ -33,10 +33,9 @@ struct AirportSunriseSunsetView: View {
 }
 
 struct AirportScreen: View {
-//  @State private var airportDetailViewModel = AirportDetailViewModel.shared
+  @Binding var selectedTab: Int
   @Environment(AirportDetailViewModel.self) private var airportDetailViewModel
   @State private var textFieldFocused: Bool = false
-  private var grid = [GridItem(.flexible()), GridItem(.flexible())]
   
   var body: some View {
     @Bindable var airportDetailViewModel = airportDetailViewModel
@@ -64,9 +63,10 @@ struct AirportScreen: View {
                   GridRow {
                     Text("Flight category")
                       .font(.subheadline)
-                    if let wx = airportDetailViewModel.airportWxMetar {
-                      Text(airportDetailViewModel.calculateWxCategory(wx: wx).rawValue)
+                    if airportDetailViewModel.airportWxMetar != nil {
+                      Text(airportDetailViewModel.wxCategory.rawValue)
                         .fontWeight(.semibold)
+                        .foregroundStyle(airportDetailViewModel.wxCategory == .MVFR ? Color.mvfr : airportDetailViewModel.wxCategory == .IFR ? Color.ifr : airportDetailViewModel.wxCategory == .LIFR ? Color.lifr : Color.vfr)
                     } else {
                       Text("N/A")
                         .fontWeight(.semibold)
@@ -78,17 +78,13 @@ struct AirportScreen: View {
                     Text("\(airportDetailViewModel.selectedAirport?.elevation ?? .zero)'")
                       .fontWeight(.semibold)
                   }
-                  GridRow {
-                    Text("Fuel")
-                      .font(.subheadline)
-                    Text("Placeholder")
-                      .fontWeight(.semibold)
-                  }
-                  GridRow {
-                    Text("Proc Avail")
-                      .font(.subheadline)
-                    Text("Placeholder")
-                      .fontWeight(.semibold)
+                  GridRow(alignment: .center) {
+                    Button {
+                      selectedTab = 1
+                    } label: {
+                      Text("View Charts")
+                    }
+                    .buttonStyle(.bordered)
                   }
                 }
                 Grid(alignment: .leading) {
@@ -153,12 +149,6 @@ struct AirportScreen: View {
                     Button {
                       airportDetailViewModel.selectedAirport = SQLiteManager.shared.selectAirport(result.airportIdentifier)
                       airportDetailViewModel.selectedAirportICAO = result.airportIdentifier
-                      
-//                      if let airport = airportScreenViewModel.selectedAirport {
-//                        DispatchQueue.main.async {
-//                          airportScreenViewModel.queryAirportData(airport: airport)
-//                        }
-//                      }
                     } label: {
                       Text("\(result.airportIdentifier) - \(result.airportName)")
                     }
@@ -204,12 +194,6 @@ struct AirportScreenInfoTabBuilder: View {
       } else {
         ContentUnavailableView("Airport Runways Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view runways."))
       }
-//    case .chart:
-//      if airportVM.selectedAirportCharts != nil {
-//        AirportScreenChart(charts: airportVM.selectedAirportCharts)
-//      } else {
-//        ContentUnavailableView("Airport Charts Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view charts."))
-//      }
     case .localwx:
       if airportVM.osmWeatherResults != nil {
         AirportScreenLocalWxTab(localwx: airportVM.osmWeatherResults)
@@ -393,6 +377,6 @@ struct AirportScreenLocalWxTab: View {
 
 
 #Preview {
-  AirportScreen()
+  AirportScreen(selectedTab: .constant(0))
 }
 
