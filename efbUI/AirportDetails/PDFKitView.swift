@@ -17,6 +17,7 @@ struct PDFKitView: UIViewRepresentable {
     pdf.displayMode = .singlePageContinuous
     pdf.autoScales = true
     pdf.usePageViewController(true)
+    pdf.backgroundColor = UIColor.clear
     return pdf
   }
   
