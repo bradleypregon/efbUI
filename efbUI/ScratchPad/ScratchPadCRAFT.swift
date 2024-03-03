@@ -23,7 +23,7 @@ struct ScratchPadCRAFT: View {
   ]
   
   var body: some View {
-    VStack(spacing: 20) {
+    VStack(spacing: 10) {
       ForEach(items) { item in
         Card(letter: item.letter, desc: item.desc)
       }
@@ -39,7 +39,7 @@ struct ScratchPadCRAFT: View {
         VStack(alignment: .leading) {
           Text(letter)
             .foregroundStyle(Color.Neumorphic.secondary)
-            .font(.system(size: 55))
+            .font(.system(size: 45))
             .fontWeight(.semibold)
           Text(desc)
             .font(.caption)
