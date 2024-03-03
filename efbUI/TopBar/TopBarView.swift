@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreLocation
 import SwiftData
+//import AVFoundation
 
 // Linked list
 // Each node can be an airport, vor, navaid, departure, arrival, any type of navigation aid with a coordinate
@@ -76,6 +77,8 @@ struct TopBarView: View {
   @Query var simbriefUser: [SimBriefUser]
   @State var route: String = ""
   
+//  let speechSynth = AVSpeechSynthesizer()
+  
   var simConnectListener: SimConnectListener = SimConnectListener()
   
   //  @State private var flightPlan: OFPSchema? = nil
@@ -109,19 +112,32 @@ struct TopBarView: View {
           VStack {
             Text("Heading")
               .font(.caption)
-            Text(roundToTenths(simConnect.ship?.heading ?? .zero))
+            Text("\(roundToTenths(simConnect.ship?.heading ?? .zero))º")
           }
           VStack {
             Text("GPS Altitude")
               .font(.caption)
-            Text(roundToTenths(simConnect.ship?.altitude ?? .zero))
+            Text("\(roundToTenths((simConnect.ship?.altitude ?? .zero) * 3.281))'") // meters to feet
           }
           VStack {
             Text("Speed")
               .font(.caption)
-            Text(roundToTenths(simConnect.ship?.altitude ?? .zero))
+            Text("\(roundToTenths((simConnect.ship?.speed ?? .zero) * 1.944))kt") // m/s to knots
           }
         }
+        
+        // i do not know why i wanted to do this
+//        Button {
+//          let utter = AVSpeechUtterance(string: "hello world")
+//          utter.voice = AVSpeechSynthesisVoice(language: "en-US")
+//          utter.rate = 0.5
+//          
+//          speechSynth.speak(utter)
+//        } label: {
+//          Text("Speech")
+//        }
+//        .buttonStyle(.bordered)
+        
         Spacer()
         Text(currentZuluTime24)
         Spacer()
