@@ -80,7 +80,7 @@ struct AirportScreen: View {
                   }
                   GridRow(alignment: .center) {
                     Button {
-                      selectedTab = 1
+                      selectedTab = 2
                     } label: {
                       Text("View Charts")
                     }
@@ -184,7 +184,7 @@ struct AirportScreenInfoTabBuilder: View {
       if let comms = airportVM.selectedAirportComms {
         AirportScreenFreqTab(comms: comms)
       } else {
-        ContentUnavailableView("Airport Frequencies Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view frequencies."))
+        ContentUnavailableView("Frequencies INOP", systemImage: "", description: Text("Select an airport to view frequencies."))
       }
     case .wx:
       AirportScreenWxTab(metar: airportVM.airportWxMetar, taf: airportVM.airportWxTAF)
@@ -192,13 +192,13 @@ struct AirportScreenInfoTabBuilder: View {
       if airportVM.selectedAirportRunways != nil {
         AirportScreenRwyTab(runway: airportVM.selectedAirportRunways, wx: airportVM.airportWxMetar)
       } else {
-        ContentUnavailableView("Airport Runways Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view runways."))
+        ContentUnavailableView("Runways INOP", systemImage: "", description: Text("Select an airport to view runways."))
       }
     case .localwx:
       if airportVM.osmWeatherResults != nil {
         AirportScreenLocalWxTab(localwx: airportVM.osmWeatherResults)
       } else {
-        ContentUnavailableView("Airport Local Weather Unavailable", systemImage: "airplane.circle", description: Text("Select an airport to view local weather."))
+        ContentUnavailableView("Local Wx INOP", systemImage: "", description: Text("Select an airport to view local weather."))
       }
     }
   }
@@ -249,7 +249,7 @@ struct AirportScreenWxTab: View {
           Text(ob)
         }
       } else {
-        ContentUnavailableView("METAR Unavailable", systemImage: "airplane.circle", description: Text("METAR may be unavailable or an internal fault happened."))
+        ContentUnavailableView("METAR INOP", systemImage: "", description: Text("METAR may be unavailable or an internal fault happened."))
       }
       if let taf = taf?.first {
         VStack {
@@ -261,7 +261,7 @@ struct AirportScreenWxTab: View {
 //          }
         }
       } else {
-        ContentUnavailableView("TAF Unavailable", systemImage: "airplane.circle", description: Text("TAF may be unavailable or an internal fault happened."))
+        ContentUnavailableView("TAF INOP", systemImage: "", description: Text("TAF may be unavailable or an internal fault happened."))
       }
     }
   }
