@@ -121,7 +121,7 @@ final class SimConnectConnection {
   func getData() {
     var buffer = Data()
     
-    self.nwConnection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { (data, _, isComplete, error) in
+    self.nwConnection.receive(minimumIncompleteLength: 1, maximumLength: 30) { (data, _, isComplete, error) in
       
       DispatchQueue.main.async {
         if let receivedData = data, !receivedData.isEmpty {
@@ -130,6 +130,19 @@ final class SimConnectConnection {
         
         // isComplete -> Process data
         if isComplete {
+          
+          guard let firstByte = buffer.first else { return }
+          
+          switch firstByte {
+          case 0xA:
+            print("received 10")
+            print(String(data: buffer[1...27], encoding: .utf8) as Any)
+          case 0x14:
+            print("received 20")
+          default:
+            print(firstByte)
+          }
+          
           if let stringData = String(data: buffer, encoding: .utf8) {
             let components = stringData.components(separatedBy: ",")
 //            print("")
@@ -195,6 +208,21 @@ final class SimConnectConnection {
     }
 
   }
+}
+
+struct GDL90Header: Decodable {
+  var messageID: UInt8
+}
+
+struct GDL90MsgA: Decodable {
+  var timestamp: UInt32
+  var lat: Double
+  var long: Double
+}
+
+struct GDL90MsgB: Decodable {
+  var alt: UInt16
+  var hdg: UInt16
 }
 
 @Observable
