@@ -102,6 +102,7 @@ struct MapScreen: View {
   @State private var largeAnnotationsVisible: Bool = true
   @State private var mediumAnnotationsVisible: Bool = false
   @State private var smallAnnotationsVisible: Bool = false
+  @State private var routeVisible: Bool = false
   
   @State private var displayRadar: Bool = false {
     didSet {
@@ -241,6 +242,58 @@ struct MapScreen: View {
                 }
                 .allowOverlap(true)
               }
+              
+              // MARK: Route Display
+              if routeVisible {
+                if let navlog = simbrief.ofp?.navlog {
+                  PolylineAnnotationGroup {
+                    PolylineAnnotation(lineCoordinates: navlog.map { CLLocationCoordinate2D(latitude: Double($0.lat) ?? .zero, longitude: Double($0.long) ?? .zero)})
+                      .lineWidth(2)
+                      .lineColor(StyleColor(.blue))
+                  }
+                  ForEvery(navlog.filter { $0.type != "apt" }, id:\.id) { wpt in
+                    MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: Double(wpt.lat) ?? .zero, longitude: Double(wpt.long) ?? .zero)) {
+                      Button {
+                        print(wpt.ident)
+                      } label: {
+                        VStack {
+                          Image(systemName: wpt.ident == "TOC" || wpt.ident == "TOD" ? "bolt.horizontal.fill" : "triangle.fill")
+                            .foregroundStyle(wpt.ident == "TOC" || wpt.ident == "TOD" ? .green : .blue)
+                          Text(wpt.ident)
+                            .padding(6)
+                            .background(.blue)
+                            .foregroundStyle(.white)
+                            .clipShape(Capsule())
+                            .font(.caption)
+                        }
+                      }
+                      
+                    }
+                    .allowOverlap(wpt.ident == "TOC" || wpt.ident == "TOD" ? true : false)
+                    
+                  }
+                }
+//                PolylineAnnotation(lineCoordinates: simbrief.ofp.navlog)
+//                  .lineWidth(5)
+//                  .lineColor(StyleColor(UIColor.blue))
+                
+//                if let navlog = simbrief.ofp?.navlog {
+//                  ForEvery(navlog.filter { $0.type != "apt" }, id: \.id) { wpt in
+//                    MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: Double(wpt.lat) ?? .zero, longitude: Double(wpt.long) ?? .zero)) {
+//                      VStack {
+//                        Image(systemName: "triangle.fill")
+//                          .foregroundStyle(wpt.ident == "TOC" || wpt.ident == "TOD" ? .green : .blue)
+//                        Text(wpt.ident)
+//                          .padding(6)
+//                          .background(.blue)
+//                          .foregroundStyle(.white)
+//                          .clipShape(Capsule())
+//                          .font(.caption)
+//                      }
+//                    }
+//                  }
+//                }
+              }
             }
             .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
             .ornamentOptions(ornamentOptions)
@@ -269,6 +322,13 @@ struct MapScreen: View {
               displayRadar.toggle()
             } label: {
               Image(systemName: displayRadar ? "cloud.sun.fill" : "cloud.sun")
+            }
+            .buttonStyle(.bordered)
+            
+            Button {
+              routeVisible.toggle()
+            } label: {
+              Image(systemName: routeVisible ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath")
             }
             .buttonStyle(.bordered)
             
@@ -414,11 +474,11 @@ struct MapScreen: View {
     if zoom >= lgAirportThreshold {
 //      loadAirports(bounds: bounds, size: "Large")
 //      airportJSONModel.fetchVisibleAirports(size: "Large", bounds: bounds)
-      mapViewModel.fetchLargeAirports(bounds: bounds)
+//      mapViewModel.fetchLargeAirports(bounds: bounds)
     } else if zoom < lgAirportThreshold {
 //      removeAirports(size: "Large")
 //      airportJSONModel.hideAirports(size: "Large")
-      mapViewModel.hideLargeAirports()
+//      mapViewModel.hideLargeAirports()
     }
     if zoom >= mdAirportThreshold {
 //      loadAirports(bounds: bounds, size: "Medium")
