@@ -14,7 +14,7 @@ struct OFPSchema: Decodable {
   let origin: OFPAirport
   let destination: OFPAirport
   let alternate: [OFPAlternate]?
-  let navlog: [Navlog]
+  let navlog: [OFPNavlog]
   let aircraft: OFPAircraft
   let fuel: OFPFuel
   let times: OFPTimes
@@ -50,26 +50,6 @@ struct OFPSchema: Decodable {
     let routeNavigraph: String
   }
   
-  struct OFPAirport: Decodable {
-    let icaoCode: String
-    let iataCode: String
-    let faaCode: String
-    let elevation: String
-    let posLat: String
-    let posLong: String
-    let name: String
-    let planRwy: String
-    let transAlt: String
-    let transLevel: String
-    let metar: String
-    let metarTime: Date
-    let metarCategory: String
-    let metarVisibility: String
-    let metarCeiling: String
-    let atis: [OFPATIS]?
-    let notam: [OFPNOTAM]?
-  }
-  
   struct OFPAlternate: Decodable {
     let icaoCode: String
     let iataCode: String
@@ -99,30 +79,6 @@ struct OFPSchema: Decodable {
     let metarCeiling: String
     let atis: [OFPATIS]?
     let notam: [OFPNOTAM]?
-  }
-  
-  struct Navlog: Decodable {
-    let ident: String
-    let name: String
-    let type: String
-    let frequency: String
-    let lat: String
-    let long: String
-    let stage: String
-    let via: String
-    let isSidStar: String
-    let distance: String
-    let track: String
-    let altitude: String
-    let windComponent: String
-    let timeLeg: String
-    let timeTotal: String
-    let fuelLeg: String
-    let fuelTotalUsed: String
-    let oat: String
-    let windDir: String
-    let windSpd: String
-    let shear: String
   }
   
   struct OFPAircraft: Decodable {
@@ -167,34 +123,83 @@ struct OFPSchema: Decodable {
     let pdf: OFPPDF
   }
   
-  struct OFPATIS: Decodable, Hashable {
-    let network: String
-    let issued: Date
-    let letter: String
-    let phonetic: String
-    let type: String
-    let message: String
-  }
-  
-  struct OFPNOTAM: Decodable {
-    let accountID: String
-    let notamID: String
-    let locationID: String
-    let locationICAO: String
-    let locationName: String
-    let locationType: String
-    let dateEffective: Date
-    let dateExpire: Date
-    let notamText: String
-    let notamQcodeCategory: String
-    let notamQcodeSubject: String
-    let notamQcodeStatus: String
-    let notamIsObstacle: Bool
-  }
-  
   struct OFPPDF: Decodable {
     let name: String
     let link: String
   }
   
+}
+
+struct OFPAirport: Decodable {
+  let icaoCode: String
+  let iataCode: String
+  let faaCode: String
+  let elevation: String
+  let posLat: String
+  let posLong: String
+  let name: String
+  let planRwy: String
+  let transAlt: String
+  let transLevel: String
+  let metar: String
+  let metarTime: Date
+  let metarCategory: String
+  let metarVisibility: String
+  let metarCeiling: String
+  let atis: [OFPATIS]?
+  let notam: [OFPNOTAM]?
+}
+
+struct OFPATIS: Decodable, Hashable {
+  let network: String
+  let issued: Date
+  let letter: String
+  let phonetic: String
+  let type: String
+  let message: String
+}
+
+struct OFPNOTAM: Decodable {
+  let accountID: String
+  let notamID: String
+  let locationID: String
+  let locationICAO: String
+  let locationName: String
+  let locationType: String
+  let dateEffective: Date
+  let dateExpire: Date
+  let notamText: String
+  let notamQcodeCategory: String
+  let notamQcodeSubject: String
+  let notamQcodeStatus: String
+  let notamIsObstacle: Bool
+}
+
+struct OFPNavlog: Decodable, Identifiable, Hashable {
+  var id: String = UUID().uuidString
+  let ident: String
+  let name: String
+  let type: String
+  let frequency: String
+  let lat: String
+  let long: String
+  let stage: String
+  let via: String
+  let isSidStar: String
+  let distance: String
+  let track: String
+  let altitude: String
+  let windComponent: String
+  let timeLeg: String
+  let timeTotal: String
+  let fuelLeg: String
+  let fuelTotalUsed: String
+  let oat: String
+  let windDir: String
+  let windSpd: String
+  let shear: String
+  
+  enum CodingKeys: String, CodingKey {
+    case ident, name, type, frequency, lat, long, stage, via, isSidStar, distance, track, altitude, windComponent, timeLeg, timeTotal, fuelLeg, fuelTotalUsed, oat, windDir, windSpd, shear
+  }
 }
