@@ -44,6 +44,8 @@
 		A25CB2802B2494E0008E9FEF /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A25CB27F2B2494E0008E9FEF /* SQLite */; };
 		A25CB2862B250298008E9FEF /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A25CB2852B250298008E9FEF /* SQLite */; };
 		A25CC05F2B94CF4100716E1A /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = A25CC05E2B94CF4100716E1A /* navdata.db */; };
+		A25CC0612B97A25D00716E1A /* RouteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A25CC0602B97A25D00716E1A /* RouteManager.swift */; };
+		A26F9BBC2B996E6E00687F77 /* SimbriefScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */; };
 		A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */; };
 		A2A243682B00368B00245A0F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A243672B00368B00245A0F /* SettingsView.swift */; };
 		A2A2436C2B0082A700245A0F /* Airport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A2436B2B0082A700245A0F /* Airport.swift */; };
@@ -98,6 +100,8 @@
 		A257E1B32B2A75C6003B1859 /* SQLiteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteManager.swift; sourceTree = "<group>"; };
 		A257E1B52B2AB514003B1859 /* DBTableStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBTableStructs.swift; sourceTree = "<group>"; };
 		A25CC05E2B94CF4100716E1A /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = navdata.db; sourceTree = "<group>"; };
+		A25CC0602B97A25D00716E1A /* RouteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteManager.swift; sourceTree = "<group>"; };
+		A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefScreen.swift; sourceTree = "<group>"; };
 		A273A6012B261EE100D2979B /* Keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Keys.xcconfig; sourceTree = "<group>"; };
 		A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AirplaneAnnotation.swift; sourceTree = "<group>"; };
 		A2A243672B00368B00245A0F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -223,6 +227,7 @@
 				3AE11B2827319450005974E5 /* efbUIApp.swift */,
 				A2EC6FD92B49AFF300F31364 /* TopBar */,
 				3A24A78C27321C15000D98E5 /* TabBar.swift */,
+				A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */,
 				3AE11B5227319480005974E5 /* SimConnect.swift */,
 				3A69AF41279BB46D00E29135 /* AirportDetails */,
 				A237AF812B63490300646AAF /* ChartsView.swift */,
@@ -233,6 +238,7 @@
 				3AE11B2E27319452005974E5 /* Preview Content */,
 				A2EC6FD72B49AF9A00F31364 /* Deprecated */,
 				A24692F22B8E3A6B00A10A7F /* DrawingView.swift */,
+				A25CC0602B97A25D00716E1A /* RouteManager.swift */,
 			);
 			path = efbUI;
 			sourceTree = "<group>";
@@ -433,6 +439,7 @@
 				3AE11B5327319480005974E5 /* SimConnect.swift in Sources */,
 				3AE11B2B27319450005974E5 /* MapScreen.swift in Sources */,
 				A21B02372B5034850041D60B /* PDFKitView.swift in Sources */,
+				A25CC0612B97A25D00716E1A /* RouteManager.swift in Sources */,
 				A20620262B49DC890034D902 /* AirportDetailViewModel.swift in Sources */,
 				A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */,
 				A2C6ED282B3763D800856381 /* AirportAnnotationSidebarView.swift in Sources */,
@@ -455,6 +462,7 @@
 				A257E1B42B2A75C6003B1859 /* SQLiteManager.swift in Sources */,
 				A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */,
 				A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */,
+				A26F9BBC2B996E6E00687F77 /* SimbriefScreen.swift in Sources */,
 				A2C6ED1D2B3005C900856381 /* FetchAirportCharts.swift in Sources */,
 				3A69AF45279BBBD800E29135 /* AirportDB.swift in Sources */,
 				3A69AF43279BBB8600E29135 /* AirportDBAPI.swift in Sources */,
