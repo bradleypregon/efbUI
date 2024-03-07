@@ -109,11 +109,12 @@ struct TopBarView: View {
   @State private var currentZuluTime24: String = ""
   @State private var currentTime: String = ""
   @Environment(SimConnectShipObserver.self) var simConnect
+  @Environment(SimBriefViewModel.self) var simbrief
   
   let topOffset: CGFloat = 65
   let middleOffset: CGFloat = 300
   let bottomOffset: CGFloat = 600
-
+  
   @State private var dragOffset: CGSize = .zero
   @State private var position: CGFloat = 65
   @State private var halfExpanded: Bool = false
@@ -122,7 +123,7 @@ struct TopBarView: View {
   @Query var simbriefUser: [SimBriefUser]
   @State var route: String = ""
   
-//  let speechSynth = AVSpeechSynthesizer()
+  //  let speechSynth = AVSpeechSynthesizer()
   
   var simConnectListener: SimConnectListener = SimConnectListener()
   
@@ -174,16 +175,16 @@ struct TopBarView: View {
         }
         
         // i do not know why i wanted to do this
-//        Button {
-//          let utter = AVSpeechUtterance(string: "hello world")
-//          utter.voice = AVSpeechSynthesisVoice(language: "en-US")
-//          utter.rate = 0.5
-//          
-//          speechSynth.speak(utter)
-//        } label: {
-//          Text("Speech")
-//        }
-//        .buttonStyle(.bordered)
+        //        Button {
+        //          let utter = AVSpeechUtterance(string: "hello world")
+        //          utter.voice = AVSpeechSynthesisVoice(language: "en-US")
+        //          utter.rate = 0.5
+        //
+        //          speechSynth.speak(utter)
+        //        } label: {
+        //          Text("Speech")
+        //        }
+        //        .buttonStyle(.bordered)
         
         Spacer()
         Text(currentZuluTime24)
@@ -192,13 +193,31 @@ struct TopBarView: View {
       .padding([.top], 15)
       Spacer()
       
-      // Half -> ATIS, general Sim Brief details
       if halfExpanded {
-        VStack {
-          WaypointsContainer(waypoints: waypoints)
-          CustomInputView(waypoints: $waypoints)
+        //        VStack {
+        //          WaypointsContainer(waypoints: waypoints)
+        //          CustomInputView(waypoints: $waypoints)
+        //        }
+        //        .padding()
+        
+        if let ofp = simbrief.ofp {
+          // TODO: build array from ofp including origin, waypoints, destination
+          // TODO: Color for Airports, color for Departures, color for Arrivals, color for TOC/TOD
+          WrappingHStack(models: ofp.navlog.filter { $0.type != "apt" }) { wpt in
+            Button {
+              print("\(wpt.ident) tapped")
+            } label: {
+              Text(wpt.isSidStar == "1" && wpt.ident != "TOC" && wpt.ident != "TOD" ? "\(wpt.via).\(wpt.ident)" : wpt.ident)
+                .padding(8)
+                .background(wpt.ident == "TOC" || wpt.ident == "TOD" ? Color.green : Color.blue)
+                .foregroundStyle(.white)
+                .clipShape(Capsule())
+                .font(.caption)
+            }
+          }
+          .frame(maxWidth: 600, maxHeight: 400)
+          .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .padding()
       }
       
       // Full -> OFP
@@ -335,3 +354,67 @@ struct TopBarView: View {
 //#Preview {
 //  TopBarView()
 //}
+
+// Adapted from: https://stackoverflow.com/questions/62102647/swiftui-hstack-with-wrap-and-dynamic-height/62103264#62103264
+struct WrappingHStack<Model, V>: View where Model: Hashable, V: View {
+  typealias ViewGenerator = (Model) -> V
+  
+  var models: [Model]
+  var viewGenerator: ViewGenerator
+  var horizontalSpacing: CGFloat = 4
+  var verticalSpacing: CGFloat = 4
+  
+  @State private var totalHeight = CGFloat.zero
+  
+  var body: some View {
+    VStack {
+      GeometryReader { geometry in
+        self.generateContent(in: geometry)
+      }
+    }
+    .frame(height: totalHeight)
+  }
+  
+  private func generateContent(in geometry: GeometryProxy) -> some View {
+    var width = CGFloat.zero
+    var height = CGFloat.zero
+    
+    return ZStack(alignment: .topLeading) {
+      ForEach(self.models, id: \.self) { models in
+        viewGenerator(models)
+          .padding(.horizontal, horizontalSpacing)
+          .padding(.vertical, verticalSpacing)
+          .alignmentGuide(.leading, computeValue: { dimension in
+            if (abs(width - dimension.width) > geometry.size.width) {
+              width = 0
+              height -= dimension.height
+            }
+            let result = width
+            if models == self.models.last! {
+              width = 0 //last item
+            } else {
+              width -= dimension.width
+            }
+            return result
+          })
+          .alignmentGuide(.top, computeValue: { dimension in
+            let result = height
+            if models == self.models.last! {
+              height = 0 // last item
+            }
+            return result
+          })
+      }
+    }.background(viewHeightReader($totalHeight))
+  }
+  
+  private func viewHeightReader(_ binding: Binding<CGFloat>) -> some View {
+    return GeometryReader { geometry -> Color in
+      let rect = geometry.frame(in: .local)
+      DispatchQueue.main.async {
+        binding.wrappedValue = rect.size.height
+      }
+      return .clear
+    }
+  }
+}
