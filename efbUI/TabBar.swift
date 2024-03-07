@@ -19,30 +19,36 @@ struct TabBar: View {
         }
         .tag(0)
       
+      SimbriefScreen()
+        .tabItem {
+          Label("Simbrief", systemImage: "list.bullet.clipboard")
+        }
+        .tag(1)
+      
       ChartsView(selectedTab: $selectedTab)
         .tabItem {
           Label("Charts", systemImage: "doc.on.doc")
         }
-        .tag(1)
+        .tag(2)
       
       MapScreen(selectedTab: $selectedTab)
         .ignoresSafeArea(.all)
         .tabItem {
           Label("Map", systemImage: "map")
         }
-        .tag(2)
+        .tag(3)
       
       ScratchPadView()
         .tabItem {
           Label("Scratch Pad", systemImage:"square.and.pencil")
         }
-        .tag(3)
+        .tag(4)
       
       SettingsView()
         .tabItem {
           Label("Settings", systemImage: "gear")
         }
-        .tag(4)
+        .tag(5)
     }
   }
 }
