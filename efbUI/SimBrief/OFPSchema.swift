@@ -14,6 +14,7 @@ struct OFPSchema: Decodable {
   let origin: OFPAirport
   let destination: OFPAirport
   let alternate: [OFPAlternate]?
+  let navlog: [Navlog]
   let aircraft: OFPAircraft
   let fuel: OFPFuel
   let times: OFPTimes
@@ -98,6 +99,30 @@ struct OFPSchema: Decodable {
     let metarCeiling: String
     let atis: [OFPATIS]?
     let notam: [OFPNOTAM]?
+  }
+  
+  struct Navlog: Decodable {
+    let ident: String
+    let name: String
+    let type: String
+    let frequency: String
+    let lat: String
+    let long: String
+    let stage: String
+    let via: String
+    let isSidStar: String
+    let distance: String
+    let track: String
+    let altitude: String
+    let windComponent: String
+    let timeLeg: String
+    let timeTotal: String
+    let fuelLeg: String
+    let fuelTotalUsed: String
+    let oat: String
+    let windDir: String
+    let windSpd: String
+    let shear: String
   }
   
   struct OFPAircraft: Decodable {
