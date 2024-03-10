@@ -121,7 +121,7 @@ final class SimConnectConnection {
   func getData() {
     var buffer = Data()
     
-    self.nwConnection.receive(minimumIncompleteLength: 1, maximumLength: 30) { (data, _, isComplete, error) in
+    self.nwConnection.receive(minimumIncompleteLength: 1, maximumLength: 1000) { (data, _, isComplete, error) in
       
       DispatchQueue.main.async {
         if let receivedData = data, !receivedData.isEmpty {
@@ -131,23 +131,19 @@ final class SimConnectConnection {
         // isComplete -> Process data
         if isComplete {
           
-          guard let firstByte = buffer.first else { return }
-          
-          switch firstByte {
-          case 0xA:
-            print("received 10")
-            print(String(data: buffer[1...27], encoding: .utf8) as Any)
-          case 0x14:
-            print("received 20")
-          default:
-            print(firstByte)
-          }
+//          guard let firstByte = buffer.first else { return }
+
+//          switch firstByte {
+//          case 0xA:
+//            print("received ownship report")
+//          case 0x14:
+//            print("received TRAFFIC report")
+//          default:
+//            print("")
+//          }
           
           if let stringData = String(data: buffer, encoding: .utf8) {
             let components = stringData.components(separatedBy: ",")
-//            print("")
-//            print(components)
-//            print("")
             
             // XGPSMSFS, long, lat, alt, ground track, speed
             // MARK: Ownship update
