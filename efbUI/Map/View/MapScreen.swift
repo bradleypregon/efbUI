@@ -122,6 +122,8 @@ struct MapScreen: View {
   @State private var drawingEnabled: Bool = false
   @State private var canvas = PKCanvasView()
   
+  @State private var waypointPopoverVisible: Bool = false
+  
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
 //      CLLocationCoordinate2DMake(coordinateBounds?.northwest.latitude ?? .zero, coordinateBounds?.northwest.longitude ?? .zero),
@@ -253,46 +255,12 @@ struct MapScreen: View {
                   }
                   ForEvery(navlog.filter { $0.type != "apt" }, id:\.id) { wpt in
                     MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: Double(wpt.lat) ?? .zero, longitude: Double(wpt.long) ?? .zero)) {
-                      Button {
-                        print(wpt.ident)
-                      } label: {
-                        VStack {
-                          Image(systemName: wpt.ident == "TOC" || wpt.ident == "TOD" ? "bolt.horizontal.fill" : "triangle.fill")
-                            .foregroundStyle(wpt.ident == "TOC" || wpt.ident == "TOD" ? .green : .blue)
-                          Text(wpt.ident)
-                            .padding(6)
-                            .background(.blue)
-                            .foregroundStyle(.white)
-                            .clipShape(Capsule())
-                            .font(.caption)
-                        }
-                      }
-                      
+                      MapScreenWaypointView(wpt: wpt)
                     }
                     .allowOverlap(wpt.ident == "TOC" || wpt.ident == "TOD" ? true : false)
-                    
+                    .ignoreCameraPadding(true)
                   }
                 }
-//                PolylineAnnotation(lineCoordinates: simbrief.ofp.navlog)
-//                  .lineWidth(5)
-//                  .lineColor(StyleColor(UIColor.blue))
-                
-//                if let navlog = simbrief.ofp?.navlog {
-//                  ForEvery(navlog.filter { $0.type != "apt" }, id: \.id) { wpt in
-//                    MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: Double(wpt.lat) ?? .zero, longitude: Double(wpt.long) ?? .zero)) {
-//                      VStack {
-//                        Image(systemName: "triangle.fill")
-//                          .foregroundStyle(wpt.ident == "TOC" || wpt.ident == "TOD" ? .green : .blue)
-//                        Text(wpt.ident)
-//                          .padding(6)
-//                          .background(.blue)
-//                          .foregroundStyle(.white)
-//                          .clipShape(Capsule())
-//                          .font(.caption)
-//                      }
-//                    }
-//                  }
-//                }
               }
             }
             .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
@@ -550,6 +518,49 @@ struct MapScreen: View {
     return coordBounds
   }
   
+}
+
+struct MapScreenWaypointView: View {
+  @State private var popoverPresented: Bool = false
+  var wpt: OFPNavlog
+  
+  var body: some View {
+    Button {
+      popoverPresented.toggle()
+    } label: {
+      VStack {
+        Image(systemName: wpt.ident == "TOC" || wpt.ident == "TOD" ? "bolt.horizontal.fill" : "triangle.fill")
+          .foregroundStyle(wpt.ident == "TOC" || wpt.ident == "TOD" ? .green : .blue)
+        Text(wpt.ident)
+          .padding(6)
+          .background(.blue)
+          .foregroundStyle(.white)
+          .clipShape(Capsule())
+          .font(.caption)
+      }
+    }
+    .popover(isPresented: $popoverPresented) {
+      List {
+        Text("Ident: \(wpt.ident)")
+        Text("Name: \(wpt.name)")
+        Text("Type: \(wpt.type)")
+        Text("Freq: \(wpt.frequency)")
+        Text("Via: \(wpt.via)")
+        Text("Alt: \(wpt.altitude)")
+        Text("W/C: \(wpt.windComponent)")
+        Text("Time leg: \(wpt.timeLeg)")
+        Text("Time Total: \(wpt.timeTotal)")
+        Text("Fuel Leg: \(wpt.fuelLeg)")
+        Text("Fuel Total: \(wpt.fuelTotalUsed)")
+        Text("Wind: \(wpt.windDir)/\(wpt.windSpd)")
+        Text("Shear: \(wpt.shear)")
+      }
+      .font(.caption)
+      .listStyle(.plain)
+      .background(.bar)
+      .frame(idealWidth: 200, idealHeight: 400)
+    }
+  }
 }
 
 #Preview {
