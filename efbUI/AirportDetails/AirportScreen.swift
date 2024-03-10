@@ -190,7 +190,7 @@ struct AirportScreenInfoTabBuilder: View {
       AirportScreenWxTab(metar: airportVM.airportWxMetar, taf: airportVM.airportWxTAF)
     case .rwy:
       if airportVM.selectedAirportRunways != nil {
-        AirportScreenRwyTab(runway: airportVM.selectedAirportRunways, wx: airportVM.airportWxMetar)
+        AirportScreenRwyTab(runways: airportVM.selectedAirportRunways, wx: airportVM.airportWxMetar)
       } else {
         ContentUnavailableView("Runways INOP", systemImage: "", description: Text("Select an airport to view runways."))
       }
@@ -296,68 +296,49 @@ struct AirportScreenWxTab: View {
 // TODO: Runway models with wind direction showing?
 // TODO: If RVR is less than length of runway, draw line displaying RVR of runway?
 struct AirportScreenRwyTab: View {
-  let runway: [RunwayTable]?
+  let runways: [RunwayTable]?
   let wx: AirportMETARSchema?
   
+  @State var optimalRunways: [RunwayTable] = []
+  
   var body: some View {
-    if let runway {
+    if let runways {
       ScrollView(.vertical) {
-        ForEach(runway, id:\.runwayIdentifier) { runway in
-          AirportRunway(runway: runway, weather: wx)
-//          VStack {
-//            HStack {
-//              Text(runway.runwayIdentifier)
-//              Text("\(runway.runwayMagneticBearing)")
-//              Text("\(runway.runwayTrueBearing)")
-//              Text("\(runway.runwayLength)")
-//              Text("\(runway.runwayWidth)")
-//              Text("\(runway.surfaceCode)")
-//            }
-//          }
+        WrappingHStack(models: runways) { runway in
+          AirportRunwayView(runway: runway, weather: wx, optimal: isOptimal(runway))
+            .onAppear {
+              optimalRunways = getOptimalRunways()
+            }
         }
       }
     }
   }
-}
+  
+  func getOptimalRunways() -> [RunwayTable] {
+    guard let runways = runways else { return [] }
+    guard let dir = wx?.first?.wdir else { return [] }
+    if dir == 0 { return [] }
+    
+    var optimalRunways: [RunwayTable] = []
+    
+    var bestDiff: Double = 360
+    for runway in runways {
+      let diff = abs(runway.runwayMagneticBearing - Double(dir))
+      if bestDiff > diff {
+        bestDiff = diff
+        
+        // Append parallel and near-heading runways (a 50 degree margin... perhaps adjust)
+        optimalRunways.removeAll()
+        let runwayRange = runways.filter { $0.runwayMagneticBearing < runway.runwayMagneticBearing + 50 && $0.runwayMagneticBearing > runway.runwayMagneticBearing - 50 }
+        optimalRunways = runwayRange
+      }
+    }
 
-struct AirportRunway: View {
-  let runway: RunwayTable
-  let weather: AirportMETARSchema?
-  
-  var body: some View {
-    ZStack {
-      RoundedRectangle(cornerRadius: 8)
-        .background(.gray)
-      VStack {
-        Text(runway.runwayIdentifier)
-        ZStack {
-          Rectangle()
-            .stroke(.white)
-            .fill(.asphalt)
-            .rotationEffect(.degrees(getRunwayHeading(heading: runway.runwayMagneticBearing)-90.0), anchor: .center)
-//          if weather != nil, let dir = weather?.first?.wdir {
-//            Image("")
-//              .foregroundStyle(.blue)
-//              .rotationEffect(.degrees(Double(dir)))
-//          }
-        }
-        .frame(maxWidth: 75)
-        Text(runway.runwayLength.string)
-      }
-    }
+    return optimalRunways
   }
   
-  func getRunwaySurface() {
-    
-  }
-  
-  func getRunwaySurfaceColor() {
-    
-  }
-  
-  func getRunwayHeading(heading: Double) -> Double {
-    if heading < 180 { return heading }
-    return heading-180
+  func isOptimal(_ runway: RunwayTable) -> Bool {
+    return optimalRunways.contains { $0 == runway }
   }
 }
 
@@ -376,7 +357,7 @@ struct AirportScreenLocalWxTab: View {
 }
 
 
-#Preview {
-  AirportScreen(selectedTab: .constant(0))
-}
+//#Preview {
+//  AirportScreen(selectedTab: .constant(0))
+//}
 
