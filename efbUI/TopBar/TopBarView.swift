@@ -133,8 +133,7 @@ struct TopBarView: View {
   
   var body: some View {
     VStack {
-      HStack(alignment: .center) {
-        Spacer()
+      HStack(alignment: .center, spacing: 20) {
         Button {
           // TODO: Instantiate server once. Don't keep reinstantiating
           let server = SimConnectServer(simConnect: simConnect, simConnListener: simConnectListener)
@@ -153,10 +152,12 @@ struct TopBarView: View {
             .font(.title)
             .foregroundStyle(getServerState())
         }
+        .padding(.leading, 40)
         
         Spacer()
           .frame(width: 40)
-        HStack(spacing: 20) {
+        
+        HStack {
           VStack {
             Text("Heading")
               .font(.caption)
@@ -173,6 +174,7 @@ struct TopBarView: View {
             Text("\(roundToTenths((simConnect.ship?.speed ?? .zero) * 1.944))kt") // m/s to knots
           }
         }
+        .fontWeight(.semibold)
         
         // i do not know why i wanted to do this
         //        Button {
