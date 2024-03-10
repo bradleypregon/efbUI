@@ -17,21 +17,24 @@ struct efbUIApp: App {
   
   var body: some Scene {
     WindowGroup {
-      ZStack {
-        TabBar()
-          .frame(maxHeight: .infinity)
-          .padding(.top, 65)
-        VStack {
-          TopBarView()
-            .background(.bar)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-          Spacer()
+      RootToastView {
+        ZStack {
+          TabBar()
+            .frame(maxHeight: .infinity)
+            .padding(.top, 65)
+          VStack {
+            TopBarView()
+              .background(.bar)
+              .clipShape(RoundedRectangle(cornerRadius: 8))
+            Spacer()
+          }
         }
+        .environment(simConnect)
+        .environment(settings)
+        .environment(airportDetailViewModel)
+        .environment(simbrief)
       }
-      .environment(simConnect)
-      .environment(settings)
-      .environment(airportDetailViewModel)
-      .environment(simbrief)
+      
     }
     .modelContainer(for: SimBriefUser.self)
   }
