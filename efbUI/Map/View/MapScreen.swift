@@ -103,6 +103,7 @@ struct MapScreen: View {
   @State private var mediumAnnotationsVisible: Bool = false
   @State private var smallAnnotationsVisible: Bool = false
   @State private var routeVisible: Bool = false
+  @State private var airmetVisible: Bool = false
   
   @State private var displayRadar: Bool = false {
     didSet {
@@ -123,6 +124,8 @@ struct MapScreen: View {
   @State private var canvas = PKCanvasView()
   
   @State private var waypointPopoverVisible: Bool = false
+  let sigmetAPI = SigmetAPI()
+  @State private var sigmet: SigmetSchema = []
   
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
@@ -262,6 +265,32 @@ struct MapScreen: View {
                   }
                 }
               }
+              
+              // MARK: Sigmet Data
+              // CONVECTIVE: orange, IFR: blue, MTN OBSCN: gray, TURB: red
+              if airmetVisible {
+                PolygonAnnotationGroup(sigmet.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
+                  var polyCoords: [CLLocationCoordinate2D] = []
+                  
+                  for coord in sigmet.coords {
+                    if let hiAlt = sigmet.altitudeHi2, let loAlt = sigmet.altitudeLow1 {
+                      if hiAlt < 35000 && loAlt > 0 {
+                        polyCoords.append(CLLocationCoordinate2DMake(coord.lat, coord.lon))
+                      }
+                    }
+                    
+                  }
+                  
+                  let polygon = Polygon([polyCoords])
+                  return PolygonAnnotation(polygon: polygon)
+                    .fillOpacity(0.05)
+                    .fillColor(sigmet.hazard == "ICE" ? StyleColor(.blue) : sigmet.hazard == "TURB" ? StyleColor(.red) : sigmet.hazard == "CONVECTIVE" ? StyleColor(.orange) : StyleColor(.gray))
+                    .fillOutlineColor(StyleColor(.black))
+                    .onTapGesture {
+                      print("hz: \(sigmet.hazard)")
+                    }
+                }
+              }
             }
             .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
             .ornamentOptions(ornamentOptions)
@@ -297,6 +326,16 @@ struct MapScreen: View {
               routeVisible.toggle()
             } label: {
               Image(systemName: routeVisible ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath")
+            }
+            .buttonStyle(.bordered)
+            
+            Button {
+              sigmetAPI.fetchSigmet { sigmet in
+                self.sigmet = sigmet
+              }
+              airmetVisible.toggle()
+            } label: {
+              Image(systemName: airmetVisible ? "hazardsign.fill" : "hazardsign")
             }
             .buttonStyle(.bordered)
             
