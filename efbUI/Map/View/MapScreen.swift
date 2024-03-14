@@ -125,7 +125,9 @@ struct MapScreen: View {
   
   @State private var waypointPopoverVisible: Bool = false
   let sigmetAPI = SigmetAPI()
-  @State private var sigmet: SigmetSchema = []
+  @State private var sigmets: SigmetSchema = []
+  @State private var sigmetMenuPopoverVisible: Bool = false
+  @State private var sigmetSliderRange: ClosedRange<Float> = 1000...37000
   
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
@@ -269,12 +271,12 @@ struct MapScreen: View {
               // MARK: Sigmet Data
               // CONVECTIVE: orange, IFR: blue, MTN OBSCN: gray, TURB: red
               if airmetVisible {
-                PolygonAnnotationGroup(sigmet.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
+                PolygonAnnotationGroup(sigmets.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
                   var polyCoords: [CLLocationCoordinate2D] = []
                   
                   for coord in sigmet.coords {
                     if let hiAlt = sigmet.altitudeHi2, let loAlt = sigmet.altitudeLow1 {
-                      if hiAlt < 35000 && loAlt > 0 {
+                      if hiAlt < Int(sigmetSliderRange.upperBound) && loAlt > Int(sigmetSliderRange.lowerBound) {
                         polyCoords.append(CLLocationCoordinate2DMake(coord.lat, coord.lon))
                       }
                     }
@@ -282,13 +284,19 @@ struct MapScreen: View {
                   }
                   
                   let polygon = Polygon([polyCoords])
-                  return PolygonAnnotation(polygon: polygon)
-                    .fillOpacity(0.05)
+                  return PolygonAnnotation(polygon: polygon, isDraggable: false)
+                    .fillOpacity(0.09)
                     .fillColor(sigmet.hazard == "ICE" ? StyleColor(.blue) : sigmet.hazard == "TURB" ? StyleColor(.red) : sigmet.hazard == "CONVECTIVE" ? StyleColor(.orange) : StyleColor(.gray))
                     .fillOutlineColor(StyleColor(.black))
                     .onTapGesture {
+                      // testing purposes
                       print("hz: \(sigmet.hazard)")
+                      print("low alt: \(sigmet.altitudeLow1 ?? .zero)")
+                      print("low alt2: \(sigmet.altitudeLow2 ?? .zero)")
+                      print("hi alt: \(sigmet.altitudeHi1 ?? .zero)")
+                      print("hi alt2: \(sigmet.altitudeHi2 ?? .zero)")
                     }
+                    
                 }
               }
             }
@@ -330,14 +338,26 @@ struct MapScreen: View {
             .buttonStyle(.bordered)
             
             Button {
-              sigmetAPI.fetchSigmet { sigmet in
-                self.sigmet = sigmet
+              sigmetAPI.fetchSigmet { sigmets in
+                self.sigmets = sigmets
               }
               airmetVisible.toggle()
             } label: {
               Image(systemName: airmetVisible ? "hazardsign.fill" : "hazardsign")
             }
             .buttonStyle(.bordered)
+            .onLongPressGesture(minimumDuration: 0.15) {
+              self.sigmetMenuPopoverVisible.toggle()
+            }
+            .popover(isPresented: $sigmetMenuPopoverVisible) {
+              VStack {
+                Text("Sigmet Altitudes")
+                RangedSliderView(value: $sigmetSliderRange, bounds: 0...50000, step: 1000)
+              }
+              .frame(idealWidth: 250)
+              .padding()
+              .padding([.leading, .trailing, .bottom], 20)
+            }
             
             Spacer()
               .frame(height: 15)
@@ -605,4 +625,3 @@ struct MapScreenWaypointView: View {
 #Preview {
   MapScreen(selectedTab: .constant(1))
 }
-

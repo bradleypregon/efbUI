@@ -48,6 +48,7 @@
 		A26E17AC2B9C11D9002B4090 /* AirportRunwayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17AB2B9C11D9002B4090 /* AirportRunwayView.swift */; };
 		A26E17AF2B9EA39E002B4090 /* SigmetSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17AE2B9EA39E002B4090 /* SigmetSchema.swift */; };
 		A26E17B12B9EA3A5002B4090 /* SigmetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17B02B9EA3A5002B4090 /* SigmetAPI.swift */; };
+		A26E17B72BA1F1B8002B4090 /* RangedSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */; };
 		A26F9BBC2B996E6E00687F77 /* SimbriefScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */; };
 		A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */; };
 		A2A243682B00368B00245A0F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A243672B00368B00245A0F /* SettingsView.swift */; };
@@ -109,6 +110,7 @@
 		A26E17AB2B9C11D9002B4090 /* AirportRunwayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportRunwayView.swift; sourceTree = "<group>"; };
 		A26E17AE2B9EA39E002B4090 /* SigmetSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigmetSchema.swift; sourceTree = "<group>"; };
 		A26E17B02B9EA3A5002B4090 /* SigmetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigmetAPI.swift; sourceTree = "<group>"; };
+		A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangedSliderView.swift; sourceTree = "<group>"; };
 		A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefScreen.swift; sourceTree = "<group>"; };
 		A273A6012B261EE100D2979B /* Keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Keys.xcconfig; sourceTree = "<group>"; };
 		A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AirplaneAnnotation.swift; sourceTree = "<group>"; };
@@ -203,6 +205,7 @@
 				3AE11B2A27319450005974E5 /* MapScreen.swift */,
 				A2C6ED272B3763D800856381 /* AirportAnnotationSidebarView.swift */,
 				3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */,
+				A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -478,6 +481,7 @@
 				A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */,
 				A26E17AF2B9EA39E002B4090 /* SigmetSchema.swift in Sources */,
 				3AE11B2927319450005974E5 /* efbUIApp.swift in Sources */,
+				A26E17B72BA1F1B8002B4090 /* RangedSliderView.swift in Sources */,
 				A237AF802B5C7F3B00646AAF /* OFPSchema.swift in Sources */,
 				3A24A79227324259000D98E5 /* ScratchPadView.swift in Sources */,
 				A237AF822B63490300646AAF /* ChartsView.swift in Sources */,
