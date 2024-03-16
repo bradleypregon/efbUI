@@ -231,6 +231,10 @@
 		3AE11B2727319450005974E5 /* efbUI */ = {
 			isa = PBXGroup;
 			children = (
+				3AE11B2C27319452005974E5 /* Assets.xcassets */,
+				3AC3392E273B6E7700ED025B /* Info.plist */,
+				A273A6012B261EE100D2979B /* Keys.xcconfig */,
+				3AE11B2827319450005974E5 /* efbUIApp.swift */,
 				A26E17AD2B9EA30C002B4090 /* Sigmet */,
 				A2EF3F942B6FE1B10096933A /* Radar */,
 				A21B023A2B55D48D0041D60B /* SimBrief */,
@@ -238,12 +242,7 @@
 				A2C6ED182B30059600856381 /* Metar */,
 				A2C6ED132B2E3D9300856381 /* Weather */,
 				A25CB27B2B249215008E9FEF /* Data */,
-				3AE11B2C27319452005974E5 /* Assets.xcassets */,
-				3AC3392E273B6E7700ED025B /* Info.plist */,
-				A273A6012B261EE100D2979B /* Keys.xcconfig */,
-				A2B98D6B2B9BB5A700A91977 /* Toast.swift */,
-				A2B98D6D2B9BBFF600A91977 /* ToastTestContentView.swift */,
-				3AE11B2827319450005974E5 /* efbUIApp.swift */,
+				A278ABE42BA64BEF00EC27FA /* Toast */,
 				A2EC6FD92B49AFF300F31364 /* TopBar */,
 				3A24A78C27321C15000D98E5 /* TabBar.swift */,
 				A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */,
@@ -298,6 +297,15 @@
 				A26E17B02B9EA3A5002B4090 /* SigmetAPI.swift */,
 			);
 			path = Sigmet;
+			sourceTree = "<group>";
+		};
+		A278ABE42BA64BEF00EC27FA /* Toast */ = {
+			isa = PBXGroup;
+			children = (
+				A2B98D6B2B9BB5A700A91977 /* Toast.swift */,
+				A2B98D6D2B9BBFF600A91977 /* ToastTestContentView.swift */,
+			);
+			path = Toast;
 			sourceTree = "<group>";
 		};
 		A2C6ED132B2E3D9300856381 /* Weather */ = {
