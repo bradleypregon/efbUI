@@ -69,3 +69,46 @@ struct GateTable {
   let gateLongitude: Double
   let name: String
 }
+
+struct ProcedureTable {
+  let areaCode: String
+  let airportIdentifier: String
+  let routeType: String
+  let transitionIdentifier: String
+  let seqno: Int
+  let waypointICAOCode: String
+  let waypointIdentifier: String
+  let waypointLatitude: Double
+  let waypointLongitude: Double
+  let waypointDescriptionCode: String
+  let turnDirection: String
+  let rnp: Double
+  let pathTermination: String
+  let recommendedNavaid: String
+  let recommendedNavaidLatitude: Double
+  let recommendedNavaidLongitude: Double
+  let arcRadius: Double
+  let theta: Double
+  let rho: Double
+  let magneticCourse: Double
+  let routeDistanceHoldingDistanceTime: Double
+  let distanceTime: String
+  let altitudeDescription: String
+  let altitude1: Int
+  let altitude2: Int
+  let transitionAltitude: Int
+  let speedLimitDescription: String
+  let speedLimit: Int
+  let verticalAngle: Double
+  let centerWaypoint: String
+  let centerWaypointLatitude: Double
+  let centerWaypointLongitude: Double
+  let aircraftCategory: String
+  let id: String
+  let recommendedId: String
+  let centerId: String
+}
+
+struct ArrivalTable {
+  
+}

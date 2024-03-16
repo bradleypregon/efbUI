@@ -156,8 +156,8 @@ class SQLiteManager {
       let ifrCapability = Expression<String?>("ifr_capability")
       let longestRunwaySurfaceCode = Expression<String>("longest_runway_surface_code")
       let elevation = Expression<Int64>("elevation")
-      let transitionAltitude = Expression<Int64>("transition_altitude")
-      let transitionLevel = Expression<Int64>("transition_level")
+      let transitionAltitude = Expression<Int64?>("transition_altitude")
+      let transitionLevel = Expression<Int64?>("transition_level")
       let speedLimit = Expression<Int64>("speed_limit")
       let speedLimitAltitude = Expression<Int64>("speed_limit_altitude")
       let iataAtaDesignator = Expression<String?>("iata_ata_designator")
@@ -181,8 +181,8 @@ class SQLiteManager {
           ifrCapibility: temp[ifrCapability] ?? "N",
           longestRunwaySurfaceCode: temp[longestRunwaySurfaceCode],
           elevation: temp[elevation],
-          transitionAltitude: temp[transitionAltitude],
-          transitionLevel: temp[transitionLevel],
+          transitionAltitude: temp[transitionAltitude] ?? .zero,
+          transitionLevel: temp[transitionLevel] ?? .zero,
           speedLimit: temp[speedLimit],
           speedLimitAltitude: temp[speedLimitAltitude],
           iataAtaDesignator: temp[iataAtaDesignator] ?? "",
@@ -233,6 +233,184 @@ class SQLiteManager {
       }
     } catch let error {
       print("Error fetching Airport Runways: \(error)")
+      return []
+    }
+  }
+  
+  func getAirportGates(_ icao: String) -> [GateTable] {
+    guard let database = db else { return [] }
+    var gates: [GateTable] = []
+    
+    do {
+      let table = Table("tbl_gate")
+      let areaCode = Expression<String?>("area_code")
+      let airportIdentifier = Expression<String>("airport_identifier")
+      let icaoCode = Expression<String>("icao_code")
+      let gateId = Expression<String>("gate_identifier")
+      let gateLat = Expression<Double>("gate_latitude")
+      let gateLong = Expression<Double>("gate_longitude")
+      let name = Expression<String>("name")
+      
+      let query = (icao == airportIdentifier)
+      for temp in try database.prepare(table.filter(query)) {
+        let result = GateTable(
+          areaCode: temp[areaCode] ?? "",
+          airportIdentifier: temp[airportIdentifier],
+          icaoCode: temp[icaoCode],
+          gateIdentifier: temp[gateId],
+          gateLatitude: temp[gateLat],
+          gateLongitude: temp[gateLong],
+          name: temp[name]
+        )
+        gates.append(result)
+      }
+      return gates
+    } catch let error {
+      print("Issue querying gates in getAirportGates(): \(error)")
+      return []
+    }
+  }
+  
+  func getAirportProcedures(_ icao: String, procedure: String) -> [ProcedureTable] {
+    guard let database = db else { return [] }
+    var procedures: [ProcedureTable] = []
+    
+    do {
+      let table = Table(procedure)
+      let areaCode = Expression<String?>("area_code")
+      let airportIdentifier = Expression<String>("airport_identifier")
+      let routeType = Expression<String?>("route_type")
+      let transitionIdentifier = Expression<String?>("transition_identifier")
+      let seqno = Expression<Int?>("seqno")
+      let waypointICAOCode = Expression<String?>("waypoint_icao_code")
+      let waypointIdentifier = Expression<String?>("waypoint_identifier")
+      let waypointLatitude = Expression<Double?>("waypoint_latitude")
+      let waypointLongitude = Expression<Double?>("waypoint_longitude")
+      let waypointDescriptionCode = Expression<String?>("waypoint_description_code")
+      let turnDirection = Expression<String?>("turn_direction")
+      let rnp = Expression<Double?>("rnp")
+      let pathTermination = Expression<String?>("path_termination")
+      let recommendedNavaid = Expression<String?>("recommanded_navaid")
+      let recommendedNavaidLatitude = Expression<Double?>("recommanded_navaid_latitude")
+      let recommendedNavaidLongitude = Expression<Double?>("recommanded_navaid_longitude")
+      let arcRadius = Expression<Double?>("arc_radius")
+      let theta = Expression<Double?>("theta")
+      let rho = Expression<Double?>("rho")
+      let magneticCourse = Expression<Double?>("magnetic_course")
+      let routeDistanceHoldingDistanceTime = Expression<Double?>("route_distance_holding_distance_time")
+      let distanceTime = Expression<String?>("distance_time")
+      let altitudeDescription = Expression<String?>("altitude_description")
+      let altitude1 = Expression<Int?>("altitude1")
+      let altitude2 = Expression<Int?>("altitude2")
+      let transitionAltitude = Expression<Int?>("transition_altitude")
+      let speedLimitDescription = Expression<String?>("speed_limit_description")
+      let speedLimit = Expression<Int?>("speed_limit")
+      let verticalAngle = Expression<Double?>("vertical_angle")
+      let centerWaypoint = Expression<String?>("center_waypoint")
+      let centerWaypointLatitude = Expression<Double?>("center_waypoint_latitude")
+      let centerWaypointLongitude = Expression<Double?>("center_waypoint_longitude")
+      let aircraftCategory = Expression<String?>("aircraft_category")
+      let id = Expression<String>("id")
+      let recommendedId = Expression<String?>("recommanded_id")
+      let centerId = Expression<String?>("center_id")
+      
+      let query = (icao == airportIdentifier)
+      for temp in try database.prepare(table.filter(query)) {
+        let result = ProcedureTable(
+          areaCode: temp[areaCode] ?? "",
+          airportIdentifier: temp[airportIdentifier],
+          routeType: temp[routeType] ?? "",
+          transitionIdentifier: temp[transitionIdentifier] ?? "",
+          seqno: temp[seqno] ?? .zero,
+          waypointICAOCode: temp[waypointICAOCode] ?? "",
+          waypointIdentifier: temp[waypointIdentifier] ?? "",
+          waypointLatitude: temp[waypointLatitude] ?? .zero,
+          waypointLongitude: temp[waypointLongitude] ?? .zero,
+          waypointDescriptionCode: temp[waypointDescriptionCode] ?? "",
+          turnDirection: temp[turnDirection] ?? "",
+          rnp: temp[rnp] ?? .zero,
+          pathTermination: temp[pathTermination] ?? "",
+          recommendedNavaid: temp[recommendedNavaid] ?? "",
+          recommendedNavaidLatitude: temp[recommendedNavaidLatitude] ?? .zero,
+          recommendedNavaidLongitude: temp[recommendedNavaidLongitude] ?? .zero,
+          arcRadius: temp[arcRadius] ?? .zero,
+          theta: temp[theta] ?? .zero,
+          rho: temp[rho] ?? .zero,
+          magneticCourse: temp[magneticCourse] ?? .zero,
+          routeDistanceHoldingDistanceTime: temp[routeDistanceHoldingDistanceTime] ?? .zero,
+          distanceTime: temp[distanceTime] ?? "",
+          altitudeDescription: temp[altitudeDescription] ?? "",
+          altitude1: temp[altitude1] ?? .zero,
+          altitude2: temp[altitude2] ?? .zero,
+          transitionAltitude: temp[transitionAltitude] ?? .zero,
+          speedLimitDescription: temp[speedLimitDescription] ?? "",
+          speedLimit: temp[speedLimit] ?? .zero,
+          verticalAngle: temp[verticalAngle] ?? .zero,
+          centerWaypoint: temp[centerWaypoint] ?? "",
+          centerWaypointLatitude: temp[centerWaypointLatitude] ?? .zero,
+          centerWaypointLongitude: temp[centerWaypointLongitude] ?? .zero,
+          aircraftCategory: temp[aircraftCategory] ?? "",
+          id: temp[id],
+          recommendedId: temp[recommendedId] ?? "",
+          centerId: temp[centerId] ?? ""
+        )
+        procedures.append(result)
+      }
+      return procedures
+    } catch let error {
+      print("Error querying Departures: \(error)")
+      return []
+    }
+  }
+  
+  func getAirports() -> [AirportTable] {
+    guard let database = db else { return [] }
+    var airports: [AirportTable] = []
+    
+    do {
+      let table = Table("tbl_airports")
+      
+      let areaCode = Expression<String?>("area_code")
+      let icaoCode = Expression<String>("icao_code")
+      let airportIdentifier = Expression<String>("airport_identifier")
+      let airportIdentifier3letter = Expression<String?>("airport_identifier_3letter")
+      let airportName = Expression<String>("airport_name")
+      let airportRefLatitude = Expression<Double>("airport_ref_latitude")
+      let airportRefLongitude = Expression<Double>("airport_ref_longitude")
+      let ifrCapability = Expression<String?>("ifr_capability")
+      let longestRunwaySurfaceCode = Expression<String>("longest_runway_surface_code")
+      let elevation = Expression<Int64>("elevation")
+      let transitionAltitude = Expression<Int64?>("transition_altitude")
+      let transitionLevel = Expression<Int64?>("transition_level")
+      let speedLimit = Expression<Int64?>("speed_limit")
+      let speedLimitAltitude = Expression<Int64?>("speed_limit_altitude")
+      let iataAtaDesignator = Expression<String?>("iata_ata_designator")
+      let id = Expression<String>("id")
+      
+      for temp in try database.prepare(table) {
+        let result = AirportTable(
+          areaCode: temp[areaCode] ?? "",
+          icaoCode: temp[icaoCode],
+          airportIdentifier: temp[airportIdentifier],
+          airportIdentifier3Letter: temp[airportIdentifier3letter] ?? "",
+          airportName: temp[airportName],
+          airportRefLat: temp[airportRefLatitude],
+          airportRefLong: temp[airportRefLongitude],
+          ifrCapibility: temp[ifrCapability] ?? "N",
+          longestRunwaySurfaceCode: temp[longestRunwaySurfaceCode],
+          elevation: temp[elevation],
+          transitionAltitude: temp[transitionAltitude] ?? .zero,
+          transitionLevel: temp[transitionLevel] ?? .zero,
+          speedLimit: temp[speedLimit] ?? .zero,
+          speedLimitAltitude: temp[speedLimitAltitude] ?? .zero,
+          iataAtaDesignator: temp[iataAtaDesignator] ?? "",
+          id: temp[id]
+        )
+        airports.append(result)
+      }
+      return airports
+    } catch let error {
+      print("Error in getAirpors(): \(error)")
       return []
     }
   }
