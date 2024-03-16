@@ -14,68 +14,14 @@ import PencilKit
 class MapScreenViewModel {
   var airportJSONModel = AirportJSONModel()
   
-  var largeAirports: [Airport] = []
-  var mediumAirports: [Airport] = []
-  var smallAirports: [Airport] = []
+  var largeAirports: [AirportSchema] = []
+  var mediumAirports: [AirportSchema] = []
+  var smallAirports: [AirportSchema] = []
   
   init() {
-    largeAirports = airportJSONModel.airports.filter { $0.properties.size.rawValue == "Large" }
-    mediumAirports = airportJSONModel.airports.filter { $0.properties.size.rawValue == "Medium" }
-    smallAirports = airportJSONModel.airports.filter { $0.properties.size.rawValue == "Small" }
-  }
-  
-  func fetchLargeAirports(bounds: CoordinateBounds) {
-    for airport in largeAirports {
-      if !airport.visible && bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
-        airport.visible = true
-      } else if airport.visible && !bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
-        airport.visible = false
-      }
-    }
-  }
-  
-  func fetchMediumAirports(bounds: CoordinateBounds) {
-    for airport in mediumAirports {
-      if !airport.visible && bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
-        airport.visible = true
-      } else if airport.visible && !bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
-        airport.visible = false
-      }
-    }
-  }
-  
-  func fetchSmallAirports(bounds: CoordinateBounds) {
-    for airport in smallAirports {
-      if !airport.visible && bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
-        airport.visible = true
-      } else if airport.visible && !bounds.contains(forPoint: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), wrappedCoordinates: false) {
-        airport.visible = false
-      }
-    }
-  }
-  
-  func hideLargeAirports() {
-    for airport in largeAirports {
-      if airport.visible {
-        airport.visible = false
-      }
-    }
-  }
-  
-  func hideMediumAirports() {
-    for airport in mediumAirports {
-      if airport.visible {
-        airport.visible = false
-      }
-    }
-  }
-  
-  func hideSmallAirports() {
-    for airport in smallAirports {
-      if airport.visible {
-        airport.visible = false
-      }
-    }
+    largeAirports = airportJSONModel.airports.filter { $0.size == .large }
+    mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
+    smallAirports = airportJSONModel.airports.filter { $0.size == .small }
   }
 }
 
@@ -89,9 +35,8 @@ struct MapScreen: View {
   @State private var viewport: Viewport = .camera(center: CLLocationCoordinate2D(latitude: 39.5, longitude: -98.0), zoom: 4, bearing: 0, pitch: 0)
   private let ornamentOptions = OrnamentOptions(scaleBar: ScaleBarViewOptions(visibility: .hidden))
   private let style = "mapbox://styles/bradleypregon/clpvnz3y900yn01qmby0f9xn6"
-  @State private var coordinateBounds: CoordinateBounds?
+//  @State private var coordinateBounds: CoordinateBounds?
   
-//  var airportJSONModel = AirportJSONModel()
   @State private var mapViewModel = MapScreenViewModel()
   
   @State private var selectedAirport: AirportTable?
@@ -113,9 +58,7 @@ struct MapScreen: View {
     }
   }
   var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-  
-//  @State var ownshipImage: Image = Image("ShipArrow32")
-  
+
   private let radarSourceID = "radar-source"
   @State private var rasterRadarAlertVisible: Bool = false
   @State private var displayTrafficAltitude: Bool = true
@@ -127,7 +70,10 @@ struct MapScreen: View {
   let sigmetAPI = SigmetAPI()
   @State private var sigmets: SigmetSchema = []
   @State private var sigmetMenuPopoverVisible: Bool = false
-  @State private var sigmetSliderRange: ClosedRange<Float> = 1000...37000
+  @State private var sigmetSliderRange: ClosedRange<Float> = 1000...41000
+  
+  @State private var mapPopoverSelectedAirport: AirportSchema? = nil
+  @State private var mapPopoverSelectedPoint: UnitPoint = .zero
   
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
@@ -161,18 +107,24 @@ struct MapScreen: View {
               // MARK: Large Airports
               if largeAnnotationsVisible {
                 PointAnnotationGroup(mapViewModel.largeAirports) { airport in
-                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), isDraggable: false)
+                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
                     .image(PointAnnotation.Image(image: UIImage(named: "lg-airport-default42") ?? UIImage(), name: "lg"))
                     .onTapGesture {
-                      selectedAirport = SQLiteManager.shared.selectAirport(airport.properties.icao)
+                      selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
                     }
-                    .textField(airport.properties.icao)
+                    .textField(airport.icao)
                     .textOffset([0.0, -1.6])
                     .textColor(StyleColor(.white))
                     .textHaloWidth(3)
                     .textHaloColor(StyleColor(.black))
                     .textSize(14)
+                    .onLongPressGesture {
+                      mapPopoverSelectedAirport = airport
+                      let point = $0.point
+                      mapPopoverSelectedPoint = UnitPoint(x: (point.x / geometry.size.width), y: (point.y / geometry.size.height))
+                      return true
+                    }
                 }
               }
               
@@ -180,13 +132,13 @@ struct MapScreen: View {
               // MARK: Medium Airports
               if mediumAnnotationsVisible {
                 PointAnnotationGroup(mapViewModel.mediumAirports, id: \.id) { airport in
-                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.coordinates.lat, longitude: airport.coordinates.long), isDraggable: false)
+                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
                     .image(PointAnnotation.Image(image: UIImage(named: "md-airport-default40") ?? UIImage(), name: "md"))
                     .onTapGesture {
-                      selectedAirport = SQLiteManager.shared.selectAirport(airport.properties.icao)
+                      selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
                     }
-                    .textField(airport.properties.icao)
+                    .textField(airport.icao)
                     .textOffset([0.0, -1.6])
                     .textColor(StyleColor(.white))
                     .textHaloBlur(10)
@@ -200,11 +152,11 @@ struct MapScreen: View {
               
               // MARK: Small Airports
               if smallAnnotationsVisible {
-                PointAnnotationGroup(mapViewModel.smallAirports) { smallAirport in
-                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: smallAirport.coordinates.lat, longitude: smallAirport.coordinates.long), isDraggable: false)
+                PointAnnotationGroup(mapViewModel.smallAirports) { airport in
+                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
                     .image(PointAnnotation.Image(image: UIImage(named: "sm-airport-default38") ?? UIImage(), name: "sm"))
                     .onTapGesture {
-                      selectedAirport = SQLiteManager.shared.selectAirport(smallAirport.properties.icao)
+                      selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
                     }
                 }
@@ -302,13 +254,17 @@ struct MapScreen: View {
             }
             .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
             .ornamentOptions(ornamentOptions)
-            .onCameraChanged(action: { changed in
-              currentZoom = changed.cameraState.zoom
-              coordinateBounds = calculateVisibleMapRegion(center: changed.cameraState.center, zoom: changed.cameraState.zoom, geometry: geometry)
-              if let coordinateBounds {
-                handleCameraChange(zoom: changed.cameraState.zoom, bounds: coordinateBounds)
-              }
-            })
+            
+            // TODO: Follow Mapbox recommendation for .onCameraChanged
+            // NO @State variable changes. Too much computation and redraws
+//            .onCameraChanged(action: { changed in
+//              currentZoom = changed.cameraState.zoom
+//              coordinateBounds = calculateVisibleMapRegion(center: changed.cameraState.center, zoom: changed.cameraState.zoom, geometry: geometry)
+//              if let coordinateBounds {
+//                handleCameraChange(zoom: changed.cameraState.zoom, bounds: coordinateBounds)
+//              }
+//            })
+            
             .onAppear {
               proxyMap = proxy
             }
@@ -318,8 +274,37 @@ struct MapScreen: View {
                 displayRadar.toggle()
               }
             }
+            .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
+              // query database if airport has SIDs and/or STARs
+              
+              VStack {
+                Text(airport.name)
+                
+                Button {
+                  print("View Airport")
+                } label: {
+                  Text("View Airport")
+                }
+                
+                Menu("View Procedures") {
+                  Button {
+                    print("View SIDs")
+                  } label: {
+                    Text("View SIDs")
+                  }
+                  
+                  Button {
+                    print("View STARs")
+                  } label: {
+                    Text("View STARs")
+                  }
+                }
+              }
+              .frame(idealWidth: 150, idealHeight: 150)
+              
+            }
           }
-          .ignoresSafeArea()
+          .ignoresSafeArea(.all)
           
           // MARK: Menu
           VStack(spacing: 5) {
