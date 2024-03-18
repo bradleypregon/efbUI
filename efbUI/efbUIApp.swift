@@ -14,6 +14,7 @@ struct efbUIApp: App {
   @State private var settings: Settings = Settings()
   @State private var airportDetailViewModel: AirportDetailViewModel = AirportDetailViewModel()
   @State private var simbrief: SimBriefViewModel = SimBriefViewModel()
+  @State private var waypointStore: WaypointStore = WaypointStore()
   
   var body: some Scene {
     WindowGroup {
@@ -33,6 +34,7 @@ struct efbUIApp: App {
         .environment(settings)
         .environment(airportDetailViewModel)
         .environment(simbrief)
+        .environment(waypointStore)
       }
       
     }

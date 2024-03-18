@@ -19,25 +19,38 @@ import SwiftData
 // nodes -> each route component
 // tail -> Airport
 
-struct Waypoint {
+
+// TODO: Instead of a heterogeneous list, create a custom type, and when the database is queried, just create custom object from what is returned from db
+@Observable
+class WaypointStore {
+  var waypoints: [Waypoint] = []
+}
+
+struct Waypoint: Identifiable, Hashable {
+  var id: String = UUID().uuidString
   var name: String
-  var type: String
 }
 
 struct WaypointsContainer: View {
-  var waypoints: [Waypoint]
+  @Environment(WaypointStore.self) private var waypointStore
   
   var body: some View {
-    HStack {
-      ForEach(waypoints, id:\.name) { waypoint in
-        WptView(wpt: waypoint)
+    ScrollView(.horizontal) {
+      LazyHStack {
+        ForEach(waypointStore.waypoints) { waypoint in
+          WptView(wpt: waypoint)
+        }
+        .onMove(perform: move)
       }
     }
+//    WrappingHStack(models: waypointStore.waypoints) { waypoint in
+//      WptView(wpt: waypoint)
+//    }
   }
   
   func WptView(wpt: Waypoint) -> some View {
     Button {
-      print("Tapped")
+      remove(wpt)
     } label: {
       Text(wpt.name)
         .padding(8)
@@ -46,16 +59,27 @@ struct WaypointsContainer: View {
         .clipShape(Capsule())
     }
   }
+  
+  func remove(_ waypoint: Waypoint) {
+    waypointStore.waypoints.removeAll { $0 == waypoint }
+  }
+  
+  func move(from source: IndexSet, to destination: Int) {
+    waypointStore.waypoints.move(fromOffsets: source, toOffset: destination)
+  }
 }
 
 struct CustomInputView: View {
-  @Binding var waypoints: [Waypoint]
+  @Environment(WaypointStore.self) private var waypointStore
   @State private var currentInput: String = ""
   
   var body: some View {
     TextField("Enter wpt", text: $currentInput) {
-      let wpt = Waypoint(name: currentInput, type: "VOR")
-      waypoints.append(wpt)
+      // TODO: Query each db table (Airport, NBD, VOR) upon submission and return either an array or single object
+      // IF an array is returned, its probbaly a matching name, user needs to select appropriate
+      // For instance, there are multiple VORs (or NBDs?) that have the same 3 letter identifier. Need to pick the right one
+      let wpt = Waypoint(name: currentInput)
+      waypointStore.waypoints.append(wpt)
       currentInput = ""
     }
     .textFieldStyle(.roundedBorder)
@@ -65,51 +89,13 @@ struct CustomInputView: View {
   }
 }
 
-class LinkedList {
-  var head: Node?
-  
-  func append(value: Any) {
-    let newNode = Node(value: value)
-    
-    if head == nil {
-      head = newNode
-    } else {
-      var current = head
-      while current?.next != nil {
-        current = current?.next
-      }
-      current?.next = newNode
-    }
-  }
-  
-  func printList() {
-    var current = head
-    while current != nil {
-      if current?.next != nil {
-        print(current!.value, terminator: " -> ")
-      } else {
-        print(current!.value)
-      }
-      current = current?.next
-    }
-  }
-}
-
-class Node {
-  var value: Any
-  var next: Node?
-  
-  init(value: Any) {
-    self.value = value
-  }
-}
-
 struct TopBarView: View {
   private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
   @State private var currentZuluTime24: String = ""
   @State private var currentTime: String = ""
   @Environment(SimConnectShipObserver.self) var simConnect
   @Environment(SimBriefViewModel.self) var simbrief
+  @Environment(WaypointStore.self) var waypointStore
   
   let topOffset: CGFloat = 65
   let middleOffset: CGFloat = 300
@@ -123,13 +109,7 @@ struct TopBarView: View {
   @Query var simbriefUser: [SimBriefUser]
   @State var route: String = ""
   
-  //  let speechSynth = AVSpeechSynthesizer()
-  
   var simConnectListener: SimConnectListener = SimConnectListener()
-  
-  //  @State private var flightPlan: OFPSchema? = nil
-  
-  @State private var waypoints: [Waypoint] = []
   
   var body: some View {
     VStack {
@@ -196,12 +176,6 @@ struct TopBarView: View {
       Spacer()
       
       if halfExpanded {
-        //        VStack {
-        //          WaypointsContainer(waypoints: waypoints)
-        //          CustomInputView(waypoints: $waypoints)
-        //        }
-        //        .padding()
-        
         if let ofp = simbrief.ofp {
           // TODO: build array from ofp including origin, waypoints, destination
           // TODO: Color for Airports, color for Departures, color for Arrivals, color for TOC/TOD
@@ -224,7 +198,11 @@ struct TopBarView: View {
       
       // Full -> OFP
       if fullExpanded {
-        Text("full expanded view")
+        VStack {
+          WaypointsContainer()
+          CustomInputView()
+        }
+        .padding()
       }
       
       Spacer()
@@ -357,66 +335,3 @@ struct TopBarView: View {
 //  TopBarView()
 //}
 
-// Adapted from: https://stackoverflow.com/questions/62102647/swiftui-hstack-with-wrap-and-dynamic-height/62103264#62103264
-struct WrappingHStack<Model, V>: View where Model: Hashable, V: View {
-  typealias ViewGenerator = (Model) -> V
-  
-  var models: [Model]
-  var viewGenerator: ViewGenerator
-  var horizontalSpacing: CGFloat = 4
-  var verticalSpacing: CGFloat = 4
-  
-  @State private var totalHeight = CGFloat.zero
-  
-  var body: some View {
-    VStack {
-      GeometryReader { geometry in
-        self.generateContent(in: geometry)
-      }
-    }
-    .frame(height: totalHeight)
-  }
-  
-  private func generateContent(in geometry: GeometryProxy) -> some View {
-    var width = CGFloat.zero
-    var height = CGFloat.zero
-    
-    return ZStack(alignment: .topLeading) {
-      ForEach(self.models, id: \.self) { models in
-        viewGenerator(models)
-          .padding(.horizontal, horizontalSpacing)
-          .padding(.vertical, verticalSpacing)
-          .alignmentGuide(.leading, computeValue: { dimension in
-            if (abs(width - dimension.width) > geometry.size.width) {
-              width = 0
-              height -= dimension.height
-            }
-            let result = width
-            if models == self.models.last! {
-              width = 0 //last item
-            } else {
-              width -= dimension.width
-            }
-            return result
-          })
-          .alignmentGuide(.top, computeValue: { dimension in
-            let result = height
-            if models == self.models.last! {
-              height = 0 // last item
-            }
-            return result
-          })
-      }
-    }.background(viewHeightReader($totalHeight))
-  }
-  
-  private func viewHeightReader(_ binding: Binding<CGFloat>) -> some View {
-    return GeometryReader { geometry -> Color in
-      let rect = geometry.frame(in: .local)
-      DispatchQueue.main.async {
-        binding.wrappedValue = rect.size.height
-      }
-      return .clear
-    }
-  }
-}
