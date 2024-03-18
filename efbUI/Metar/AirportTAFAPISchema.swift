@@ -82,9 +82,9 @@ struct AirportTAFIcgTurb: Decodable {
 }
 
 struct AirportTAFTemp: Decodable {
-  let validTime: Int
-  let sfcTemp: Int
-  let maxOrMix: String
+  let validTime: Int?
+  let sfcTemp: Int?
+  let maxOrMix: String?
 }
 
 typealias AirportTAFSchema = [AirportTAFAPISchemaElement]
