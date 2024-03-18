@@ -70,6 +70,7 @@
 		A2C9E3F82B5786E1007D667F /* AirportTAFAPISchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C9E3F72B5786E1007D667F /* AirportTAFAPISchema.swift */; };
 		A2D13D222BA635BD00E5AFEE /* Airports.json in Resources */ = {isa = PBXBuildFile; fileRef = A2D13D212BA635BC00E5AFEE /* Airports.json */; };
 		A2D13D242BA6361200E5AFEE /* AirportSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D13D232BA6361200E5AFEE /* AirportSchema.swift */; };
+		A2D5FE1B2BA7C7950084AE7E /* WrappingHStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D5FE1A2BA7C7950084AE7E /* WrappingHStack.swift */; };
 		A2DE93D82B9237390065FEF6 /* ScratchPadATIS.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D72B9237390065FEF6 /* ScratchPadATIS.swift */; };
 		A2DE93DA2B925E340065FEF6 /* ScratchPadCRAFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D92B925E340065FEF6 /* ScratchPadCRAFT.swift */; };
 		A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */; };
@@ -132,6 +133,7 @@
 		A2C9E3F72B5786E1007D667F /* AirportTAFAPISchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportTAFAPISchema.swift; sourceTree = "<group>"; };
 		A2D13D212BA635BC00E5AFEE /* Airports.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Airports.json; sourceTree = "<group>"; };
 		A2D13D232BA6361200E5AFEE /* AirportSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportSchema.swift; sourceTree = "<group>"; };
+		A2D5FE1A2BA7C7950084AE7E /* WrappingHStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrappingHStack.swift; sourceTree = "<group>"; };
 		A2DE93D72B9237390065FEF6 /* ScratchPadATIS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadATIS.swift; sourceTree = "<group>"; };
 		A2DE93D92B925E340065FEF6 /* ScratchPadCRAFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadCRAFT.swift; sourceTree = "<group>"; };
 		A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportIcon.swift; sourceTree = "<group>"; };
@@ -252,6 +254,7 @@
 				3A27F356282F5D1800C4B82A /* Map */,
 				3A24A79027324142000D98E5 /* ScratchPad */,
 				A2EC6FDA2B49B00C00F31364 /* Settings */,
+				A2D5FE192BA7C7730084AE7E /* Extra */,
 				A22322D42B20B74E001274CA /* Extensions.swift */,
 				3AE11B2E27319452005974E5 /* Preview Content */,
 				A2EC6FD72B49AF9A00F31364 /* Deprecated */,
@@ -343,6 +346,14 @@
 				A2D13D232BA6361200E5AFEE /* AirportSchema.swift */,
 			);
 			path = Airports;
+			sourceTree = "<group>";
+		};
+		A2D5FE192BA7C7730084AE7E /* Extra */ = {
+			isa = PBXGroup;
+			children = (
+				A2D5FE1A2BA7C7950084AE7E /* WrappingHStack.swift */,
+			);
+			path = Extra;
 			sourceTree = "<group>";
 		};
 		A2EC6FD72B49AF9A00F31364 /* Deprecated */ = {
@@ -504,6 +515,7 @@
 				A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */,
 				A26E17AF2B9EA39E002B4090 /* SigmetSchema.swift in Sources */,
 				3AE11B2927319450005974E5 /* efbUIApp.swift in Sources */,
+				A2D5FE1B2BA7C7950084AE7E /* WrappingHStack.swift in Sources */,
 				A26E17B72BA1F1B8002B4090 /* RangedSliderView.swift in Sources */,
 				A237AF802B5C7F3B00646AAF /* OFPSchema.swift in Sources */,
 				3A24A79227324259000D98E5 /* ScratchPadView.swift in Sources */,
