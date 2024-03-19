@@ -279,6 +279,7 @@ class SQLiteManager {
       let table = Table(procedure)
       let areaCode = Expression<String?>("area_code")
       let airportIdentifier = Expression<String>("airport_identifier")
+      let procedureIdentifier = Expression<String>("procedure_identifier")
       let routeType = Expression<String?>("route_type")
       let transitionIdentifier = Expression<String?>("transition_identifier")
       let seqno = Expression<Int?>("seqno")
@@ -319,6 +320,7 @@ class SQLiteManager {
         let result = ProcedureTable(
           areaCode: temp[areaCode] ?? "",
           airportIdentifier: temp[airportIdentifier],
+          procedureIdentifier: temp[procedureIdentifier],
           routeType: temp[routeType] ?? "",
           transitionIdentifier: temp[transitionIdentifier] ?? "",
           seqno: temp[seqno] ?? .zero,
