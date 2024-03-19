@@ -70,9 +70,10 @@ struct GateTable {
   let name: String
 }
 
-struct ProcedureTable {
+struct ProcedureTable: Hashable {
   let areaCode: String
   let airportIdentifier: String
+  let procedureIdentifier: String
   let routeType: String
   let transitionIdentifier: String
   let seqno: Int
