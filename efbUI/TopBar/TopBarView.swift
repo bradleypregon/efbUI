@@ -27,36 +27,48 @@ class WaypointStore {
 }
 
 struct Waypoint: Identifiable, Hashable {
-  var id: String = UUID().uuidString
-  var name: String
+  let id: String = UUID().uuidString
+  let name: String
 }
 
+// TODO: Add Move and Delete functions like a normal vertical SwiftUI List
 struct WaypointsContainer: View {
   @Environment(WaypointStore.self) private var waypointStore
+  @State private var popover: Bool = false
   
   var body: some View {
-    ScrollView(.horizontal) {
-      LazyHStack {
-        ForEach(waypointStore.waypoints) { waypoint in
-          WptView(wpt: waypoint)
-        }
-        .onMove(perform: move)
-      }
+//      Ideal, but need Horizontal
+//      List {
+//        ForEach(waypointStore.waypoints) { waypoint in
+//          WptView(wpt: waypoint)
+//        }
+//        .onMove(perform: move)
+//      }
+    
+    WrappingHStack(models: waypointStore.waypoints) { waypoint in
+      WptView(wpt: waypoint)
     }
-//    WrappingHStack(models: waypointStore.waypoints) { waypoint in
-//      WptView(wpt: waypoint)
-//    }
   }
   
   func WptView(wpt: Waypoint) -> some View {
     Button {
-      remove(wpt)
+      print(wpt)
     } label: {
       Text(wpt.name)
         .padding(8)
         .background(.blue)
         .foregroundStyle(.white)
         .clipShape(Capsule())
+    }
+    .popover(isPresented: $popover) {
+      Button {
+        remove(wpt)
+      } label: {
+        Text("Remove")
+      }
+    }
+    .onLongPressGesture {
+      popover.toggle()
     }
   }
   
@@ -74,13 +86,18 @@ struct CustomInputView: View {
   @State private var currentInput: String = ""
   
   var body: some View {
-    TextField("Enter wpt", text: $currentInput) {
+    TextField("Wpt...", text: $currentInput)
       // TODO: Query each db table (Airport, NBD, VOR) upon submission and return either an array or single object
-      // IF an array is returned, its probbaly a matching name, user needs to select appropriate
+      // airports, enroute_airways, enroute_waypoints, pathpoints, sids, stars, terminal_waypoints, vhfnavaids
+      // TODO: How to handle airways?
+      // If an array is returned, its probbaly a matching name, user needs to select appropriate
       // For instance, there are multiple VORs (or NBDs?) that have the same 3 letter identifier. Need to pick the right one
-      let wpt = Waypoint(name: currentInput)
-      waypointStore.waypoints.append(wpt)
-      currentInput = ""
+    .onReceive(currentInput.publisher) { val in
+      if (val == " ") {
+        let wpt = Waypoint(name: currentInput.trimmingCharacters(in: .whitespaces))
+        waypointStore.waypoints.append(wpt)
+        currentInput = ""
+      }
     }
     .textFieldStyle(.roundedBorder)
     .frame(maxWidth: 300)
