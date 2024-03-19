@@ -75,6 +75,12 @@ struct MapScreen: View {
   @State private var mapPopoverSelectedAirport: AirportSchema? = nil
   @State private var mapPopoverSelectedPoint: UnitPoint = .zero
   
+  @State private var sidVisible: Bool = false
+  @State private var sidRoute: [[ProcedureTable]] = []
+  
+  @State private var starVisible: Bool = false
+  @State private var starRoute: [[ProcedureTable]] = []
+  
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
 //      CLLocationCoordinate2DMake(coordinateBounds?.northwest.latitude ?? .zero, coordinateBounds?.northwest.longitude ?? .zero),
@@ -251,6 +257,22 @@ struct MapScreen: View {
                     
                 }
               }
+              
+              //MARK: SID Chart
+              if sidVisible {
+                // TODO: add array of polylines on group
+                // Currently, it is creating 1 polyline of all SIDs and connecting them all
+                PolylineAnnotationGroup {
+                  PolylineAnnotation(lineCoordinates: sidRoute.flatMap { $0.map { CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude) }.filter { $0.latitude != .zero && $0.longitude != .zero} })
+                }
+              }
+              
+              // MARK: STAR Chart
+              if starVisible {
+                PolylineAnnotationGroup {
+                  
+                }
+              }
             }
             .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
             .ornamentOptions(ornamentOptions)
@@ -275,7 +297,8 @@ struct MapScreen: View {
               }
             }
             .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
-              // query database if airport has SIDs and/or STARs
+              let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
+              let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
               
               VStack {
                 Text(airport.name)
@@ -287,17 +310,26 @@ struct MapScreen: View {
                 }
                 
                 Menu("View Procedures") {
-                  Button {
-                    print("View SIDs")
-                  } label: {
-                    Text("View SIDs")
+                  if (!sids.isEmpty) {
+                    Button {
+                      let grouped = Dictionary(grouping: sids, by: { $0.procedureIdentifier })
+                      self.sidRoute = Array(grouped.values)
+                      sidVisible.toggle()
+                    } label: {
+                      Text("View SIDs")
+                    }
                   }
                   
-                  Button {
-                    print("View STARs")
-                  } label: {
-                    Text("View STARs")
+                  if (!stars.isEmpty) {
+                    Button {
+                      let grouped = Dictionary(grouping: stars, by: {$0.procedureIdentifier })
+                      self.starRoute = Array(grouped.values)
+                      starVisible.toggle()
+                    } label: {
+                      Text("View STARs")
+                    }
                   }
+                  
                 }
               }
               .frame(idealWidth: 150, idealHeight: 150)
