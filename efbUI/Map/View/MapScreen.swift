@@ -258,19 +258,37 @@ struct MapScreen: View {
                 }
               }
               
+              
+              // TODO: Filter waypoints. Too many are showing up, just want the route
+              // TODO: Have text label at end of route
+              // TODO: Fix multiple routes overlapping each other
+              
               //MARK: SID Chart
               if sidVisible {
-                // TODO: add array of polylines on group
-                // Currently, it is creating 1 polyline of all SIDs and connecting them all
-                PolylineAnnotationGroup {
-                  PolylineAnnotation(lineCoordinates: sidRoute.flatMap { $0.map { CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude) }.filter { $0.latitude != .zero && $0.longitude != .zero} })
+                
+                // Currently, waypoints for each runway on the sid are showing up
+                // Filter by 'EE'? Essential and End of Enroute??
+                //  - need to be careful though, as SID can have > 1 "ending" waypoint
+                PolylineAnnotationGroup(sidRoute.compactMap { $0 }, id: \.self) { route in
+                  PolylineAnnotation(lineCoordinates: route.map { CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)}.filter { $0.latitude != .zero && $0.longitude != .zero })
+                    .lineWidth(2.0)
+                    .lineColor(StyleColor( UIColor(red: .random(in: 0.0...1.0), green: .random(in: 0.0...1.0), blue: .random(in: 0.0...1.0), alpha: 1.0) ))
+                    .onTapGesture {
+                      // TODO: popover with route details?
+                      print(route.first?.procedureIdentifier)
+                    }
                 }
               }
               
               // MARK: STAR Chart
               if starVisible {
-                PolylineAnnotationGroup {
-                  
+                PolylineAnnotationGroup(starRoute.compactMap {$0}, id: \.self) { route in
+                  PolylineAnnotation(lineCoordinates: route.map { CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)}.filter { $0.latitude != .zero && $0.longitude != .zero})
+                    .lineWidth(3.0)
+                    .lineColor(StyleColor( UIColor(red: .random(in: 0.0...1.0), green: .random(in: 0.0...1.0), blue: .random(in: 0.0...1.0), alpha: 1.0) ))
+                    .onTapGesture {
+                      print(route.first?.procedureIdentifier)
+                    }
                 }
               }
             }
@@ -309,6 +327,7 @@ struct MapScreen: View {
                   Text("View Airport")
                 }
                 
+                // TODO: Fix .toggle() causing routes to not show up
                 Menu("View Procedures") {
                   if (!sids.isEmpty) {
                     Button {
