@@ -44,7 +44,7 @@ struct WaypointsContainer: View {
 //        }
 //        .onMove(perform: move)
 //      }
-    
+    //
     WrappingHStack(models: waypointStore.waypoints) { waypoint in
       WptView(wpt: waypoint)
     }
