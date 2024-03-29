@@ -114,16 +114,16 @@ struct MapScreen: View {
               if largeAnnotationsVisible {
                 PointAnnotationGroup(mapViewModel.largeAirports) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
-                    .image(PointAnnotation.Image(image: UIImage(named: "lg-airport-default42") ?? UIImage(), name: "lg"))
+                    .image(PointAnnotation.Image(image: UIImage(named: "airporticon")?.resize(newWidth: 32) ?? UIImage(), name: "lg"))
                     .onTapGesture {
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
                     }
                     .textField(airport.icao)
-                    .textOffset([0.0, -1.6])
+                    .textOffset([0.0, -1.8])
                     .textColor(StyleColor(.white))
-                    .textHaloWidth(3)
-                    .textHaloColor(StyleColor(.black))
+//                    .textHaloWidth(3)
+//                    .textHaloColor(StyleColor(.black))
                     .textSize(14)
                     .onLongPressGesture {
                       mapPopoverSelectedAirport = airport
