@@ -12,13 +12,14 @@ struct AirportRunwayView: View {
   let runway: RunwayTable
   let weather: AirportMETARSchema?
   let optimal: Bool
+  let longest: Bool
   
   @State private var popoverPresented: Bool = false
   
   var body: some View {
     VStack {
       Text(runway.runwayIdentifier)
-        .foregroundStyle(Color.Neumorphic.secondary)
+        .foregroundStyle(longest ? .orange : Color.Neumorphic.secondary)
         .fontWeight(.semibold)
       
       Button {
@@ -63,7 +64,7 @@ struct AirportRunwayView: View {
       }
       
       Text("\(runway.runwayLength)'")
-        .foregroundStyle(Color.Neumorphic.secondary)
+        .foregroundStyle(longest ? .orange : Color.Neumorphic.secondary)
         .fontWeight(.semibold)
     }
 //    .frame(width: 200, height: 230)
@@ -94,5 +95,5 @@ struct AirportRunwayView: View {
 }
 
 #Preview(traits: .sizeThatFitsLayout) {
-  AirportRunwayView(runway: .init(areaCode: "", icaoCode: "", airportIdentifier: "", runwayIdentifier: "RW10", runwayLatitude: .zero, runwayLongitude: .zero, runwayGradient: .zero, runwayMagneticBearing: 360, runwayTrueBearing: 010, landingThresholdElevation: 1000, displacedThresholdDistance: 100, thresholdCrossingHeight: 100, runwayLength: 6000, runwayWidth: 200, llzIdentifier: "", llz_mls_gls_category: "", surfaceCode: 5, id: ""), weather: nil, optimal: false)
+  AirportRunwayView(runway: .init(areaCode: "", icaoCode: "", airportIdentifier: "", runwayIdentifier: "RW10", runwayLatitude: .zero, runwayLongitude: .zero, runwayGradient: .zero, runwayMagneticBearing: 360, runwayTrueBearing: 010, landingThresholdElevation: 1000, displacedThresholdDistance: 100, thresholdCrossingHeight: 100, runwayLength: 6000, runwayWidth: 200, llzIdentifier: "", llz_mls_gls_category: "", surfaceCode: 5, id: ""), weather: nil, optimal: false, longest: true)
 }
