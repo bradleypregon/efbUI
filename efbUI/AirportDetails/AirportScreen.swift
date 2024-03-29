@@ -300,45 +300,57 @@ struct AirportScreenRwyTab: View {
   let wx: AirportMETARSchema?
   
   @State var optimalRunways: [RunwayTable] = []
+  @State var longestRunways: [RunwayTable] = []
   
   var body: some View {
     if let runways {
       ScrollView(.vertical) {
         WrappingHStack(models: runways) { runway in
-          AirportRunwayView(runway: runway, weather: wx, optimal: isOptimal(runway))
-            .onAppear {
-              optimalRunways = getOptimalRunways()
-            }
+          AirportRunwayView(runway: runway, weather: wx, optimal: isOptimal(runway), longest: isLongest(runway))
         }
+      }
+      .onAppear {
+        getOptimalRunways()
+        getLongestRunways()
       }
     }
   }
   
-  func getOptimalRunways() -> [RunwayTable] {
-    guard let runways = runways else { return [] }
-    guard let dir = wx?.first?.wdir else { return [] }
-    if dir == 0 { return [] }
+  func getOptimalRunways() {
+    self.optimalRunways = []
+    guard let runways = runways else { return }
+    guard let dir = wx?.first?.wdir else { return }
+    if dir == 0 { return }
     
-    var optimalRunways: [RunwayTable] = []
+    let runwayDiff = runways.map { ($0, abs($0.runwayMagneticBearing - Double(dir))) }
     
-    var bestDiff: Double = 360
+    let sortedRunways = runwayDiff.sorted { $0.1 < $1.1 }
+    
+    self.optimalRunways = sortedRunways.filter { $0.1 == sortedRunways.first?.1 }.map { $0.0 }
+  }
+  
+  func getLongestRunways() {
+    self.longestRunways = []
+    guard let runways = runways else { return }
+    var longestLength = 0
+    
     for runway in runways {
-      let diff = abs(runway.runwayMagneticBearing - Double(dir))
-      if bestDiff > diff {
-        bestDiff = diff
-        
-        // Append parallel and near-heading runways (a 50 degree margin... perhaps adjust)
-        optimalRunways.removeAll()
-        let runwayRange = runways.filter { $0.runwayMagneticBearing < runway.runwayMagneticBearing + 50 && $0.runwayMagneticBearing > runway.runwayMagneticBearing - 50 }
-        optimalRunways = runwayRange
+      if runway.runwayLength > longestLength {
+        longestLength = runway.runwayLength
+        self.longestRunways = [runway]
+      } else if runway.runwayLength == longestLength {
+        self.longestRunways.append(runway)
       }
     }
-
-    return optimalRunways
   }
   
   func isOptimal(_ runway: RunwayTable) -> Bool {
-    return optimalRunways.contains { $0 == runway }
+    return optimalRunways.contains(runway)
+  }
+  
+  func isLongest(_ runway: RunwayTable) -> Bool {
+    return longestRunways.contains(runway)
+
   }
 }
 
