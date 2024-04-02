@@ -19,35 +19,41 @@ enum MapStyle: String, CaseIterable {
 
 @Observable
 class Settings {
-  var mapStyle: MapStyle = .standard
   
-  var simBriefUID: String = ""
 }
 
 struct SettingsView: View {
-  
   @Environment(Settings.self) private var settings
   @Environment(\.modelContext) private var modelContext
   
-  @State var simbriefUserIDString: String = ""
+  @State var mapStyle: MapStyle = .standard
   
-//  var simbriefUser: SimBriefUser?
+  @State var simbriefUserIDString: String = ""
+  @State var mapOwnshipRegistration: String = ""
+  @State var outboundNotificationDistance: Int = 20
+  @State var inboundNotificationDistance: Int = 30
+  @State var finalNotificationDistance: Int = 5
+  
   @Query var simbriefUser: [SimBriefUser]
   
   var body: some View {
+    
     NavigationStack {
       VStack {
-        Spacer()
-          .frame(height: 400)
         Form {
           Section(header: Text("Map"), content: {
             HStack {
               Text("Map Style")
-//              Picker("", selection: settings.mapStyle.rawValue) {
-//                ForEach(MapStyle.allCases, id: \.self) { style in
-//                  Text(style.rawValue).tag(style)
-//                }
-//              }
+              Picker("Map Style", selection: $mapStyle) {
+                ForEach(MapStyle.allCases, id: \.self) { style in
+                  Text(style.rawValue).tag(style)
+                }
+              }
+              
+            }
+            HStack {
+              Text("Default Ownship Registration")
+              TextField("N123NA", text: $mapOwnshipRegistration)
             }
           })
           Section(header: Text("Simbrief")) {
@@ -66,8 +72,27 @@ struct SettingsView: View {
                 }
             }
           }
+          Section(header: Text("Airport Notification Distances")) {
+            HStack {
+              Text("Outbound")
+              TextField("20 miles final call...", value: $outboundNotificationDistance, format: .number)
+                .keyboardType(.decimalPad)
+            }
+            HStack {
+              Text("Inbound")
+              TextField("30 miles inb...", value: $inboundNotificationDistance, format: .number)
+                .keyboardType(.decimalPad)
+            }
+            HStack {
+              Text("Final")
+              TextField("5 mile final...", value: $finalNotificationDistance, format: .number)
+                .keyboardType(.decimalPad)
+            }
+          }
         }
       }
+      .navigationTitle("Settings")
+      .navigationBarTitleDisplayMode(.large)
     }
     .onAppear {
       simbriefUserIDString = simbriefUser.first?.userID ?? ""
