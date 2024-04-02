@@ -122,9 +122,7 @@ struct MapScreen: View {
                     .textField(airport.icao)
                     .textOffset([0.0, -1.8])
                     .textColor(StyleColor(.white))
-//                    .textHaloWidth(3)
-//                    .textHaloColor(StyleColor(.black))
-                    .textSize(14)
+                    .textSize(12)
                     .onLongPressGesture {
                       mapPopoverSelectedAirport = airport
                       let point = $0.point
@@ -171,19 +169,19 @@ struct MapScreen: View {
               
               
               // MARK: Ownship Annotation
-              MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: simConnect.ship?.coordinate.latitude ?? .zero, longitude: simConnect.ship?.coordinate.longitude ?? .zero)) {
-                VStack(spacing: 0) {
-                  Image("ShipArrow")
-                    .resizable()
-                    .frame(width: 32, height: 32)
-                    .rotationEffect(.degrees(simConnect.ship?.heading ?? .zero))
-                  Text((simbrief.ofp?.aircraft.reg) ?? "ownship")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.teal)
-                    .glowBorder(color: .black, lineWidth: 4)
+              if let ship = simConnect.ship {
+                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: ship.coordinate.latitude, longitude: ship.coordinate.longitude)) {
+                  VStack(spacing: 0) {
+                    Image("ShipArrow")
+                      .resizable()
+                      .frame(width: 32, height: 32)
+                      .rotationEffect(.degrees(ship.heading))
+                    Text((simbrief.ofp?.aircraft.reg) ?? "ownship")
+                      .font(.system(size: 10))
+                      .foregroundStyle(.teal)
+                  }
                 }
               }
-              .allowOverlap(true)
               
               // MARK: Traffic Annotations
               ForEvery(simConnect.simConnectTraffic, id: \.id) { traffic in
@@ -373,6 +371,7 @@ struct MapScreen: View {
             }
             .buttonStyle(.bordered)
             
+            // TODO: Fix long press gesture not working properly
             Button {
               sigmetAPI.fetchSigmet { sigmets in
                 self.sigmets = sigmets
