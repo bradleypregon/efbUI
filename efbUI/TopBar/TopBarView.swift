@@ -113,43 +113,47 @@ struct TopBarView: View {
   @Environment(SimConnectShipObserver.self) var simConnect
   @Environment(SimBriefViewModel.self) var simbrief
   @Environment(WaypointStore.self) var waypointStore
+  @State private var serverRunning: Bool = false
+  
+  var serverListener: ServerListener = ServerListener()
   
   let topOffset: CGFloat = 65
   let middleOffset: CGFloat = 300
   let bottomOffset: CGFloat = 600
-  
   @State private var dragOffset: CGSize = .zero
   @State private var position: CGFloat = 65
   @State private var halfExpanded: Bool = false
   @State private var fullExpanded: Bool = false
   
-  @Query var simbriefUser: [SimBriefUser]
-  @State var route: String = ""
-  
-  var simConnectListener: SimConnectListener = SimConnectListener()
+  private var server: SimConnectServer {
+    SimConnectServer(simConnect: simConnect, serverListener: serverListener)
+  }
   
   var body: some View {
     VStack {
       HStack(alignment: .center, spacing: 20) {
-        Button {
-          // TODO: Instantiate server once. Don't keep reinstantiating
-          let server = SimConnectServer(simConnect: simConnect, simConnListener: simConnectListener)
-          if !server.isRunning {
-            do {
-              try server.start()
-            } catch {
-              print("Error trying to start SimConnect server: \(error)")
+        Toggle("SimConnect", systemImage: serverRunning ? "wifi" : "wifi.slash", isOn: $serverRunning)
+          .font(.title2)
+          .tint(getServerState())
+          .toggleStyle(.button)
+          .labelStyle(.iconOnly)
+          .contentTransition(.symbolEffect)
+          .onChange(of: serverRunning) {
+            // this works perfect
+            if serverRunning {
+              do {
+                try server.start()
+              } catch {
+                print("Error starting server: \(error)")
+              }
+            } else {
+              print("server needs to stop")
+//              if server.isRunning {
+//                server.stop()
+//              }
             }
-          } else {
-            server.stop()
           }
-        } label: {
-          Image(systemName: "target")
-            .frame(width: 25, height: 25, alignment: .center)
-            .font(.title)
-            .foregroundStyle(getServerState())
-        }
-        .padding(.leading, 40)
+          .padding([.leading, .trailing], 20)
         
         Spacer()
           .frame(width: 40)
@@ -228,6 +232,8 @@ struct TopBarView: View {
           .frame(width: 200, height: 8)
           .foregroundStyle(.gray)
       }
+      .padding(18) // are these working or is it placebo?
+      .padding(-18)
       .offset(x: 0, y: -10)
       .gesture(
         DragGesture()
@@ -319,13 +325,13 @@ struct TopBarView: View {
   }
   
   func getServerState() -> Color {
-    switch simConnectListener.serverState {
-    case .connected:
-      return .green
+    switch serverListener.status {
+    case .running:
+      return .vfr
     case .heartbeat:
-      return .blue
+      return .mvfr
     case .stopped:
-      return .red
+      return .ifr
     }
   }
   
