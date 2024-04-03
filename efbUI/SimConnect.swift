@@ -29,16 +29,6 @@ struct SimConnectShip: Identifiable {
 class SimConnectShipObserver {
   var ship: SimConnectShip? = nil
   var simConnectTraffic: [SimConnectShip] = []
-  
-//  var shipPublisher = PassthroughSubject<SimConnectShip, Never>()
-//  private var cancellables = Set<AnyCancellable>()
-//  init() {
-//    shipPublisher
-//      .sink { ship in
-//        self.ship = ship
-//      }.store(in: &cancellables)
-//  }
-  
 }
 
 final class SimConnectConnection {
@@ -222,23 +212,22 @@ struct GDL90MsgB: Decodable {
 }
 
 @Observable
-final class SimConnectListener {
-  var serverState: ServerState = .stopped
+class ServerListener {
+  var status: Status = .stopped
   
-  enum ServerState {
-    case connected, heartbeat, stopped
+  enum Status {
+    case running, heartbeat, stopped
   }
 }
 
 final class SimConnectServer {
-  @State var isRunning: Bool = false
-  let simConnect: SimConnectShipObserver
-  var simConnListener: SimConnectListener
+  var simConnect: SimConnectShipObserver
+  var isRunning: Bool = false
+  var serverListener: ServerListener
   
-  init(simConnect: SimConnectShipObserver, simConnListener: SimConnectListener) {
+  init(simConnect: SimConnectShipObserver, serverListener: ServerListener) {
     self.simConnect = simConnect
-    self.simConnListener = simConnListener
-//    self.listener = try! NWListener(using: .udp, on: 4000)
+    self.serverListener = serverListener
     self.listener = try! NWListener(using: .udp, on: 49002)
     self.timer = DispatchSource.makeTimerSource(queue: .main)
   }
@@ -256,7 +245,7 @@ final class SimConnectServer {
     self.timer.schedule(deadline: .now() + 5.0, repeating: 5.0)
     self.timer.activate()
     
-    simConnListener.serverState = .heartbeat
+    serverListener.status = .heartbeat
     isRunning = true
   }
   
@@ -288,7 +277,8 @@ final class SimConnectServer {
       self.connectionDidStop(connection)
     }
     connection.start()
-    simConnListener.serverState = .connected
+    
+    serverListener.status = .running
     print("Server opened connection \(connection.id)")
   }
   
@@ -309,7 +299,7 @@ final class SimConnectServer {
     self.connectionsByID.removeAll()
     self.timer.cancel()
     
-    simConnListener.serverState = .stopped
+    serverListener.status = .stopped
     isRunning = false
   }
   
