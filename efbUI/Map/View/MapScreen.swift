@@ -145,9 +145,6 @@ struct MapScreen: View {
                     .textField(airport.icao)
                     .textOffset([0.0, -1.6])
                     .textColor(StyleColor(.white))
-                    .textHaloBlur(10)
-                    .textHaloWidth(10)
-                    .textHaloColor(StyleColor(.black))
                     .textSize(11)
                 }
                 .clusterOptions(ClusterOptions(clusterRadius: 75.0, clusterMaxZoom: 8.0))
