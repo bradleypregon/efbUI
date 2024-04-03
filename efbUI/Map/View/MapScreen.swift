@@ -113,16 +113,16 @@ struct MapScreen: View {
               // MARK: Large Airports
               if largeAnnotationsVisible {
                 PointAnnotationGroup(mapViewModel.largeAirports) { airport in
-                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
-                    .image(PointAnnotation.Image(image: UIImage(named: "airporticon")?.resize(newWidth: 32) ?? UIImage(), name: "lg"))
-                    .onTapGesture {
-                      selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
-                      columnVisibility = .all
-                    }
+                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(airport.lat, airport.long), isDraggable: false)
+                    .image(PointAnnotation.Image(image: UIImage(named: "lg-airport-vfr") ?? UIImage(), name: "lg"))
                     .textField(airport.icao)
                     .textOffset([0.0, -1.8])
                     .textColor(StyleColor(.white))
                     .textSize(12)
+                    .onTapGesture {
+                      selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
+                      columnVisibility = .all
+                    }
                     .onLongPressGesture {
                       mapPopoverSelectedAirport = airport
                       let point = $0.point
@@ -137,7 +137,7 @@ struct MapScreen: View {
               if mediumAnnotationsVisible {
                 PointAnnotationGroup(mapViewModel.mediumAirports, id: \.id) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
-                    .image(PointAnnotation.Image(image: UIImage(named: "md-airport-default40") ?? UIImage(), name: "md"))
+                    .image(PointAnnotation.Image(image: UIImage(named: "md-airport-vfr") ?? UIImage(), name: "md"))
                     .onTapGesture {
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
@@ -158,7 +158,7 @@ struct MapScreen: View {
               if smallAnnotationsVisible {
                 PointAnnotationGroup(mapViewModel.smallAirports) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
-                    .image(PointAnnotation.Image(image: UIImage(named: "sm-airport-default38") ?? UIImage(), name: "sm"))
+                    .image(PointAnnotation.Image(image: UIImage(named: "sm-airport-vfr") ?? UIImage(), name: "sm"))
                     .onTapGesture {
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
@@ -170,17 +170,13 @@ struct MapScreen: View {
               
               // MARK: Ownship Annotation
               if let ship = simConnect.ship {
-                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: ship.coordinate.latitude, longitude: ship.coordinate.longitude)) {
-                  VStack(spacing: 0) {
-                    Image("ShipArrow")
-                      .resizable()
-                      .frame(width: 32, height: 32)
-                      .rotationEffect(.degrees(ship.heading))
-                    Text((simbrief.ofp?.aircraft.reg) ?? "ownship")
-                      .font(.system(size: 10))
-                      .foregroundStyle(.teal)
-                  }
-                }
+                PointAnnotation(coordinate: CLLocationCoordinate2DMake(ship.coordinate.latitude, ship.coordinate.longitude))
+                  .image(PointAnnotation.Image(image: UIImage(named: "ShipArrow") ?? UIImage(), name: "ownship"))
+                  .iconRotate(ship.heading)
+                  .textField(simbrief.ofp?.aircraft.reg ?? "ownship")
+                  .textOffset([0, 1.6])
+                  .textColor(StyleColor(.white))
+                  .textSize(12)
               }
               
               // MARK: Traffic Annotations
@@ -194,8 +190,6 @@ struct MapScreen: View {
                         .foregroundStyle(.pink)
                     }
                     Image("TrafficArrow")
-                      .resizable()
-                      .frame(width: 30, height: 30)
                       .rotationEffect(.degrees(traffic.heading))
                     Text(traffic.registration ?? "Tfc")
                       .font(.system(size: 9))
@@ -400,23 +394,18 @@ struct MapScreen: View {
             Button {
               largeAnnotationsVisible.toggle()
             } label: {
-              Image("lg-airport-temp")
-                .resizable()
-                .frame(width: 38, height: 38)
+              Text("Lg")
             }
+            
             Button {
               mediumAnnotationsVisible.toggle()
             } label: {
-              Image("md-airport-temp")
-                .resizable()
-                .frame(width: 38, height: 38)
+              Text("Md")
             }
             Button {
               smallAnnotationsVisible.toggle()
             } label: {
-              Image("sm-airport-temp")
-                .resizable()
-                .frame(width: 38, height: 38)
+              Text("Sm")
             }
           }
           .padding([.leading], 5)
