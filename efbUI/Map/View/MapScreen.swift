@@ -13,10 +13,18 @@ import PencilKit
 @Observable
 class MapScreenViewModel {
   var airportJSONModel = AirportJSONModel()
-  
   var largeAirports: [AirportSchema] = []
   var mediumAirports: [AirportSchema] = []
   var smallAirports: [AirportSchema] = []
+  
+  var displayRadar: Bool = false
+  var displayRoute: Bool = false
+  var displaySigmet: Bool = false
+  var displayLg: Bool = true
+  var displayMd: Bool = false
+  var displaySm: Bool = false
+  var displaySID: Bool = false
+  var displaySTAR: Bool = false
   
   init() {
     largeAirports = airportJSONModel.airports.filter { $0.size == .large }
@@ -44,19 +52,6 @@ struct MapScreen: View {
   @State private var proxyMap: MapProxy? = nil
   @State private var currentZoom: CGFloat = 3.0
   
-  @State private var largeAnnotationsVisible: Bool = true
-  @State private var mediumAnnotationsVisible: Bool = false
-  @State private var smallAnnotationsVisible: Bool = false
-  @State private var routeVisible: Bool = false
-  @State private var airmetVisible: Bool = false
-  
-  @State private var displayRadar: Bool = false {
-    didSet {
-      if let proxyMap, let map = proxyMap.map {
-        displayRadar ? addRasterRadarSource(map) : removeRasterRadarSource(map)
-      }
-    }
-  }
   var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
   private let radarSourceID = "radar-source"
@@ -69,17 +64,16 @@ struct MapScreen: View {
   @State private var waypointPopoverVisible: Bool = false
   let sigmetAPI = SigmetAPI()
   @State private var sigmets: SigmetSchema = []
+  @GestureState private var sigmetLongPress = false
   @State private var sigmetMenuPopoverVisible: Bool = false
   @State private var sigmetSliderRange: ClosedRange<Float> = 1000...41000
   
   @State private var mapPopoverSelectedAirport: AirportSchema? = nil
   @State private var mapPopoverSelectedPoint: UnitPoint = .zero
   
-  @State private var sidVisible: Bool = false
   @State private var sidRoute: [[ProcedureTable]] = []
-  
-  @State private var starVisible: Bool = false
   @State private var starRoute: [[ProcedureTable]] = []
+  
   
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
@@ -111,7 +105,7 @@ struct MapScreen: View {
               // MARK: Airport Annotations
               
               // MARK: Large Airports
-              if largeAnnotationsVisible {
+              if mapViewModel.displayLg {
                 PointAnnotationGroup(mapViewModel.largeAirports) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2DMake(airport.lat, airport.long), isDraggable: false)
                     .image(PointAnnotation.Image(image: UIImage(named: "lg-airport-vfr") ?? UIImage(), name: "lg"))
@@ -134,7 +128,7 @@ struct MapScreen: View {
               
               
               // MARK: Medium Airports
-              if mediumAnnotationsVisible {
+              if mapViewModel.displayMd {
                 PointAnnotationGroup(mapViewModel.mediumAirports, id: \.id) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
                     .image(PointAnnotation.Image(image: UIImage(named: "md-airport-vfr") ?? UIImage(), name: "md"))
@@ -152,7 +146,7 @@ struct MapScreen: View {
               
               
               // MARK: Small Airports
-              if smallAnnotationsVisible {
+              if mapViewModel.displaySm {
                 PointAnnotationGroup(mapViewModel.smallAirports) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
                     .image(PointAnnotation.Image(image: UIImage(named: "sm-airport-vfr") ?? UIImage(), name: "sm"))
@@ -181,24 +175,22 @@ struct MapScreen: View {
                 MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: traffic.coordinate.latitude, longitude: traffic.coordinate.longitude)) {
                   VStack(spacing: 0) {
                     if displayTrafficAltitude {
-                      Text(traffic.altitude.string)
+                      Text("\(traffic.altitude.string)'")
                         .font(.system(size: 9))
-                        .glowBorder(color: .black, lineWidth: 4)
-                        .foregroundStyle(.pink)
+                        .foregroundStyle(.lifr)
                     }
                     Image("TrafficArrow")
                       .rotationEffect(.degrees(traffic.heading))
-                    Text(traffic.registration ?? "Tfc")
+                    Text(traffic.registration ?? "tfc")
                       .font(.system(size: 9))
-                      .glowBorder(color: .black, lineWidth: 4)
-                      .foregroundStyle(.pink)
+                      .foregroundStyle(.lifr)
                   }
                 }
                 .allowOverlap(true)
               }
               
               // MARK: Route Display
-              if routeVisible {
+              if mapViewModel.displayRoute {
                 if let navlog = simbrief.ofp?.navlog {
                   PolylineAnnotationGroup {
                     PolylineAnnotation(lineCoordinates: navlog.map { CLLocationCoordinate2D(latitude: Double($0.lat) ?? .zero, longitude: Double($0.long) ?? .zero)})
@@ -217,7 +209,7 @@ struct MapScreen: View {
               
               // MARK: Sigmet Data
               // CONVECTIVE: orange, IFR: blue, MTN OBSCN: gray, TURB: red
-              if airmetVisible {
+              if mapViewModel.displaySigmet {
                 PolygonAnnotationGroup(sigmets.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
                   var polyCoords: [CLLocationCoordinate2D] = []
                   
@@ -253,7 +245,7 @@ struct MapScreen: View {
               // TODO: Fix multiple routes overlapping each other
               
               //MARK: SID Chart
-              if sidVisible {
+              if mapViewModel.displaySID {
                 
                 // Currently, waypoints for each runway on the sid are showing up
                 // Filter by 'EE'? Essential and End of Enroute??
@@ -270,7 +262,7 @@ struct MapScreen: View {
               }
               
               // MARK: STAR Chart
-              if starVisible {
+              if mapViewModel.displaySTAR {
                 PolylineAnnotationGroup(starRoute.compactMap {$0}, id: \.self) { route in
                   PolylineAnnotation(lineCoordinates: route.map { CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)}.filter { $0.latitude != .zero && $0.longitude != .zero})
                     .lineWidth(3.0)
@@ -300,7 +292,7 @@ struct MapScreen: View {
             .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
               Button("Ok") {
                 // TODO: Handle retrying radar
-                displayRadar.toggle()
+                mapViewModel.displayRadar.toggle()
               }
             }
             .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
@@ -322,7 +314,7 @@ struct MapScreen: View {
                     Button {
                       let grouped = Dictionary(grouping: sids, by: { $0.procedureIdentifier })
                       self.sidRoute = Array(grouped.values)
-                      sidVisible.toggle()
+                      mapViewModel.displaySID.toggle()
                     } label: {
                       Text("View SIDs")
                     }
@@ -332,7 +324,7 @@ struct MapScreen: View {
                     Button {
                       let grouped = Dictionary(grouping: stars, by: {$0.procedureIdentifier })
                       self.starRoute = Array(grouped.values)
-                      starVisible.toggle()
+                      mapViewModel.displaySID.toggle()
                     } label: {
                       Text("View STARs")
                     }
@@ -348,62 +340,75 @@ struct MapScreen: View {
           
           // MARK: Menu
           VStack(spacing: 5) {
-            Button {
-              displayRadar.toggle()
-            } label: {
-              Image(systemName: displayRadar ? "cloud.sun.fill" : "cloud.sun")
-            }
-            .buttonStyle(.bordered)
+            Toggle("Radar", systemImage: mapViewModel.displayRadar ? "cloud.sun.fill" : "cloud.sun", isOn: $mapViewModel.displayRadar)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
+              .onChange(of: mapViewModel.displayRadar) {
+                if let proxyMap, let map = proxyMap.map {
+                  mapViewModel.displayRadar ? addRasterRadarSource(map) : removeRasterRadarSource(map)
+                }
+              }
             
-            Button {
-              routeVisible.toggle()
-            } label: {
-              Image(systemName: routeVisible ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath")
-            }
-            .buttonStyle(.bordered)
+            Toggle("Route", systemImage: mapViewModel.displayRoute ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $mapViewModel.displayRoute)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
             
             // TODO: Fix long press gesture not working properly
-            Button {
-              sigmetAPI.fetchSigmet { sigmets in
-                self.sigmets = sigmets
+            Toggle("Sigmet", systemImage: mapViewModel.displaySigmet ? "hazardsign.fill" : "hazardsign", isOn: $mapViewModel.displaySigmet)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
+              .onChange(of: mapViewModel.displaySigmet) {
+                // TODO: stash fetch as to not call api every time is tapped
+                sigmetAPI.fetchSigmet { sigmets in
+                  self.sigmets = sigmets
+                }
               }
-              airmetVisible.toggle()
-            } label: {
-              Image(systemName: airmetVisible ? "hazardsign.fill" : "hazardsign")
-            }
-            .buttonStyle(.bordered)
-            .onLongPressGesture(minimumDuration: 0.15) {
-              self.sigmetMenuPopoverVisible.toggle()
-            }
-            .popover(isPresented: $sigmetMenuPopoverVisible) {
-              VStack {
-                Text("Sigmet Altitudes")
-                RangedSliderView(value: $sigmetSliderRange, bounds: 0...50000, step: 1000)
+              .onLongPressGesture {
+                sigmetMenuPopoverVisible.toggle()
               }
-              .frame(idealWidth: 250)
-              .padding()
-              .padding([.leading, .trailing, .bottom], 20)
-            }
+//              .gesture(
+//                LongPressGesture(minimumDuration: 0.25)
+//                  .updating($sigmetLongPress) { currentState, gestureState, transaction in
+//                    gestureState = currentState
+//                  }
+//                  .onEnded { _ in
+//                    sigmetMenuPopoverVisible.toggle()
+//                  }
+//              )
+              .popover(isPresented: $sigmetMenuPopoverVisible) {
+                VStack {
+                  Text("Sigmet Altitudes")
+                  RangedSliderView(value: $sigmetSliderRange, bounds: 0...50000,  step: 1000)
+                }
+                .frame(idealWidth: 250)
+                .padding()
+                .padding([.leading, .trailing, .bottom], 20)
+              }
             
             Spacer()
               .frame(height: 15)
             
-            Button {
-              largeAnnotationsVisible.toggle()
-            } label: {
-              Text("Lg")
-            }
-            
-            Button {
-              mediumAnnotationsVisible.toggle()
-            } label: {
-              Text("Md")
-            }
-            Button {
-              smallAnnotationsVisible.toggle()
-            } label: {
-              Text("Sm")
-            }
+            Toggle("Lg", isOn: $mapViewModel.displayLg)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+            Toggle("Md", isOn: $mapViewModel.displayMd)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+            Toggle("Sm", isOn: $mapViewModel.displaySm)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
           }
           .padding([.leading], 5)
         }
