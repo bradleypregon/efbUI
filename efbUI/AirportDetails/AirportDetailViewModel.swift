@@ -20,7 +20,7 @@ enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
 
 @Observable
 class AirportDetailViewModel {
-  static let shared = AirportDetailViewModel()
+//  static let shared = AirportDetailViewModel()
   var selectedAirportElement: AirportSchema?
   var airportWxMetar: AirportMETARSchema? = nil
   var airportWxTAF: AirportTAFSchema? = nil

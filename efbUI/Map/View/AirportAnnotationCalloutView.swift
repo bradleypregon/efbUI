@@ -20,7 +20,7 @@ struct AirportAnnotationCalloutView: View {
   @Binding var selectedTab: Int
   @Binding var selectedAirport: AirportTable?
   
-  @State private var airportVM = AirportDetailViewModel.shared
+//  @State private var airportVM = AirportDetailViewModel.shared
   @State var selectedInfoTab: AirportAnnotationCalloutInfoTab = .info
   
   var body: some View {
@@ -69,7 +69,7 @@ struct AirportAnnotationCalloutView: View {
           .foregroundStyle(.gray)
           
           Button {
-            AirportDetailViewModel.shared.selectedAirportICAO = "KDSM"
+//            AirportDetailViewModel.shared.selectedAirportICAO = "KDSM"
             selectedTab = 0
           } label: {
             Text("View Airport")
