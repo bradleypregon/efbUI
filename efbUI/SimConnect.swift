@@ -59,24 +59,24 @@ final class ServerListener {
   }
   
   func start() {
-    self.listener?.stateUpdateHandler = { state in
+    self.listener?.stateUpdateHandler = { [self] state in
       switch state {
       case .ready:
         print("Listener is ready")
         break
       case .failed, .cancelled:
-        self.listening = false
+        listening = false
         print("Listener did fail")
-        self.stopListener()
+        stopListener()
       default:
         print("default triggered in listener state update")
-        self.listening = true
+        listening = true
         break
       }
     }
     
-    self.listener?.newConnectionHandler = { connection in
-      self.createConnection(connection: connection)
+    self.listener?.newConnectionHandler = { [self] connection in
+      createConnection(connection: connection)
     }
     
     self.listener?.start(queue: DispatchQueue.global(qos: .userInitiated))
@@ -92,7 +92,7 @@ final class ServerListener {
   private func createConnection(connection: NWConnection) {
     self.connection = connection
     
-    self.connection?.stateUpdateHandler = { state in
+    self.connection?.stateUpdateHandler = { [self] state in
       switch state {
       case .ready:
         ServerStatus.shared.status = .running

@@ -22,7 +22,7 @@ struct ChartsView: View {
   @State private var zoom: CGFloat = 1
   @GestureState private var pinchZoom: CGFloat = 1
   
-  @State private var canvas = PKCanvasView()
+//  @State private var canvas = PKCanvasView()
   
   @State private var selectedCharts: AirportChart = .Curr
   
@@ -66,6 +66,7 @@ struct ChartsView: View {
     }
   }
   
+  @MainActor 
   @ViewBuilder
   func chartViewBuilder() -> some View {
     switch selectedCharts {
@@ -84,6 +85,7 @@ struct ChartsView: View {
     }
   }
   
+  @MainActor 
   func starredCharts() -> some View {
     List {
       ForEach(starred, id: \.id) { chart in
@@ -109,6 +111,7 @@ struct ChartsView: View {
     }
   }
   
+  @MainActor 
   func charts(charts: DecodedArray<AirportChartAPISchema>?) -> some View {
     List {
       if let charts = charts?.first {
@@ -236,6 +239,7 @@ struct ChartsView: View {
     .listStyle(.sidebar)
   }
   
+  @MainActor
   func ofp() -> some View {
     List {
       if let ofp = sbViewModel.ofp {

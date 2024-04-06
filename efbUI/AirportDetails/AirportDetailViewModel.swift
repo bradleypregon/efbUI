@@ -18,6 +18,7 @@ enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
   var id: Self { self }
 }
 
+// TODO: Dont fetch metar until told to (button, pull to refresh, etc). Save APIs from too many calls?
 @Observable
 class AirportDetailViewModel {
 //  static let shared = AirportDetailViewModel()
