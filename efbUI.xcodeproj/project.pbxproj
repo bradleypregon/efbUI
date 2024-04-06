@@ -74,6 +74,7 @@
 		A2DE93D82B9237390065FEF6 /* ScratchPadATIS.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D72B9237390065FEF6 /* ScratchPadATIS.swift */; };
 		A2DE93DA2B925E340065FEF6 /* ScratchPadCRAFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D92B925E340065FEF6 /* ScratchPadCRAFT.swift */; };
 		A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */; };
+		A2E956AB2BBEE3F000639D8C /* TestSimConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E956AA2BBEE3F000639D8C /* TestSimConnect.swift */; };
 		A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */; };
 		A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */; };
 /* End PBXBuildFile section */
@@ -137,6 +138,7 @@
 		A2DE93D72B9237390065FEF6 /* ScratchPadATIS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadATIS.swift; sourceTree = "<group>"; };
 		A2DE93D92B925E340065FEF6 /* ScratchPadCRAFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadCRAFT.swift; sourceTree = "<group>"; };
 		A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportIcon.swift; sourceTree = "<group>"; };
+		A2E956AA2BBEE3F000639D8C /* TestSimConnect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSimConnect.swift; sourceTree = "<group>"; };
 		A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerAPI.swift; sourceTree = "<group>"; };
 		A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerSchema.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -249,6 +251,7 @@
 				3A24A78C27321C15000D98E5 /* TabBar.swift */,
 				A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */,
 				3AE11B5227319480005974E5 /* SimConnect.swift */,
+				A2E956AA2BBEE3F000639D8C /* TestSimConnect.swift */,
 				3A69AF41279BB46D00E29135 /* AirportDetails */,
 				A237AF812B63490300646AAF /* ChartsView.swift */,
 				3A27F356282F5D1800C4B82A /* Map */,
@@ -540,6 +543,7 @@
 				A2DE93D82B9237390065FEF6 /* ScratchPadATIS.swift in Sources */,
 				A26E17B12B9EA3A5002B4090 /* SigmetAPI.swift in Sources */,
 				A2C6ED172B2E3DCE00856381 /* OSMWeatherSchema.swift in Sources */,
+				A2E956AB2BBEE3F000639D8C /* TestSimConnect.swift in Sources */,
 				A2DE93DA2B925E340065FEF6 /* ScratchPadCRAFT.swift in Sources */,
 				A2C6ED1F2B30068300856381 /* AirportMetarAPISchema.swift in Sources */,
 			);
@@ -602,7 +606,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -660,7 +664,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -690,7 +694,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -700,6 +704,7 @@
 				PRODUCT_NAME = EFB;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 2;
@@ -726,7 +731,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -736,6 +741,7 @@
 				PRODUCT_NAME = EFB;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 2;
