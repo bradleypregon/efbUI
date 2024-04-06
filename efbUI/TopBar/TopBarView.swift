@@ -115,8 +115,6 @@ struct TopBarView: View {
   @Environment(WaypointStore.self) var waypointStore
   @State private var serverRunning: Bool = false
   
-  var serverListener: ServerListener = ServerListener()
-  
   let topOffset: CGFloat = 65
   let middleOffset: CGFloat = 300
   let bottomOffset: CGFloat = 600
@@ -125,8 +123,8 @@ struct TopBarView: View {
   @State private var halfExpanded: Bool = false
   @State private var fullExpanded: Bool = false
   
-  private var server: SimConnectServer {
-    SimConnectServer(simConnect: simConnect, serverListener: serverListener)
+  var server: ServerListener {
+    ServerListener(ship: simConnect)
   }
   
   var body: some View {
@@ -139,18 +137,8 @@ struct TopBarView: View {
           .labelStyle(.iconOnly)
           .contentTransition(.symbolEffect)
           .onChange(of: serverRunning) {
-            // this works perfect
             if serverRunning {
-              do {
-                try server.start()
-              } catch {
-                print("Error starting server: \(error)")
-              }
-            } else {
-              print("server needs to stop")
-//              if server.isRunning {
-//                server.stop()
-//              }
+              server.start()
             }
           }
           .padding([.leading, .trailing], 20)
@@ -162,17 +150,17 @@ struct TopBarView: View {
           VStack {
             Text("Heading")
               .font(.caption)
-            Text("\(roundToTenths(simConnect.ship?.heading ?? .zero))º")
+            Text("\(roundToTenths(simConnect.ownship.heading))º")
           }
           VStack {
             Text("GPS Altitude")
               .font(.caption)
-            Text("\(roundToTenths((simConnect.ship?.altitude ?? .zero) * 3.281))'") // meters to feet
+            Text("\(roundToTenths((simConnect.ownship.altitude) * 3.281))'") // meters to feet
           }
           VStack {
             Text("Speed")
               .font(.caption)
-            Text("\(roundToTenths((simConnect.ship?.speed ?? .zero) * 1.944))kt") // m/s to knots
+            Text("\(roundToTenths((simConnect.ownship.speed) * 1.944))kt") // m/s to knots
           }
         }
         .fontWeight(.semibold)
@@ -325,7 +313,7 @@ struct TopBarView: View {
   }
   
   func getServerState() -> Color {
-    switch serverListener.status {
+    switch ServerStatus.shared.status {
     case .running:
       return .vfr
     case .heartbeat:
