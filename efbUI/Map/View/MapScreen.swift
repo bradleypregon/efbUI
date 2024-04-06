@@ -108,7 +108,7 @@ struct MapScreen: View {
               if mapViewModel.displayLg {
                 PointAnnotationGroup(mapViewModel.largeAirports) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2DMake(airport.lat, airport.long), isDraggable: false)
-                    .image(PointAnnotation.Image(image: UIImage(named: "lg-airport-vfr") ?? UIImage(), name: "lg"))
+                    .image(named: "lg-airport-vfr")
                     .textField(airport.icao)
                     .textOffset([0.0, -1.8])
                     .textColor(StyleColor(.white))
@@ -117,9 +117,9 @@ struct MapScreen: View {
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
                     }
-                    .onLongPressGesture {
+                    .onLongPressGesture { context in
                       mapPopoverSelectedAirport = airport
-                      let point = $0.point
+                      let point = context.point
                       mapPopoverSelectedPoint = UnitPoint(x: (point.x / geometry.size.width), y: (point.y / geometry.size.height))
                       return true
                     }
@@ -131,7 +131,7 @@ struct MapScreen: View {
               if mapViewModel.displayMd {
                 PointAnnotationGroup(mapViewModel.mediumAirports, id: \.id) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
-                    .image(PointAnnotation.Image(image: UIImage(named: "md-airport-vfr") ?? UIImage(), name: "md"))
+                    .image(named: "md-airport-vfr")
                     .onTapGesture {
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
@@ -149,7 +149,7 @@ struct MapScreen: View {
               if mapViewModel.displaySm {
                 PointAnnotationGroup(mapViewModel.smallAirports) { airport in
                   PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
-                    .image(PointAnnotation.Image(image: UIImage(named: "sm-airport-vfr") ?? UIImage(), name: "sm"))
+                    .image(named: "sm-airport-vfr")
                     .onTapGesture {
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
@@ -160,18 +160,20 @@ struct MapScreen: View {
               
               
               // MARK: Ownship Annotation
-              if let ship = simConnect.ship {
-                PointAnnotation(coordinate: CLLocationCoordinate2DMake(ship.coordinate.latitude, ship.coordinate.longitude))
-                  .image(PointAnnotation.Image(image: UIImage(named: "ShipArrow") ?? UIImage(), name: "ownship"))
-                  .iconRotate(ship.heading)
-                  .textField(simbrief.ofp?.aircraft.reg ?? "ownship")
-                  .textOffset([0, 1.6])
-                  .textColor(StyleColor(.white))
-                  .textSize(12)
+              if simConnect.ownship.coordinate.latitude != .zero {
+                PointAnnotationGroup {
+                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude), isSelected: false, isDraggable: false)
+                    .image(named: "ShipArrow")
+                    .iconRotate(simConnect.ownship.heading)
+                    .textField(simbrief.ofp?.aircraft.reg ?? "ownship")
+                    .textOffset([0, 1.65])
+                    .textColor(StyleColor(.white))
+                    .textSize(12)
+                }
               }
               
               // MARK: Traffic Annotations
-              ForEvery(simConnect.simConnectTraffic, id: \.id) { traffic in
+              ForEvery(simConnect.traffic, id: \.id) { traffic in
                 MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: traffic.coordinate.latitude, longitude: traffic.coordinate.longitude)) {
                   VStack(spacing: 0) {
                     if displayTrafficAltitude {
