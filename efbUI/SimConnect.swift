@@ -11,8 +11,6 @@ import CoreLocation
 import Combine
 import Observation
 
-// XTRAFFICMSFS, fs2ff id?, lat, long, altitude, vertical speed, onGround 0 or 1, true heading, ground velocity, flight number or tail number
-
 struct SimConnectShip: Identifiable {
   let id = UUID()
   
@@ -27,192 +25,17 @@ struct SimConnectShip: Identifiable {
 
 @Observable
 class SimConnectShipObserver {
-  var ship: SimConnectShip? = nil
-  var simConnectTraffic: [SimConnectShip] = []
-}
-
-final class SimConnectConnection {
-  let simConnect: SimConnectShipObserver
+  var ownship: SimConnectShip
+  var traffic: [SimConnectShip]
   
-  init(nwConnection: NWConnection, simConnect: SimConnectShipObserver) {
-    self.nwConnection = nwConnection
-    self.id = SimConnectConnection.nextID
-    SimConnectConnection.nextID += 1
-    self.simConnect = simConnect
-  }
-  
-  private static var nextID: Int = 0
-  
-  let nwConnection: NWConnection
-  let id: Int
-  
-  var didStopCallback: ((Error?) -> Void)? = nil
-  
-  func start() {
-    print("connection \(self.id) will start")
-    self.nwConnection.stateUpdateHandler = self.stateDidChange(to:)
-    self.getData()
-    self.nwConnection.start(queue: .main)
-  }
-  
-  func send(data: Data) {
-    self.nwConnection.send(content: data, completion: .contentProcessed( { error in
-      if let error = error {
-        self.connectionDidFail(error: error)
-        return
-      }
-      print("connection \(self.id) did send, data: \(data as NSData)")
-    }))
-  }
-  
-  func stop() {
-    print("connection \(self.id) will stop")
-  }
-  
-  private func stateDidChange(to state: NWConnection.State) {
-    switch state {
-    case .setup:
-      break
-    case .waiting(let error):
-      self.connectionDidFail(error: error)
-    case .preparing:
-      break
-    case .ready:
-      print("connection \(self.id) ready")
-    case .failed(let error):
-      self.connectionDidFail(error: error)
-    case .cancelled:
-      break
-    default:
-      break
-    }
-  }
-  
-  private func connectionDidFail(error: Error) {
-    print("connection \(self.id) did fail, error: \(error)")
-    self.stop(error: error)
-  }
-  
-  private func connectionDidEnd() {
-    print("connection \(self.id) did end")
-    self.stop(error: nil)
-  }
-  
-  private func stop(error: Error?) {
-    self.nwConnection.stateUpdateHandler = nil
-    self.nwConnection.cancel()
-    if let didStopCallback = self.didStopCallback {
-      self.didStopCallback = nil
-      didStopCallback(error)
-    }
-  }
-  
-  // MARK: getData()
-  func getData() {
-    var buffer = Data()
-    
-    self.nwConnection.receive(minimumIncompleteLength: 1, maximumLength: 1000) { (data, _, isComplete, error) in
-      
-      DispatchQueue.main.async {
-        if let receivedData = data, !receivedData.isEmpty {
-          buffer.append(receivedData)  // Accumulate incoming data in the buffer
-        }
-        
-        // isComplete -> Process data
-        if isComplete {
-          
-//          guard let firstByte = buffer.first else { return }
-
-//          switch firstByte {
-//          case 0xA:
-//            print("received ownship report")
-//          case 0x14:
-//            print("received TRAFFIC report")
-//          default:
-//            print("")
-//          }
-          
-          if let stringData = String(data: buffer, encoding: .utf8) {
-            let components = stringData.components(separatedBy: ",")
-            
-            // XGPSMSFS, long, lat, alt, ground track, speed
-            // MARK: Ownship update
-            if components[0] == "XGPSMSFS" {
-              let lat = Double(components[2])
-              let long = Double(components[1])
-              let coordinate = CLLocationCoordinate2D(latitude: lat ?? .zero, longitude: long ?? .zero)
-              
-              let altitude = Double(components[3]) ?? .zero
-              let heading = Double(components[4]) ?? .zero
-              let speed = Double(components[5]) ?? .zero
-              
-              let ship: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed)
-              
-              self.simConnect.ship = ship
-//              self.simConnect.shipPublisher.send(ship)
-            }
-            
-            // XTRAFFICMSFS, fs2ff id, lat, long, altitude, vertical speed, onGround (0 or 1), true heading, ground velocity, flight number or tail number
-            if components[0] == "XTRAFFICMSFS" {
-              let lat = Double(components[2])
-              let long = Double(components[3])
-              let coordinate = CLLocationCoordinate2D(latitude: lat ?? .zero, longitude: long ?? .zero)
-              
-              let fs2ffID = Int(components[1]) ?? .zero
-              let altitude = Double(components[4]) ?? .zero
-              let heading = Double(components[7]) ?? .zero
-              let speed = Double(components[8]) ?? .zero
-              let callsign = String(components[9])
-              let onGround = components[6] == "1" ? true : false
-              
-              let plane: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: fs2ffID, onGround: onGround, registration: callsign)
-              
-              // if traffic is in array, replace, otherwise, add
-              // TODO: find better way of doing this?
-              // How to handle planes no longer here? If the leave the game, their annotation will persist
-              // Figure some kind of pruning function...
-              //  maybe keep track of the traffic message with a timer
-              //  if timer is x minutes after last message, remove plane
-              for ship in self.simConnect.simConnectTraffic {
-                if ship.fs2ffid == plane.fs2ffid {
-                  self.simConnect.simConnectTraffic.removeAll(where: { $0.fs2ffid == plane.fs2ffid })
-                }
-              }
-              self.simConnect.simConnectTraffic.append(plane)
-//              self.simConnect.publisher.send(true)
-            }
-          }
-          
-          buffer.removeAll()  // Clear the buffer
-          self.connectionDidEnd()
-        } else if let error = error {
-          self.connectionDidFail(error: error)
-        } else {
-          self.getData()  // Continue receiving more data
-        }
-      }
-    }
-
+  init(ownship: SimConnectShip = SimConnectShip(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero), traffic: [SimConnectShip]) {
+    self.ownship = ownship
+    self.traffic = traffic
   }
 }
 
-struct GDL90Header: Decodable {
-  var messageID: UInt8
-}
-
-struct GDL90MsgA: Decodable {
-  var timestamp: UInt32
-  var lat: Double
-  var long: Double
-}
-
-struct GDL90MsgB: Decodable {
-  var alt: UInt16
-  var hdg: UInt16
-}
-
-@Observable
-class ServerListener {
+class ServerStatus {
+  static let shared = ServerStatus()
   var status: Status = .stopped
   
   enum Status {
@@ -220,97 +43,175 @@ class ServerListener {
   }
 }
 
-final class SimConnectServer {
-  var simConnect: SimConnectShipObserver
-  var isRunning: Bool = false
-  var serverListener: ServerListener
+// MARK: NWListener
+final class ServerListener {
+  var ship: SimConnectShipObserver
+  private let port: NWEndpoint.Port = 49002
+  private var listener: NWListener?
+  private var connection: NWConnection?
+  private let timer: DispatchSourceTimer
+  private var listening: Bool = true
   
-  init(simConnect: SimConnectShipObserver, serverListener: ServerListener) {
-    self.simConnect = simConnect
-    self.serverListener = serverListener
-    self.listener = try! NWListener(using: .udp, on: 49002)
+  init(ship: SimConnectShipObserver) {
+    self.ship = ship
+    self.listener = try? NWListener(using: .udp, on: port)
     self.timer = DispatchSource.makeTimerSource(queue: .main)
   }
   
-  let listener: NWListener
-  let timer: DispatchSourceTimer
-  
-  func start() throws {
-    print("Server will start")
-    self.listener.stateUpdateHandler = self.stateDidChange(to:)
-    self.listener.newConnectionHandler = self.didAccept(nwConnection:)
-    self.listener.start(queue: .main)
+  func start() {
+    self.listener?.stateUpdateHandler = { state in
+      switch state {
+      case .ready:
+        print("Listener is ready")
+        break
+      case .failed, .cancelled:
+        self.listening = false
+        print("Listener did fail")
+        self.stopListener()
+      default:
+        print("default triggered in listener state update")
+        self.listening = true
+        break
+      }
+    }
     
+    self.listener?.newConnectionHandler = { connection in
+      self.createConnection(connection: connection)
+    }
+    
+    self.listener?.start(queue: DispatchQueue.global(qos: .userInitiated))
+    
+    // TODO: Find reliable way for code to figure out if packets have stopped incoming
+    // IF packets have stopped, start heartbeat
+    // if heartbeat is active and packets begin, stop heartbeat
     self.timer.setEventHandler(handler: self.heartbeat)
     self.timer.schedule(deadline: .now() + 5.0, repeating: 5.0)
     self.timer.activate()
-    
-    serverListener.status = .heartbeat
-    isRunning = true
   }
   
-  func stateDidChange(to newState: NWListener.State) {
-    switch newState {
-    case .setup:
-      break
-    case .waiting:
-      break
-    case .ready:
-      break
-    case .failed(let error):
-      print("server did fail, error: \(error)")
-      self.stop()
-    case .cancelled:
-      break
-    default:
-      break
+  private func createConnection(connection: NWConnection) {
+    self.connection = connection
+    
+    self.connection?.stateUpdateHandler = { state in
+      switch state {
+      case .ready:
+        ServerStatus.shared.status = .running
+        print("Connection ready to receive message")
+        self.consumeData()
+      case .cancelled, .failed:
+        ServerStatus.shared.status = .stopped
+        self.listening = false
+        print("Connection stopped")
+        self.listener?.cancel()
+      default:
+        print("default triggered in connection createConnection")
+        print("Connection waiting to receive message")
+      }
+    }
+    
+    self.connection?.start(queue: .global())
+  }
+  
+  private func consumeData() {
+    self.connection?.receive(minimumIncompleteLength: 1, maximumLength: 64000) { (data, _, isComplete, error) in
+      if let error = error {
+        print("NWError received in \(#function): \(error)")
+      }
+      guard let receivedData = data, !receivedData.isEmpty, isComplete else { return }
+      
+      if let stringData = String(data: receivedData, encoding: .utf8) {
+        let components = stringData.components(separatedBy: ",")
+        
+        // MARK: Ownship update
+        if components[0] == "XGPSMSFS" {
+          self.updateOwnship(components)
+        }
+        if components[0] == "XTRAFFICMSFS" {
+          self.updateTraffic(components)
+        }
+      }
+      
+      self.consumeData()
     }
   }
   
-  private var connectionsByID: [Int: SimConnectConnection] = [:]
-  
-  private func didAccept(nwConnection: NWConnection) {
-    let connection = SimConnectConnection(nwConnection: nwConnection, simConnect: simConnect)
-    self.connectionsByID[connection.id] = connection
+  private func updateOwnship(_ components: [String]) {
+    /// XGPSMSFS, long, lat, alt, ground track, speed
+    let lat = Double(components[2])
+    let long = Double(components[1])
+    let coordinate = CLLocationCoordinate2D(latitude: lat ?? .zero, longitude: long ?? .zero)
+    let altitude = Double(components[3]) ?? .zero
+    let heading = Double(components[4]) ?? .zero
+    let speed = Double(components[5]) ?? .zero
     
-    connection.didStopCallback = { _ in
-      self.connectionDidStop(connection)
-    }
-    connection.start()
-    
-    serverListener.status = .running
-    print("Server opened connection \(connection.id)")
+//    self.simConnect.ownship = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed)
+    self.ship.ownship.coordinate = coordinate
+    self.ship.ownship.altitude = altitude
+    self.ship.ownship.heading = heading
+    self.ship.ownship.speed = speed
   }
   
-  private func connectionDidStop(_ connection: SimConnectConnection) {
-    self.connectionsByID.removeValue(forKey: connection.id)
-    print("Server closed connection \(connection.id)")
+  private func updateTraffic(_ components: [String]) {
+    /// XTRAFFICMSFS, fs2ff id, lat, long, altitude, vertical speed, onGround (0 or 1), true heading, ground velocity, flight number or tail number
+    let lat = Double(components[2])
+    let long = Double(components[3])
+    let coordinate = CLLocationCoordinate2D(latitude: lat ?? .zero, longitude: long ?? .zero)
+    
+    let fs2ffID = Int(components[1]) ?? .zero
+    let altitude = Double(components[4]) ?? .zero
+    let heading = Double(components[7]) ?? .zero
+    let speed = Double(components[8]) ?? .zero
+    let callsign = String(components[9])
+    let onGround = components[6] == "1" ? true : false
+    
+    let plane: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: fs2ffID, onGround: onGround, registration: callsign)
+    
+    // if traffic is in array, replace, otherwise, add
+    // TODO: find better way of doing this?
+    // How to handle planes no longer here? If the leave the game, their annotation will persist
+    // Figure some kind of pruning function...
+    //  maybe keep track of the traffic message with a timer
+    //  if timer is x minutes after last message, remove plane
+    for ship in self.ship.traffic {
+      if ship.fs2ffid == plane.fs2ffid {
+        self.ship.traffic.removeAll(where: { $0.fs2ffid == plane.fs2ffid })
+      }
+    }
+    self.ship.traffic.append(plane)
+  }
+  
+  private func stopListener() {
+    print("Server will stop")
+//    self.listener?.stateUpdateHandler = nil
+//    self.listener?.newConnectionHandler = nil
+    self.listener?.cancel()
+    self.timer.cancel()
+  }
+  
+  private func stopConnection() {
+    self.connection?.cancel()
+//    self.connection?.stateUpdateHandler = nil
   }
   
   func stop() {
-    print("Server will stop")
-    self.listener.stateUpdateHandler = nil
-    self.listener.newConnectionHandler = nil
-    self.listener.cancel()
-    for connection in self.connectionsByID.values {
-      connection.didStopCallback = nil
-      connection.stop()
-    }
-    self.connectionsByID.removeAll()
-    self.timer.cancel()
-    
-    serverListener.status = .stopped
-    isRunning = false
+    stopListener()
+    stopConnection()
   }
+
   
   private func heartbeat() {
     let timestamp = Date()
-    print("server heartbeat, timestamp: \(timestamp)")
+    print("Heartbeat, timestamp: \(timestamp)")
+    let data = "heartbeat timestamp \(timestamp)\r\n"
     
-    for connection in self.connectionsByID.values {
-      let data = "heartbeat, connection: \(connection.id), timestamp: \(timestamp)\r\n"
-      connection.send(data: Data(data.utf8))
-    }
+    let endpoint = NWEndpoint.hostPort(host: .ipv4(IPv4Address.broadcast), port: 63093)
+    let udpConnection = NWConnection(to: endpoint, using: .udp)
+    
+    udpConnection.send(content: data.data(using: .utf8), completion: .contentProcessed { error in
+      if let error = error {
+        print("Error sending heartbeat: \(error)")
+      }
+    })
   }
   
 }
