@@ -62,11 +62,8 @@ struct TabBar: View {
         .tag(5)
     }
     .onReceive(timer) { _ in
-      
-      guard let ship = ship.ship else { return }
-      
       if let ofp = simbrief.ofp {
-        let shipLocation = CLLocation(latitude: ship.coordinate.latitude, longitude: ship.coordinate.longitude)
+        let shipLocation = CLLocation(latitude: ship.ownship.coordinate.latitude, longitude: ship.ownship.coordinate.longitude)
         let originCoord = CLLocation(latitude: Double(ofp.origin.posLat) ?? .zero, longitude: Double(ofp.origin.posLong) ?? .zero)
         let destCoord = CLLocation(latitude: Double(ofp.destination.posLat) ?? .zero, longitude: Double(ofp.destination.posLong) ?? .zero)
         
