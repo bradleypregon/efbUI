@@ -54,6 +54,7 @@ class AirportDetailViewModel {
   var selectedInfoTab: AirportsScreenInfoTabs = .freq
   var selectedAirportCharts: DecodedArray<AirportChartAPISchema>?
   var wxCategory: WxCategory = .VFR
+  var atis: AtisAPISchema? = nil
   
   private func queryAirportData(airport: AirportTable) {
     /**
@@ -175,6 +176,13 @@ class AirportDetailViewModel {
     let airportCharts = FetchAirportCharts()
     airportCharts.fetchCharts(icao: icao) { charts in
       self.selectedAirportCharts = charts
+    }
+  }
+  
+  func fetchATIS(icao: String) throws {
+    let atisAPI = AtisAPI()
+    atisAPI.fetchATIS(icao: icao) { schema in
+      self.atis = schema
     }
   }
   

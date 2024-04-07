@@ -243,26 +243,45 @@ struct AirportScreenWxTab: View {
   
   var body: some View {
     ScrollView {
+      Text("METAR")
+        .font(.title)
       if let metar = metar?.first, let ob = metar.rawOb {
-        VStack {
-          Text("METAR")
-            .font(.largeTitle)
-          Text(ob)
-        }
+        Text(ob)
       } else {
         ContentUnavailableView("METAR INOP", systemImage: "", description: Text("METAR may be unavailable or an internal fault happened."))
       }
+      
+      Text("TAF")
+        .font(.title2)
       if let taf = taf {
-        VStack {
-          Text("TAF")
-            .font(.largeTitle)
-          ForEach(taf, id: \.self) { taf in
-            Text(taf)
-          }
-          .frame(alignment: .leading)
+        ForEach(taf, id: \.self) { taf in
+          Text(taf)
         }
+        .frame(alignment: .leading)
       } else {
         ContentUnavailableView("TAF INOP", systemImage: "", description: Text("TAF may be unavailable or an internal fault happened."))
+      }
+      
+      HStack {
+        Text("ATIS")
+          .font(.title2)
+        Button {
+          do {
+            try airportVM.fetchATIS(icao: airportVM.selectedAirportICAO)
+          } catch {
+            print("atis failed for: \(airportVM.selectedAirportICAO)")
+          }
+          
+        } label: {
+          Text("Refresh")
+        }
+      }
+      if let atis = airportVM.atis {
+        ForEach(atis, id:\.self) { atis in
+          Text(atis.datis)
+        }
+      } else {
+        ContentUnavailableView("ATIS INOP", systemImage: "", description: Text("ATIS unavailable"))
       }
     }
     .refreshable {
