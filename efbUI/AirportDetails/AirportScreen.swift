@@ -187,7 +187,7 @@ struct AirportScreenInfoTabBuilder: View {
         ContentUnavailableView("Frequencies INOP", systemImage: "", description: Text("Select an airport to view frequencies."))
       }
     case .wx:
-      AirportScreenWxTab(metar: airportVM.airportWxMetar, taf: airportVM.airportWxTAF)
+      AirportScreenWxTab(metar: airportVM.airportWxMetar, taf: airportVM.airportWxTAF, airportVM: airportVM)
     case .rwy:
       if airportVM.selectedAirportRunways != nil {
         AirportScreenRwyTab(runways: airportVM.selectedAirportRunways, wx: airportVM.airportWxMetar)
@@ -238,7 +238,8 @@ struct AirportScreenFreqTab: View {
 
 struct AirportScreenWxTab: View {
   let metar: AirportMETARSchema?
-  let taf: AirportTAFSchema?
+  let taf: [String]?
+  let airportVM: AirportDetailViewModel
   
   var body: some View {
     ScrollView {
@@ -251,45 +252,24 @@ struct AirportScreenWxTab: View {
       } else {
         ContentUnavailableView("METAR INOP", systemImage: "", description: Text("METAR may be unavailable or an internal fault happened."))
       }
-      if let taf = taf?.first {
+      if let taf = taf {
         VStack {
           Text("TAF")
             .font(.largeTitle)
-          Text(taf.rawTAF ?? "")
-//          ForEach(splitTAF(taf.rawTAF ?? ""), id:\.self) { taf in
-//            Text(taf)
-//          }
+          ForEach(taf, id: \.self) { taf in
+            Text(taf)
+          }
+          .frame(alignment: .leading)
         }
       } else {
         ContentUnavailableView("TAF INOP", systemImage: "", description: Text("TAF may be unavailable or an internal fault happened."))
       }
     }
+    .refreshable {
+      guard airportVM.selectedAirportICAO != "" else { return }
+      airportVM.fetchAirportWx(icao: airportVM.selectedAirportICAO)
+    }
   }
-  
-//  func splitTAF(_ taf: String) -> [String] {
-//    if taf == "" { return [""] }
-//    var substrings: [String] = []
-//    
-//    do {
-//      let pattern = #"(\bTEMPO\b|\bBECMG\b|\bFM\d{6}\b)"#
-//      let regex = try NSRegularExpression(pattern: pattern, options: [])
-//      let matches = regex.matches(in: taf, options: [], range: NSRange(location: 0, length: taf.utf16.count))
-//      
-//      var start = taf.startIndex
-//      for match in matches {
-//        let range = Range(match.range, in: taf)!
-//        let substring = String(taf[start..<range.lowerBound])
-//        let string = "\(substring) \(String(taf[range]))"
-//        substrings.append(string)
-//        start = range.upperBound
-//      }
-//      substrings.append(String(taf[start...]))
-//      return substrings
-//    } catch {
-//      print("Error using RegEx on TAF: \(error)")
-//      return [""]
-//    }
-//  }
 }
 
 // TODO: Organize Runways, build runway model things?

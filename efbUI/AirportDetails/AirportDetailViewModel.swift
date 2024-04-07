@@ -21,24 +21,24 @@ enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
 // TODO: Dont fetch metar until told to (button, pull to refresh, etc). Save APIs from too many calls?
 @Observable
 class AirportDetailViewModel {
-//  static let shared = AirportDetailViewModel()
   var selectedAirportElement: AirportSchema?
   var airportWxMetar: AirportMETARSchema? = nil
-  var airportWxTAF: AirportTAFSchema? = nil
+  var airportWxTAF: [String]? = nil
   var loadingAirportWx: Bool = false
   
   var selectedAirportICAO: String = "" {
     didSet {
-      // get selected airport
+      // Get selected airport
       selectedAirport = SQLiteManager.shared.selectAirport(selectedAirportICAO)
       if let selectedAirport {
-        DispatchQueue.main.async {
+        Task.detached {
           self.queryAirportData(airport: selectedAirport)
         }
       }
     }
   }
   
+  // MARK: AirportScreen search bar
   var airportSearchResults = [QueryAirportTextResult]()
   var searchText: String = "" {
     didSet {

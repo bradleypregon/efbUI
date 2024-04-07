@@ -5,6 +5,7 @@
 //  Created by Bradley Pregon on 1/16/24.
 //
 
+/*
 import Foundation
 
 struct AirportTAFAPISchemaElement: Decodable {
@@ -88,3 +89,4 @@ struct AirportTAFTemp: Decodable {
 }
 
 typealias AirportTAFSchema = [AirportTAFAPISchemaElement]
+*/

@@ -28,21 +28,18 @@ class FetchAirportWx {
     }.resume()
   }
   
-  func fetchTAF(icao: String, completion: @escaping (AirportTAFSchema) -> ()) {
-    let url = "https://aviationweather.gov/cgi-bin/data/taf.php?ids=\(icao)&format=json"
+  func fetchTAF(icao: String, completion: @escaping ([String]) -> ()) {
+    let url = "https://aviationweather.gov/cgi-bin/data/taf.php?ids=\(icao)"
     guard let url = URL(string: url) else { return }
     
     URLSession.shared.dataTask(with: url) { (data, response, error) in
       guard error == nil else { return }
       guard let data = data else { return }
       
-      do {
-        let result = try JSONDecoder().decode(AirportTAFSchema.self, from: data)
+      if let result = String(data: data, encoding: .utf8)?.components(separatedBy: .newlines) {
         DispatchQueue.main.async {
           completion(result)
         }
-      } catch {
-        print("Error fetching \(icao) TAF: \(error)")
       }
     }.resume()
   }

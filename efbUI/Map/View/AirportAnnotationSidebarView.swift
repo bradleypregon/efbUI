@@ -9,13 +9,15 @@ import SwiftUI
 import CoreLocation
 import Neumorphic
 
-// general info: atis freq, shorthand runways, city served
+// TODO: Separate this from AirportDetailViewModel
+//  Reason: Will allow user to select multiple airports on map without affecting selected airport in AirportScreen
+//  When user taps button in SidebarView to navigate to Airport Screen, change AirportDetailViewModel to selected airport (selectedAirportICAO property)
+//  At same time, when AirportDetailViewModel.selectedAirportICAO is changed, it will not be necessary to call all fetch() functions
+//    - Simply just update properties from SidebarView
 
 struct AirportAnnotationSidebarView: View {
   @Binding var selectedTab: Int
   @Binding var selectedAirport: AirportTable?
-  
-//  @State private var airportVM = AirportDetailViewModel.shared
   @Environment(AirportDetailViewModel.self) private var airportVM
   
   var body: some View {
@@ -82,10 +84,15 @@ struct AirportAnnotationSidebarView: View {
                   }
                   
                   Text("METAR")
-                  Text(airportVM.airportWxMetar?.first?.rawOb ?? "METAR Unavailable")
+                  Text(airportVM.airportWxMetar?.first?.rawOb ?? "METAR INOP")
                   DisclosureGroup("TAF") {
-//                    Text(airportVM.airportWx?.first?.rawTaf ?? "TAF Unavailable")
-                    Text("TAF Here")
+                    if let tafs = airportVM.airportWxTAF {
+                      ForEach(tafs, id: \.self) { taf in
+                        Text(taf)
+                      }
+                    } else {
+                      Text("TAF INOP")
+                    }
                   }
                   
                 }
