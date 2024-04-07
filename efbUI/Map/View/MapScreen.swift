@@ -161,15 +161,13 @@ struct MapScreen: View {
               
               // MARK: Ownship Annotation
               if simConnect.ownship.coordinate.latitude != .zero {
-                PointAnnotationGroup {
-                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude), isSelected: false, isDraggable: false)
-                    .image(named: "ShipArrow")
-                    .iconRotate(simConnect.ownship.heading)
-                    .textField(simbrief.ofp?.aircraft.reg ?? "ownship")
-                    .textOffset([0, 1.65])
-                    .textColor(StyleColor(.white))
-                    .textSize(12)
-                }
+                PointAnnotation(coordinate: CLLocationCoordinate2DMake(simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude), isSelected: false, isDraggable: false)
+                  .image(named: "ShipArrow")
+                  .iconRotate(simConnect.ownship.heading)
+                  .textField(simbrief.ofp?.aircraft.reg ?? "ownship")
+                  .textOffset([0, 1.7])
+                  .textColor(StyleColor(.white))
+                  .textSize(12)
               }
               
               // MARK: Traffic Annotations
