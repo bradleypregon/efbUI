@@ -236,6 +236,7 @@ struct AirportScreenFreqTab: View {
   }
 }
 
+// TODO: fix this ugly screen
 struct AirportScreenWxTab: View {
   let metar: AirportMETARSchema?
   let taf: [String]?
