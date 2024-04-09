@@ -139,6 +139,7 @@ class SQLiteManager {
     }
   }
   
+  // TODO: Deprecate
   func getAirportsInMapRect(minLat: Double, maxLat: Double, minLong: Double, maxLong: Double, ifr: Bool) -> [AirportTable] {
     guard let database = db else { return [] }
     var airports: [AirportTable] = []
