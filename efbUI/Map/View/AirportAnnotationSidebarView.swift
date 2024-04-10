@@ -23,13 +23,15 @@ struct AirportAnnotationSidebarView: View {
   var body: some View {
     if let selectedAirport {
       VStack(spacing: 20) {
-        // Header
+        /// Header
         HStack {
           Spacer()
             .frame(maxWidth: .infinity, alignment: .leading)
           Text(!selectedAirport.airportIdentifier.isEmpty ? selectedAirport.airportIdentifier : selectedAirport.id)
             .fontWeight(.semibold)
             .frame(maxWidth: .infinity, alignment: .center)
+          
+          // TODO: Functions to refresh METAR, TAF, ATIS
           Button {
             print("refresh")
           } label: {
@@ -40,10 +42,81 @@ struct AirportAnnotationSidebarView: View {
           .frame(maxWidth: .infinity, alignment: .trailing)
           .padding(.trailing, 10)
         }
-        Divider()
         
-          List {
-            Section {
+        Divider()
+        List {
+          // TODO: Add CTAF/UNI com frequency, drop other frequencies
+          // add Elevation
+          Section {
+            Grid(alignment: .leading) {
+              GridRow {
+                Text("ATIS")
+                  .font(.subheadline)
+                Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "ATI"))
+                  .fontWeight(.semibold)
+              }
+              GridRow {
+                Text("Clearance")
+                  .font(.subheadline)
+                Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "CLD"))
+                  .fontWeight(.semibold)
+              }
+              GridRow {
+                Text("Ground")
+                  .font(.subheadline)
+                Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "GND"))
+                  .fontWeight(.semibold)
+              }
+              GridRow {
+                Text("Tower")
+                  .font(.subheadline)
+                Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "TWR"))
+                  .fontWeight(.semibold)
+              }
+            }
+          } header: {
+            Text("Info")
+          }
+          
+          Section {
+            if airportVM.loadingAirportWx {
+              ProgressView()
+            } else {
+              VStack {
+                if let wx = airportVM.airportWxMetar {
+                  Text(airportVM.calculateWxCategory(wx: wx).rawValue)
+                }
+                
+                Text("METAR")
+                Text(airportVM.airportWxMetar?.first?.rawOb ?? "METAR INOP")
+                DisclosureGroup("TAF") {
+                  if let tafs = airportVM.airportWxTAF {
+                    ForEach(tafs, id: \.self) { taf in
+                      Text(taf)
+                    }
+                  } else {
+                    Text("TAF INOP")
+                  }
+                }
+                
+              }
+            }
+          } header: {
+            Text("Wx")
+          }
+          
+          Section {
+            VStack {
+              ForEach(airportVM.selectedAirportRunways ?? [], id: \.self) { runway in
+                Text(runway.runwayIdentifier)
+              }
+            }
+          } header: {
+            Text("Rwy")
+          }
+          
+          Section {
+            VStack {
               Grid(alignment: .leading) {
                 GridRow {
                   Text("ATIS")
@@ -70,81 +143,12 @@ struct AirportAnnotationSidebarView: View {
                     .fontWeight(.semibold)
                 }
               }
-            } header: {
-              Text("Info")
             }
-            
-            Section {
-              if airportVM.loadingAirportWx {
-                ProgressView()
-              } else {
-                VStack {
-                  if let wx = airportVM.airportWxMetar {
-                    Text(airportVM.calculateWxCategory(wx: wx).rawValue)
-                  }
-                  
-                  Text("METAR")
-                  Text(airportVM.airportWxMetar?.first?.rawOb ?? "METAR INOP")
-                  DisclosureGroup("TAF") {
-                    if let tafs = airportVM.airportWxTAF {
-                      ForEach(tafs, id: \.self) { taf in
-                        Text(taf)
-                      }
-                    } else {
-                      Text("TAF INOP")
-                    }
-                  }
-                  
-                }
-              }
-            } header: {
-              Text("Wx")
-            }
-            
-            Section {
-              VStack {
-                ForEach(airportVM.selectedAirportRunways ?? [], id: \.self) { runway in
-                  Text(runway.runwayIdentifier)
-                }
-              }
-            } header: {
-              Text("Rwy")
-            }
-            
-            Section {
-              VStack {
-                Grid(alignment: .leading) {
-                  GridRow {
-                    Text("ATIS")
-                      .font(.subheadline)
-                    Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "ATI"))
-                      .fontWeight(.semibold)
-                  }
-                  GridRow {
-                    Text("Clearance")
-                      .font(.subheadline)
-                    Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "CLD"))
-                      .fontWeight(.semibold)
-                  }
-                  GridRow {
-                    Text("Ground")
-                      .font(.subheadline)
-                    Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "GND"))
-                      .fontWeight(.semibold)
-                  }
-                  GridRow {
-                    Text("Tower")
-                      .font(.subheadline)
-                    Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "TWR"))
-                      .fontWeight(.semibold)
-                  }
-                }
-              }
-            } header: {
-              Text("Freqs")
-            }
+          } header: {
+            Text("Freqs")
           }
-          .listStyle(.plain)
+        }
+        .listStyle(.plain)
         
         Spacer()
         HStack {
@@ -157,7 +161,7 @@ struct AirportAnnotationSidebarView: View {
           .foregroundStyle(.gray)
           
           Button {
-//            AirportDetailViewModel.shared.selectedAirportICAO = selectedAirport.airportIdentifier
+            //            AirportDetailViewModel.shared.selectedAirportICAO = selectedAirport.airportIdentifier
             airportVM.selectedAirportICAO = selectedAirport.airportIdentifier
             selectedTab = 0
           } label: {
