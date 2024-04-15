@@ -10,7 +10,7 @@ import PencilKit
 
 struct ChartsView: View {
   @Binding var selectedTab: Int
-  @Environment(AirportDetailViewModel.self) private var airportDetailViewModel
+  @Environment(AirportScreenViewModel.self) private var airportDetailViewModel
   @Environment(SimBriefViewModel.self) private var sbViewModel
   
   @State private var columnVisibility: NavigationSplitViewVisibility = .all

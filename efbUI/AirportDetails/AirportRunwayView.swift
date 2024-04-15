@@ -52,7 +52,7 @@ struct AirportRunwayView: View {
             }
             .rotationEffect(.degrees(runway.runwayMagneticBearing))
             
-            if let windDir = weather?.first?.wdir {
+            if let windDir = weather?.wdir {
               Image(systemName: "arrow.up")
                 .foregroundStyle(.blue)
                 .rotationEffect(.degrees(Double(invertDegree(for: windDir))))

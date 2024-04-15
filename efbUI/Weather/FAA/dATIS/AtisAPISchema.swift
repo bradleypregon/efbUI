@@ -7,8 +7,6 @@
 
 import Foundation
 
-struct AtisAPISchemaElement: Decodable, Hashable {
+struct AtisAPISchema: Decodable, Hashable {
   let airport, type, code, datis: String
 }
-
-typealias AtisAPISchema = [AtisAPISchemaElement]

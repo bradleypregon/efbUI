@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AirportMetarInfoElement: Decodable {
+struct AirportMETARSchema: Decodable {
   let metarID: Int?
   let icaoID: String?
   let receiptTime: String?
@@ -70,5 +70,3 @@ struct AirportMetarInfoClouds: Decodable {
   let cover: String?
   let base: Int?
 }
-
-typealias AirportMETARSchema = [AirportMetarInfoElement]

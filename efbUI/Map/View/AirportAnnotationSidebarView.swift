@@ -18,7 +18,9 @@ import Neumorphic
 struct AirportAnnotationSidebarView: View {
   @Binding var selectedTab: Int
   @Binding var selectedAirport: AirportTable?
-  @Environment(AirportDetailViewModel.self) private var airportVM
+  
+  @Environment(AirportScreenViewModel.self) private var airportVM
+  @State private var vm = AirportDetails()
   
   var body: some View {
     if let selectedAirport {
@@ -43,76 +45,95 @@ struct AirportAnnotationSidebarView: View {
           .padding(.trailing, 10)
         }
         
-        Divider()
         List {
-          // TODO: Add CTAF/UNI com frequency, drop other frequencies
-          // add Elevation
           Section {
             Grid(alignment: .leading) {
               GridRow {
+                Text("CTAF")
+                  .font(.subheadline)
+                Text(vm.getCommunicationType(comms: vm.comms, type: "UNI"))
+                  .fontWeight(.semibold)
+              }
+              GridRow {
                 Text("ATIS")
                   .font(.subheadline)
-                Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "ATI"))
+                Text(vm.getCommunicationType(comms: vm.comms, type: "ATI"))
                   .fontWeight(.semibold)
               }
               GridRow {
-                Text("Clearance")
+                Text("Elev")
                   .font(.subheadline)
-                Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "CLD"))
-                  .fontWeight(.semibold)
-              }
-              GridRow {
-                Text("Ground")
-                  .font(.subheadline)
-                Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "GND"))
-                  .fontWeight(.semibold)
-              }
-              GridRow {
-                Text("Tower")
-                  .font(.subheadline)
-                Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "TWR"))
+                Text("\(selectedAirport.elevation)'")
                   .fontWeight(.semibold)
               }
             }
           } header: {
             Text("Info")
+              .fontWeight(.semibold)
+              .font(.title3)
           }
           
+          // TODO: Button to refresh Wx
+          // Label to show how old weather is?
           Section {
-            if airportVM.loadingAirportWx {
-              ProgressView()
-            } else {
-              VStack {
-                if let wx = airportVM.airportWxMetar {
-                  Text(airportVM.calculateWxCategory(wx: wx).rawValue)
+            VStack {
+              HStack {
+                Text(vm.wxCategory.rawValue)
+                  .fontWeight(.semibold)
+                  .foregroundStyle(vm.wxCategoryColor(for: vm.wxCategory))
+                Button {
+                  vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: true)
+                } label: {
+                  Text("Refresh")
                 }
-                
-                Text("METAR")
-                Text(airportVM.airportWxMetar?.first?.rawOb ?? "METAR INOP")
-                DisclosureGroup("TAF") {
-                  if let tafs = airportVM.airportWxTAF {
-                    ForEach(tafs, id: \.self) { taf in
-                      Text(taf)
-                    }
-                  } else {
-                    Text("TAF INOP")
-                  }
-                }
-                
+                .clipShape(Capsule())
               }
+              
+              Divider()
+              
+              Picker("Weather Source", selection: $vm.wxSource) {
+                ForEach(WxSources.allCases) { source in
+                  Text(source.rawValue.uppercased())
+                }
+              }
+              .pickerStyle(.segmented)
+
+              Picker("Weather Type", selection: $vm.wxType) {
+                ForEach(WxTabs.allCases) { tab in
+                  Text(tab.rawValue)
+                }
+              }
+              .pickerStyle(.segmented)
+              
+              Text(vm.currentWxString)
+                .font(.system(size: 14))
+            }
+            .onAppear {
+              vm.fetchFaaMetar(icao: selectedAirport.airportIdentifier)
+            }
+            .onChange(of: vm.wxSource.rawValue) {
+              vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: false)
+            }
+            .onChange(of: vm.wxType.rawValue) {
+              vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: false)
             }
           } header: {
             Text("Wx")
+              .fontWeight(.semibold)
+              .font(.title3)
           }
           
+          // TODO: Runway view like Airport Screen, but small?
           Section {
             VStack {
-              ForEach(airportVM.selectedAirportRunways ?? [], id: \.self) { runway in
+              ForEach(vm.runways, id: \.self) { runway in
                 Text(runway.runwayIdentifier)
               }
             }
           } header: {
             Text("Rwy")
+              .fontWeight(.semibold)
+              .font(.title3)
           }
           
           Section {
@@ -121,34 +142,42 @@ struct AirportAnnotationSidebarView: View {
                 GridRow {
                   Text("ATIS")
                     .font(.subheadline)
-                  Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "ATI"))
+                  Text(vm.getCommunicationType(comms: vm.comms, type: "ATI"))
                     .fontWeight(.semibold)
                 }
                 GridRow {
                   Text("Clearance")
                     .font(.subheadline)
-                  Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "CLD"))
+                  Text(vm.getCommunicationType(comms: vm.comms, type: "CLD"))
                     .fontWeight(.semibold)
                 }
                 GridRow {
                   Text("Ground")
                     .font(.subheadline)
-                  Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "GND"))
+                  Text(vm.getCommunicationType(comms: vm.comms, type: "GND"))
                     .fontWeight(.semibold)
                 }
                 GridRow {
                   Text("Tower")
                     .font(.subheadline)
-                  Text(airportVM.getCommunicationType(comms: airportVM.selectedAirportComms, type: "TWR"))
+                  Text(vm.getCommunicationType(comms: vm.comms, type: "TWR"))
+                    .fontWeight(.semibold)
+                }
+                GridRow {
+                  Text("CTAF")
+                    .font(.subheadline)
+                  Text(vm.getCommunicationType(comms: vm.comms, type: "UNI"))
                     .fontWeight(.semibold)
                 }
               }
             }
           } header: {
             Text("Freqs")
+              .fontWeight(.semibold)
+              .font(.title3)
           }
         }
-        .listStyle(.plain)
+        .listStyle(.insetGrouped)
         
         Spacer()
         HStack {
@@ -160,8 +189,8 @@ struct AirportAnnotationSidebarView: View {
           .frame(maxWidth: .infinity, alignment: .leading)
           .foregroundStyle(.gray)
           
+          // TODO: Make button bigger
           Button {
-            //            AirportDetailViewModel.shared.selectedAirportICAO = selectedAirport.airportIdentifier
             airportVM.selectedAirportICAO = selectedAirport.airportIdentifier
             selectedTab = 0
           } label: {
@@ -176,15 +205,16 @@ struct AirportAnnotationSidebarView: View {
         }
         
       }
-      .padding(1)
       .onAppear {
-        // TODO: Get data if airport is major, otherwise, click button to get data
-        // query?
-        airportVM.selectedAirportICAO = selectedAirport.airportIdentifier
+        vm.fetchAirportDetails(icao: selectedAirport.airportIdentifier)
       }
     } else {
       ContentUnavailableView("Airport Details Unavailable", systemImage: "airplane.circle", description: Text("Select an airport on the map to view details."))
     }
+  }
+  
+  func getWeather(_ source: WxSources, _ type: WxTabs) -> String {
+    return "hello"
   }
 }
 

@@ -12,7 +12,8 @@ import SwiftData
 struct efbUIApp: App {
   @State private var simConnect: SimConnectShipObserver = SimConnectShipObserver(traffic: [])
   @State private var settings: Settings = Settings()
-  @State private var airportDetailViewModel: AirportDetailViewModel = AirportDetailViewModel()
+  // TODO: This no longer needs to be Environment
+  @State private var airportDetailViewModel: AirportScreenViewModel = AirportScreenViewModel()
   @State private var simbrief: SimBriefViewModel = SimBriefViewModel()
   @State private var waypointStore: WaypointStore = WaypointStore()
   

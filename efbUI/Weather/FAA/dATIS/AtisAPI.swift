@@ -8,7 +8,7 @@
 import Foundation
 
 class AtisAPI {
-  func fetchATIS(icao: String, completion: @escaping (AtisAPISchema) -> ()) {
+  func fetchATIS(icao: String, completion: @escaping ([AtisAPISchema]) -> ()) {
     // https://datis.clowd.io/api/kden
     let url = "https://datis.clowd.io/api/\(icao)"
     guard let url = URL(string: url) else { return }
@@ -18,7 +18,7 @@ class AtisAPI {
       guard let data = data else { return }
       
       do {
-        let result = try JSONDecoder().decode(AtisAPISchema.self, from: data)
+        let result = try JSONDecoder().decode([AtisAPISchema].self, from: data)
         DispatchQueue.main.async {
           completion(result)
         }

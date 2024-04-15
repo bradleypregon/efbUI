@@ -38,7 +38,7 @@ struct MapScreen: View {
   @Environment(SimConnectShipObserver.self) private var simConnect
   @Environment(Settings.self) private var settings
   @Environment(SimBriefViewModel.self) private var simbrief
-  @Environment(AirportDetailViewModel.self) private var airportVM
+  @Environment(AirportScreenViewModel.self) private var airportVM
   
   @State private var viewport: Viewport = .camera(center: CLLocationCoordinate2D(latitude: 39.5, longitude: -98.0), zoom: 4, bearing: 0, pitch: 0)
   private let ornamentOptions = OrnamentOptions(scaleBar: ScaleBarViewOptions(visibility: .hidden))

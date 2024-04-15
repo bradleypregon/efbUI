@@ -34,26 +34,26 @@ struct AirportSunriseSunsetView: View {
 
 struct AirportScreen: View {
   @Binding var selectedTab: Int
-  @Environment(AirportDetailViewModel.self) private var airportDetailViewModel
+  @Environment(AirportScreenViewModel.self) private var viewModel
   @State private var textFieldFocused: Bool = false
   
   var body: some View {
-    @Bindable var airportDetailViewModel = airportDetailViewModel
+    @Bindable var viewModel = viewModel
     
     NavigationStack {
       ZStack {
         VStack(spacing: 30) {
-          if airportDetailViewModel.selectedAirport != nil {
+          if viewModel.selectedAirport != nil {
             HStack {
               Grid(alignment: .leading) {
                 GridRow {
-                  Text(airportDetailViewModel.cityServed)
+                  Text(viewModel.cityServed)
                 }
                 GridRow {
-                  Text(airportDetailViewModel.formatAirportCoordinates(lat: airportDetailViewModel.selectedAirport?.airportRefLat ?? .zero, long: airportDetailViewModel.selectedAirport?.airportRefLong ?? .zero))
+                  Text(viewModel.formatAirportCoordinates(lat: viewModel.selectedAirport?.airportRefLat ?? .zero, long: viewModel.selectedAirport?.airportRefLong ?? .zero))
                 }
                 GridRow {
-                  AirportSunriseSunsetView(weather: airportDetailViewModel.osmWeatherResults)
+                  AirportSunriseSunsetView(weather: viewModel.osmWeatherResults)
                 }
               }
               .frame(maxWidth: .infinity, alignment: .leading)
@@ -63,19 +63,23 @@ struct AirportScreen: View {
                   GridRow {
                     Text("Flight category")
                       .font(.subheadline)
-                    if airportDetailViewModel.airportWxMetar != nil {
-                      Text(airportDetailViewModel.wxCategory.rawValue)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(airportDetailViewModel.wxCategory == .MVFR ? Color.mvfr : airportDetailViewModel.wxCategory == .IFR ? Color.ifr : airportDetailViewModel.wxCategory == .LIFR ? Color.lifr : Color.vfr)
-                    } else {
-                      Text("N/A")
-                        .fontWeight(.semibold)
-                    }
+                    // TODO: Fix
+                    Text("VFR")
+                      .fontWeight(.semibold)
+                      .foregroundStyle(.vfr)
+//                    if airportDetailViewModel.airportWxMetar != nil {
+//                      Text(airportDetailViewModel.wxCategory.rawValue)
+//                        .fontWeight(.semibold)
+//                        .foregroundStyle(airportDetailViewModel.wxCategory == .MVFR ? Color.mvfr : airportDetailViewModel.wxCategory == .IFR ? Color.ifr : airportDetailViewModel.wxCategory == .LIFR ? Color.lifr : Color.vfr)
+//                    } else {
+//                      Text("N/A")
+//                        .fontWeight(.semibold)
+//                    }
                   }
                   GridRow {
                     Text("Elevation")
                       .font(.subheadline)
-                    Text("\(airportDetailViewModel.selectedAirport?.elevation ?? .zero)'")
+                    Text("\(viewModel.selectedAirport?.elevation ?? .zero)'")
                       .fontWeight(.semibold)
                   }
                   GridRow(alignment: .center) {
@@ -91,25 +95,25 @@ struct AirportScreen: View {
                   GridRow {
                     Text("ATIS")
                       .font(.subheadline)
-                    Text(airportDetailViewModel.getCommunicationType(comms: airportDetailViewModel.selectedAirportComms, type: "ATI"))
+                    Text(viewModel.getCommunicationType(comms: viewModel.comms, type: "ATI"))
                       .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Clearance")
                       .font(.subheadline)
-                    Text(airportDetailViewModel.getCommunicationType(comms: airportDetailViewModel.selectedAirportComms, type: "CLD"))
+                    Text(viewModel.getCommunicationType(comms: viewModel.comms, type: "CLD"))
                       .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Ground")
                       .font(.subheadline)
-                    Text(airportDetailViewModel.getCommunicationType(comms: airportDetailViewModel.selectedAirportComms, type: "GND"))
+                    Text(viewModel.getCommunicationType(comms: viewModel.comms, type: "GND"))
                       .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Tower")
                       .font(.subheadline)
-                    Text(airportDetailViewModel.getCommunicationType(comms: airportDetailViewModel.selectedAirportComms, type: "TWR"))
+                    Text(viewModel.getCommunicationType(comms: viewModel.comms, type: "TWR"))
                       .fontWeight(.semibold)
                   }
                 }
@@ -122,20 +126,20 @@ struct AirportScreen: View {
               .frame(maxHeight: 200)
           }
           
-          Picker(selection: $airportDetailViewModel.selectedInfoTab, label: Text("Picker")) {
+          Picker(selection: $viewModel.selectedInfoTab, label: Text("Picker")) {
             ForEach(AirportsScreenInfoTabs.allCases, id: \.id) { tab in
               Text(tab.rawValue)
                 .tag(tab)
             }
           }
           .pickerStyle(.segmented)
-          AirportScreenInfoTabBuilder(selectedTab: airportDetailViewModel.selectedInfoTab, airportVM: airportDetailViewModel)
+          AirportScreenInfoTabBuilder(selectedTab: viewModel.selectedInfoTab, airportVM: viewModel)
           Spacer()
         }
-        .navigationTitle("\(airportDetailViewModel.selectedAirport?.airportName ?? "Airport Details")")
+        .navigationTitle("\(viewModel.selectedAirport?.airportName ?? "Airport Details")")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
-          TextField("Search Airports...", text: $airportDetailViewModel.searchText)
+          TextField("Search Airports...", text: $viewModel.searchText)
             .textFieldStyle(.roundedBorder)
           // TODO: Find better way to handle tap gesture to reveal popover
             .onTapGesture {
@@ -143,12 +147,12 @@ struct AirportScreen: View {
             }
             .frame(width: 300)
             .popover(isPresented: $textFieldFocused, content: {
-              if airportDetailViewModel.searchText.count > 1 {
+              if viewModel.searchText.count > 1 {
                 List {
-                  ForEach(airportDetailViewModel.airportSearchResults) { result in
+                  ForEach(viewModel.airportSearchResults) { result in
                     Button {
-                      airportDetailViewModel.selectedAirport = SQLiteManager.shared.selectAirport(result.airportIdentifier)
-                      airportDetailViewModel.selectedAirportICAO = result.airportIdentifier
+                      viewModel.selectedAirport = SQLiteManager.shared.selectAirport(result.airportIdentifier)
+                      viewModel.selectedAirportICAO = result.airportIdentifier
                     } label: {
                       Text("\(result.airportIdentifier) - \(result.airportName)")
                     }
@@ -175,22 +179,22 @@ struct AirportScreen: View {
 
 struct AirportScreenInfoTabBuilder: View {
   let selectedTab: AirportsScreenInfoTabs
-  let airportVM: AirportDetailViewModel
+  let airportVM: AirportScreenViewModel
   
   @ViewBuilder
   var body: some View {
     switch selectedTab {
     case .freq:
-      if let comms = airportVM.selectedAirportComms {
-        AirportScreenFreqTab(comms: comms)
+      if airportVM.comms != [] {
+        AirportScreenFreqTab(comms: airportVM.comms)
       } else {
         ContentUnavailableView("Frequencies INOP", systemImage: "", description: Text("Select an airport to view frequencies."))
       }
     case .wx:
-      AirportScreenWxTab(metar: airportVM.airportWxMetar, taf: airportVM.airportWxTAF, airportVM: airportVM)
+      AirportScreenWxTab(airportVM: airportVM)
     case .rwy:
-      if airportVM.selectedAirportRunways != nil {
-        AirportScreenRwyTab(runways: airportVM.selectedAirportRunways, wx: airportVM.airportWxMetar)
+      if airportVM.runways != [] {
+        AirportScreenRwyTab(runways: airportVM.runways, wx: nil)
       } else {
         ContentUnavailableView("Runways INOP", systemImage: "", description: Text("Select an airport to view runways."))
       }
@@ -238,56 +242,53 @@ struct AirportScreenFreqTab: View {
 
 // TODO: fix this ugly screen
 struct AirportScreenWxTab: View {
-  let metar: AirportMETARSchema?
-  let taf: [String]?
-  let airportVM: AirportDetailViewModel
+  let airportVM: AirportScreenViewModel
   
   var body: some View {
     ScrollView {
       Text("METAR")
         .font(.title)
-      if let metar = metar?.first, let ob = metar.rawOb {
-        Text(ob)
-      } else {
-        ContentUnavailableView("METAR INOP", systemImage: "", description: Text("METAR may be unavailable or an internal fault happened."))
-      }
+      ContentUnavailableView("METAR INOP", systemImage: "", description: Text("METAR may be unavailable or an internal fault happened."))
+//      if let metar = airportVM.noaaMetar.first?.rawOb {
+//        Text(metar)
+//      } else {
+//        ContentUnavailableView("METAR INOP", systemImage: "", description: Text("METAR may be unavailable or an internal fault happened."))
+//      }
       
       Text("TAF")
         .font(.title2)
-      if let taf = taf {
-        ForEach(taf, id: \.self) { taf in
-          Text(taf)
-        }
-        .frame(alignment: .leading)
-      } else {
-        ContentUnavailableView("TAF INOP", systemImage: "", description: Text("TAF may be unavailable or an internal fault happened."))
-      }
+      ContentUnavailableView("TAF INOP", systemImage: "", description: Text("TAF may be unavailable or an internal fault happened."))
+//      if airportVM.noaaTaf != [] {
+//        ForEach(airportVM.noaaTaf, id: \.self) { taf in
+//          Text(taf)
+//        }
+//        .frame(alignment: .leading)
+//      } else {
+//        ContentUnavailableView("TAF INOP", systemImage: "", description: Text("TAF may be unavailable or an internal fault happened."))
+//      }
       
       HStack {
         Text("ATIS")
           .font(.title2)
         Button {
-          do {
-            try airportVM.fetchATIS(icao: airportVM.selectedAirportICAO)
-          } catch {
-            print("atis failed for: \(airportVM.selectedAirportICAO)")
-          }
+          let temp = airportVM.fetchFaaAtis(icao: airportVM.selectedAirportICAO)
           
         } label: {
           Text("Refresh")
         }
       }
-      if let atis = airportVM.atis {
-        ForEach(atis, id:\.self) { atis in
-          Text(atis.datis)
-        }
-      } else {
-        ContentUnavailableView("ATIS INOP", systemImage: "", description: Text("ATIS unavailable"))
-      }
+      ContentUnavailableView("ATIS INOP", systemImage: "", description: Text("ATIS unavailable"))
+//      if airportVM.faaAtis != [] {
+//        ForEach(airportVM.faaAtis, id:\.self) { atis in
+//          Text(atis.datis)
+//        }
+//      } else {
+//        ContentUnavailableView("ATIS INOP", systemImage: "", description: Text("ATIS unavailable"))
+//      }
     }
     .refreshable {
       guard airportVM.selectedAirportICAO != "" else { return }
-      airportVM.fetchAirportWx(icao: airportVM.selectedAirportICAO)
+//      airportVM.fetchAirportWx(icao: airportVM.selectedAirportICAO)
     }
   }
 }
@@ -297,7 +298,7 @@ struct AirportScreenWxTab: View {
 // TODO: If RVR is less than length of runway, draw line displaying RVR of runway?
 struct AirportScreenRwyTab: View {
   let runways: [RunwayTable]?
-  let wx: AirportMETARSchema?
+  let wx: [AirportMETARSchema]?
   
   @State var optimalRunways: [RunwayTable] = []
   @State var longestRunways: [RunwayTable] = []
@@ -306,7 +307,7 @@ struct AirportScreenRwyTab: View {
     if let runways {
       ScrollView(.vertical) {
         WrappingHStack(models: runways) { runway in
-          AirportRunwayView(runway: runway, weather: wx, optimal: isOptimal(runway), longest: isLongest(runway))
+          AirportRunwayView(runway: runway, weather: wx?.first, optimal: isOptimal(runway), longest: isLongest(runway))
         }
       }
       .onAppear {
