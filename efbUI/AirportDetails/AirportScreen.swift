@@ -271,7 +271,7 @@ struct AirportScreenWxTab: View {
         Text("ATIS")
           .font(.title2)
         Button {
-          let temp = airportVM.fetchFaaAtis(icao: airportVM.selectedAirportICAO)
+//          let temp = airportVM.fetchFaaAtis(icao: airportVM.selectedAirportICAO)
           
         } label: {
           Text("Refresh")

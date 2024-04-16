@@ -45,11 +45,19 @@ class AirportWeather {
     }
   }
 
-  func fetchFaaAtis(icao: String) {
-    let atisAPI = AtisAPI()
-    atisAPI.fetchATIS(icao: icao) { atis in
-      self.faaAtis = atis
-      self.currentWxString = atis.map { $0.datis }.joined(separator: "\n")
+  func fetchFaaAtis(icao: String) async {
+    let atisAPI = FaaAtisAPI()
+    do {
+      self.faaAtis = try await atisAPI.fetchATIS(icao: icao)
+      self.currentWxString = self.faaAtis.map { $0.datis }.joined(separator: "\n")
+    } catch FaaAtisError.badURL {
+      print("Bad URL for FaaAtisAPI")
+    } catch FaaAtisError.badResponse {
+      print("Bad response for FaaAtisAPI")
+    } catch FaaAtisError.badData {
+      print("Bad data for FaaAtisAPI")
+    } catch {
+      print("Unexpected error fetching from FaaAtisAPI")
     }
   }
   
@@ -151,7 +159,9 @@ class AirportWeather {
       if prevICAO == icao && !refresh && !self.faaAtis.isEmpty {
         self.currentWxString = self.faaAtis.map { $0.datis }.joined(separator: "\n")
       } else {
-        self.fetchFaaAtis(icao: icao)
+        Task {
+          await fetchFaaAtis(icao: icao)
+        }
       }
     case (.ivao, .metar):
       self.currentWxString = "ivao metar"

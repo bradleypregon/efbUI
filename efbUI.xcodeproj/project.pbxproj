@@ -35,7 +35,7 @@
 		A232CCBC2B250659005C3E2E /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A232CCBB2B250659005C3E2E /* MapboxMaps */; };
 		A237AF802B5C7F3B00646AAF /* OFPSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A237AF7F2B5C7F3B00646AAF /* OFPSchema.swift */; };
 		A237AF822B63490300646AAF /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A237AF812B63490300646AAF /* ChartsView.swift */; };
-		A23B5BB32BC3096800DA5A08 /* AtisAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23B5BB22BC3096800DA5A08 /* AtisAPI.swift */; };
+		A23B5BB32BC3096800DA5A08 /* FaaAtisAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23B5BB22BC3096800DA5A08 /* FaaAtisAPI.swift */; };
 		A23B5BB52BC309BB00DA5A08 /* AtisAPISchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23B5BB42BC309BB00DA5A08 /* AtisAPISchema.swift */; };
 		A23B5BB92BCDDA0100DA5A08 /* PilotedgeAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23B5BB82BCDDA0100DA5A08 /* PilotedgeAPI.swift */; };
 		A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A24692F22B8E3A6B00A10A7F /* DrawingView.swift */; };
@@ -99,7 +99,7 @@
 		A22322D42B20B74E001274CA /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		A237AF7F2B5C7F3B00646AAF /* OFPSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OFPSchema.swift; sourceTree = "<group>"; };
 		A237AF812B63490300646AAF /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
-		A23B5BB22BC3096800DA5A08 /* AtisAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtisAPI.swift; sourceTree = "<group>"; };
+		A23B5BB22BC3096800DA5A08 /* FaaAtisAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaaAtisAPI.swift; sourceTree = "<group>"; };
 		A23B5BB42BC309BB00DA5A08 /* AtisAPISchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtisAPISchema.swift; sourceTree = "<group>"; };
 		A23B5BB82BCDDA0100DA5A08 /* PilotedgeAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PilotedgeAPI.swift; sourceTree = "<group>"; };
 		A24692F22B8E3A6B00A10A7F /* DrawingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingView.swift; sourceTree = "<group>"; };
@@ -277,7 +277,7 @@
 		A23B5BB12BC3094E00DA5A08 /* ATIS */ = {
 			isa = PBXGroup;
 			children = (
-				A23B5BB22BC3096800DA5A08 /* AtisAPI.swift */,
+				A23B5BB22BC3096800DA5A08 /* FaaAtisAPI.swift */,
 				A23B5BB42BC309BB00DA5A08 /* AtisAPISchema.swift */,
 			);
 			path = ATIS;
@@ -574,7 +574,7 @@
 				A2C6ED232B300A8B00856381 /* AirportChartAPISchema.swift in Sources */,
 				A257E1B42B2A75C6003B1859 /* SQLiteManager.swift in Sources */,
 				A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */,
-				A23B5BB32BC3096800DA5A08 /* AtisAPI.swift in Sources */,
+				A23B5BB32BC3096800DA5A08 /* FaaAtisAPI.swift in Sources */,
 				A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */,
 				A26F9BBC2B996E6E00687F77 /* SimbriefScreen.swift in Sources */,
 				A2C6ED1D2B3005C900856381 /* FetchAirportCharts.swift in Sources */,
