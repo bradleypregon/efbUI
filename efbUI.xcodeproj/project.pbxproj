@@ -50,6 +50,7 @@
 		A26E17B12B9EA3A5002B4090 /* SigmetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17B02B9EA3A5002B4090 /* SigmetAPI.swift */; };
 		A26E17B72BA1F1B8002B4090 /* RangedSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */; };
 		A26F9BBC2B996E6E00687F77 /* SimbriefScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */; };
+		A2710D052BCEB1BB0034889B /* IvaoAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2710D042BCEB1BB0034889B /* IvaoAPI.swift */; };
 		A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */; };
 		A2A243682B00368B00245A0F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A243672B00368B00245A0F /* SettingsView.swift */; };
 		A2AAEBAF2B1CF82C00BEA78E /* Neumorphic in Frameworks */ = {isa = PBXBuildFile; productRef = A2AAEBAE2B1CF82C00BEA78E /* Neumorphic */; };
@@ -111,6 +112,7 @@
 		A26E17B02B9EA3A5002B4090 /* SigmetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigmetAPI.swift; sourceTree = "<group>"; };
 		A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangedSliderView.swift; sourceTree = "<group>"; };
 		A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefScreen.swift; sourceTree = "<group>"; };
+		A2710D042BCEB1BB0034889B /* IvaoAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IvaoAPI.swift; sourceTree = "<group>"; };
 		A273A6012B261EE100D2979B /* Keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Keys.xcconfig; sourceTree = "<group>"; };
 		A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AirplaneAnnotation.swift; sourceTree = "<group>"; };
 		A2A243672B00368B00245A0F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -272,20 +274,20 @@
 			path = SimBrief;
 			sourceTree = "<group>";
 		};
-		A23B5BB12BC3094E00DA5A08 /* dATIS */ = {
+		A23B5BB12BC3094E00DA5A08 /* ATIS */ = {
 			isa = PBXGroup;
 			children = (
 				A23B5BB22BC3096800DA5A08 /* AtisAPI.swift */,
 				A23B5BB42BC309BB00DA5A08 /* AtisAPISchema.swift */,
 			);
-			path = dATIS;
+			path = ATIS;
 			sourceTree = "<group>";
 		};
 		A23B5BB62BCDD96A00DA5A08 /* FAA */ = {
 			isa = PBXGroup;
 			children = (
-				A23B5BB12BC3094E00DA5A08 /* dATIS */,
-				A2C6ED182B30059600856381 /* Metar */,
+				A23B5BB12BC3094E00DA5A08 /* ATIS */,
+				A2C6ED182B30059600856381 /* METAR */,
 			);
 			path = FAA;
 			sourceTree = "<group>";
@@ -319,6 +321,38 @@
 			path = Sigmet;
 			sourceTree = "<group>";
 		};
+		A2710D002BCEB1830034889B /* IVAO */ = {
+			isa = PBXGroup;
+			children = (
+				A2710D032BCEB1950034889B /* TAF */,
+				A2710D022BCEB1900034889B /* METAR */,
+				A2710D012BCEB18C0034889B /* ATIS */,
+				A2710D042BCEB1BB0034889B /* IvaoAPI.swift */,
+			);
+			path = IVAO;
+			sourceTree = "<group>";
+		};
+		A2710D012BCEB18C0034889B /* ATIS */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ATIS;
+			sourceTree = "<group>";
+		};
+		A2710D022BCEB1900034889B /* METAR */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = METAR;
+			sourceTree = "<group>";
+		};
+		A2710D032BCEB1950034889B /* TAF */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = TAF;
+			sourceTree = "<group>";
+		};
 		A278ABE42BA64BEF00EC27FA /* Toast */ = {
 			isa = PBXGroup;
 			children = (
@@ -331,6 +365,7 @@
 		A2C6ED132B2E3D9300856381 /* Weather */ = {
 			isa = PBXGroup;
 			children = (
+				A2710D002BCEB1830034889B /* IVAO */,
 				A23B5BB72BCDD9E400DA5A08 /* Pilotedge */,
 				A23B5BB62BCDD96A00DA5A08 /* FAA */,
 				A2C6ED142B2E3DA400856381 /* OSMWeatherAPI.swift */,
@@ -339,13 +374,13 @@
 			path = Weather;
 			sourceTree = "<group>";
 		};
-		A2C6ED182B30059600856381 /* Metar */ = {
+		A2C6ED182B30059600856381 /* METAR */ = {
 			isa = PBXGroup;
 			children = (
 				A2C6ED192B3005A700856381 /* FetchAirportWx.swift */,
 				A2C6ED1E2B30068300856381 /* AirportMetarAPISchema.swift */,
 			);
-			path = Metar;
+			path = METAR;
 			sourceTree = "<group>";
 		};
 		A2C6ED1B2B3005BB00856381 /* Charts */ = {
@@ -506,6 +541,7 @@
 				A23B5BB92BCDDA0100DA5A08 /* PilotedgeAPI.swift in Sources */,
 				A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */,
 				A2C6ED152B2E3DA400856381 /* OSMWeatherAPI.swift in Sources */,
+				A2710D052BCEB1BB0034889B /* IvaoAPI.swift in Sources */,
 				A23B5BB52BC309BB00DA5A08 /* AtisAPISchema.swift in Sources */,
 				A22322D52B20B74E001274CA /* Extensions.swift in Sources */,
 				3AE11B5327319480005974E5 /* SimConnect.swift in Sources */,
