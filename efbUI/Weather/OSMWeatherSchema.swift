@@ -8,26 +8,20 @@
 import Foundation
 
 // MARK: - WeatherInfo
-struct OSMWeatherSchema: Codable {
+struct OSMWeatherSchema: Decodable {
   let lat, lon: Double
-  let timezone: String
-  let timezoneOffset: Int
   let current: Current
-  let minutely: [Minutely]
-  let hourly: [Current]
   let daily: [Daily]
   
   enum CodingKeys: String, CodingKey {
-    case lat, lon, timezone
-    case timezoneOffset = "timezone_offset"
-    case current, minutely, hourly, daily
+    case lat, lon
+    case current, daily
   }
 }
 
-// MARK: - Current
-struct Current: Codable {
+struct Current: Decodable {
   let dt: Int
-  let sunrise, sunset: Int?
+  let sunrise, sunset: Int
   let temp, feelsLike: Double
   let pressure, humidity: Int
   let dewPoint, uvi: Double
@@ -52,8 +46,7 @@ struct Current: Codable {
   }
 }
 
-// MARK: - Rain
-struct Rain: Codable {
+struct Rain: Decodable {
   let the1H: Double
   
   enum CodingKeys: String, CodingKey {
@@ -61,31 +54,14 @@ struct Rain: Codable {
   }
 }
 
-// MARK: - Weather
-struct Weather: Codable {
+struct Weather: Decodable {
   let id: Int
   let main: String
   let description: String
   let icon: String
 }
 
-//enum Description: String, Codable {
-//    case brokenClouds = "broken clouds"
-//    case clearSky = "clear sky"
-//    case fewClouds = "few clouds"
-//    case lightRain = "light rain"
-//    case moderateRain = "moderate rain"
-//    case scatteredClouds = "scattered clouds"
-//}
-
-//enum Main: String, Codable {
-//  case clear = "Clear"
-//  case clouds = "Clouds"
-//  case rain = "Rain"
-//}
-
-// MARK: - Daily
-struct Daily: Codable {
+struct Daily: Decodable {
   let dt, sunrise, sunset, moonrise: Int
   let moonset: Int
   let moonPhase: Double
@@ -115,19 +91,11 @@ struct Daily: Codable {
   }
 }
 
-// MARK: - FeelsLike
-struct FeelsLike: Codable {
+struct FeelsLike: Decodable {
   let day, night, eve, morn: Double
 }
 
-// MARK: - Temp
-struct Temp: Codable {
+struct Temp: Decodable {
   let day, min, max, night: Double
   let eve, morn: Double
-}
-
-// MARK: - Minutely
-struct Minutely: Codable {
-  let dt: Int
-  let precipitation: Double
 }
