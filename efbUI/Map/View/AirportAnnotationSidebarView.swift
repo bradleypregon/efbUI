@@ -108,9 +108,6 @@ struct AirportAnnotationSidebarView: View {
               Text(vm.currentWxString)
                 .font(.system(size: 14))
             }
-            .onAppear {
-              vm.fetchFaaMetar(icao: selectedAirport.airportIdentifier)
-            }
             .onChange(of: vm.wxSource.rawValue) {
               vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: false)
             }
@@ -206,7 +203,14 @@ struct AirportAnnotationSidebarView: View {
         
       }
       .onAppear {
+        if selectedAirport.airportIdentifier != vm.prevICAO {
+          vm.fetchFaaMetar(icao: selectedAirport.airportIdentifier)
+        }
         vm.fetchAirportDetails(icao: selectedAirport.airportIdentifier)
+      }
+      .onDisappear {
+        vm.wxSource = .faa
+        vm.wxType = .metar
       }
     } else {
       ContentUnavailableView("Airport Details Unavailable", systemImage: "airplane.circle", description: Text("Select an airport on the map to view details."))

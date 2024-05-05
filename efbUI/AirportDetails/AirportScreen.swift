@@ -12,13 +12,17 @@ struct AirportSunriseSunsetView: View {
   var weather: OSMWeatherSchema?
   
   var body: some View {
-    HStack(spacing: 1) {
-      Image(systemName: "sunrise.fill")
-      Text("\(convertTime(weather?.current.sunrise ?? .zero))")
-      Spacer().frame(width: 5)
-      Image(systemName: "sunset.fill")
-      Text("\(convertTime(weather?.current.sunset ?? .zero))")
+    if let weather = weather {
+      HStack(spacing: 1) {
+        Image(systemName: "sunrise.fill")
+        Text("\(convertTime(weather.current.sunrise))")
+        Spacer()
+          .frame(width: 5)
+        Image(systemName: "sunset.fill")
+        Text("\(convertTime(weather.current.sunset))")
+      }
     }
+    
   }
   
   func convertTime(_ timestamp: Int) -> String {
@@ -36,6 +40,7 @@ struct AirportScreen: View {
   @Binding var selectedTab: Int
   @Environment(AirportScreenViewModel.self) private var viewModel
   @State private var textFieldFocused: Bool = false
+  @FocusState private var isTextFieldFocused: Bool
   
   var body: some View {
     @Bindable var viewModel = viewModel
@@ -63,18 +68,14 @@ struct AirportScreen: View {
                   GridRow {
                     Text("Flight category")
                       .font(.subheadline)
-                    // TODO: Fix
-                    Text("VFR")
-                      .fontWeight(.semibold)
-                      .foregroundStyle(.vfr)
-//                    if airportDetailViewModel.airportWxMetar != nil {
-//                      Text(airportDetailViewModel.wxCategory.rawValue)
-//                        .fontWeight(.semibold)
-//                        .foregroundStyle(airportDetailViewModel.wxCategory == .MVFR ? Color.mvfr : airportDetailViewModel.wxCategory == .IFR ? Color.ifr : airportDetailViewModel.wxCategory == .LIFR ? Color.lifr : Color.vfr)
-//                    } else {
-//                      Text("N/A")
-//                        .fontWeight(.semibold)
-//                    }
+                    if !viewModel.faaMetar.isEmpty {
+                      Text(viewModel.wxCategory.rawValue)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(viewModel.wxCategoryColor(for: viewModel.wxCategory))
+                    } else {
+                      Text("N/A")
+                        .fontWeight(.semibold)
+                    }
                   }
                   GridRow {
                     Text("Elevation")
@@ -140,11 +141,13 @@ struct AirportScreen: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
           TextField("Search Airports...", text: $viewModel.searchText)
+            .autocorrectionDisabled()
             .textFieldStyle(.roundedBorder)
           // TODO: Find better way to handle tap gesture to reveal popover
-            .onTapGesture {
-              textFieldFocused.toggle()
-            }
+//            .onTapGesture {
+//              textFieldFocused.toggle()
+//            }
+            .focused($isTextFieldFocused)
             .frame(width: 300)
             .popover(isPresented: $textFieldFocused, content: {
               if viewModel.searchText.count > 1 {
@@ -162,7 +165,7 @@ struct AirportScreen: View {
                 .listStyle(.plain)
                 .frame(idealWidth: 300, idealHeight: 300, maxHeight: 500)
               } else {
-                Color.clear
+                EmptyView()
                   .frame(idealWidth: 300, idealHeight: 300)
               }
             })
@@ -172,6 +175,9 @@ struct AirportScreen: View {
     }
     .onAppear {
       // fetch metar, weather, local weather, etc
+      if viewModel.selectedAirportICAO != viewModel.prevICAO {
+        viewModel.fetchFaaMetar(icao: viewModel.selectedAirportICAO)
+      }
     }
   }
   
@@ -194,7 +200,7 @@ struct AirportScreenInfoTabBuilder: View {
       AirportScreenWxTab(airportVM: airportVM)
     case .rwy:
       if airportVM.runways != [] {
-        AirportScreenRwyTab(runways: airportVM.runways, wx: nil)
+        AirportScreenRwyTab(runways: airportVM.runways, wx: airportVM.faaMetar)
       } else {
         ContentUnavailableView("Runways INOP", systemImage: "", description: Text("Select an airport to view runways."))
       }
@@ -242,53 +248,46 @@ struct AirportScreenFreqTab: View {
 
 // TODO: fix this ugly screen
 struct AirportScreenWxTab: View {
-  let airportVM: AirportScreenViewModel
+  var airportVM: AirportScreenViewModel
   
   var body: some View {
-    ScrollView {
-      Text("METAR")
-        .font(.title)
-      ContentUnavailableView("METAR INOP", systemImage: "", description: Text("METAR may be unavailable or an internal fault happened."))
-//      if let metar = airportVM.noaaMetar.first?.rawOb {
-//        Text(metar)
-//      } else {
-//        ContentUnavailableView("METAR INOP", systemImage: "", description: Text("METAR may be unavailable or an internal fault happened."))
-//      }
+    @Bindable var airportVM = airportVM
+    VStack {
+      Button {
+        airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: true)
+      } label: {
+        Text("Refresh")
+      }
       
-      Text("TAF")
-        .font(.title2)
-      ContentUnavailableView("TAF INOP", systemImage: "", description: Text("TAF may be unavailable or an internal fault happened."))
-//      if airportVM.noaaTaf != [] {
-//        ForEach(airportVM.noaaTaf, id: \.self) { taf in
-//          Text(taf)
-//        }
-//        .frame(alignment: .leading)
-//      } else {
-//        ContentUnavailableView("TAF INOP", systemImage: "", description: Text("TAF may be unavailable or an internal fault happened."))
-//      }
-      
-      HStack {
-        Text("ATIS")
-          .font(.title2)
-        Button {
-//          let temp = airportVM.fetchFaaAtis(icao: airportVM.selectedAirportICAO)
-          
-        } label: {
-          Text("Refresh")
+      Picker("Weather Source", selection: $airportVM.wxSource) {
+        ForEach(WxSources.allCases) { source in
+          Text(source.rawValue.uppercased())
+            .tag(source)
         }
       }
-      ContentUnavailableView("ATIS INOP", systemImage: "", description: Text("ATIS unavailable"))
-//      if airportVM.faaAtis != [] {
-//        ForEach(airportVM.faaAtis, id:\.self) { atis in
-//          Text(atis.datis)
-//        }
-//      } else {
-//        ContentUnavailableView("ATIS INOP", systemImage: "", description: Text("ATIS unavailable"))
-//      }
+      .pickerStyle(.segmented)
+
+      Picker("Weather Type", selection: $airportVM.wxType) {
+        ForEach(WxTabs.allCases) { tab in
+          Text(tab.rawValue)
+            .tag(tab)
+        }
+      }
+      .pickerStyle(.segmented)
+      
+      Text(airportVM.currentWxString)
+        .font(.system(size: 14))
     }
+    .padding()
     .refreshable {
       guard airportVM.selectedAirportICAO != "" else { return }
 //      airportVM.fetchAirportWx(icao: airportVM.selectedAirportICAO)
+    }
+    .onChange(of: airportVM.wxSource) {
+      airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: false)
+    }
+    .onChange(of: airportVM.wxType) {
+      airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: false)
     }
   }
 }

@@ -8,8 +8,25 @@ import Observation
 import CoreLocation
 import SwiftUI
 
+enum WxCategory: String {
+  case VFR, MVFR, IFR, LIFR
+}
+
+
+enum WxTabs: String, Identifiable, CaseIterable {
+  case metar, taf, atis
+  var id: Self { self }
+}
+
+enum WxSources: String, Identifiable, CaseIterable {
+  case faa, ivao, pilotedge
+  var id: Self { self }
+}
+
 @Observable
-class AirportWeather {
+class AirportDetails {
+  var runways: [RunwayTable] = []
+  var comms: [AirportCommunicationTable] = []
   var prevICAO: String = ""
   var wxSource: WxSources = .faa
   var wxType: WxTabs = .metar
@@ -26,6 +43,38 @@ class AirportWeather {
   var vatsimAtis: String = ""
   
   var currentWxString: String = ""
+  
+  /**
+    fetchAirportDetails(icao: String)
+    fetches runways, comms
+   */
+  func fetchAirportDetails(icao: String) {
+    Task.detached {
+      self.fetchRunways(icao: icao)
+      self.fetchComms(icao: icao)
+    }
+  }
+  
+  func fetchRunways(icao: String) {
+    let runways = SQLiteManager.shared.getAirportRunways(icao)
+    self.runways = runways
+  }
+  
+  func fetchComms(icao: String) {
+    let comms = SQLiteManager.shared.getAirportComms(icao)
+    self.comms = comms
+  }
+  
+  func getCommunicationType(comms: [AirportCommunicationTable]?, type: String) -> String {
+    if comms == nil { return "" }
+    var frequency = ""
+    if let freq = comms?.first(where: { $0.communicationType == type && $0.frequencyUnits == "V"} ) {
+      frequency = freq.communicationFrequency.string
+      return frequency
+    } else {
+      return "n/a"
+    }
+  }
   
   /// fetch faa/noaa metar and calculate wx category
   func fetchFaaMetar(icao: String) {
@@ -182,59 +231,6 @@ class AirportWeather {
     }
     self.prevICAO = icao
   }
-}
-
-enum WxCategory: String {
-  case VFR, MVFR, IFR, LIFR
-}
-
-
-enum WxTabs: String, Identifiable, CaseIterable {
-  case metar, taf, atis
-  var id: Self { self }
-}
-
-enum WxSources: String, Identifiable, CaseIterable {
-  case faa, ivao, pilotedge
-  var id: Self { self }
-}
-
-@Observable
-class AirportDetails: AirportWeather {
-  var runways: [RunwayTable] = []
-  var comms: [AirportCommunicationTable] = []
-  
-  /**
-    fetchAirportDetails(icao: String)
-    fetches runways, comms
-   */
-  func fetchAirportDetails(icao: String) {
-    Task.detached {
-      self.fetchRunways(icao: icao)
-      self.fetchComms(icao: icao)
-    }
-  }
-  
-  func fetchRunways(icao: String) {
-    let runways = SQLiteManager.shared.getAirportRunways(icao)
-    self.runways = runways
-  }
-  
-  func fetchComms(icao: String) {
-    let comms = SQLiteManager.shared.getAirportComms(icao)
-    self.comms = comms
-  }
-  
-  func getCommunicationType(comms: [AirportCommunicationTable]?, type: String) -> String {
-    if comms == nil { return "" }
-    var frequency = ""
-    if let freq = comms?.first(where: { $0.communicationType == type && $0.frequencyUnits == "V"} ) {
-      frequency = freq.communicationFrequency.string
-      return frequency
-    } else {
-      return "n/a"
-    }
-  }
   
 }
 
@@ -251,8 +247,6 @@ enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
 // cityServed, sunrise/sunset, charts, local weather, selectedInfoTab
 @Observable
 class AirportScreenViewModel: AirportDetails {
-  var selectedAirportElement: AirportSchema?
-  var loadingAirportWx: Bool = false
   var selectedAirport: AirportTable?
   var osmWeatherResults: OSMWeatherSchema?
   var cityServed = ""
@@ -267,6 +261,7 @@ class AirportScreenViewModel: AirportDetails {
         Task.detached {
           self.fetchAirportDetails(icao: self.selectedAirportICAO)
           self.queryAirportData(airport: selectedAirport)
+          self.fetchFaaMetar(icao: self.selectedAirportICAO)
         }
       }
     }

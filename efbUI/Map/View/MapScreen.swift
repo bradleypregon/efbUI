@@ -27,9 +27,14 @@ class MapScreenViewModel {
   var displaySTAR: Bool = false
   
   init() {
-    largeAirports = airportJSONModel.airports.filter { $0.size == .large }
-    mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
-    smallAirports = airportJSONModel.airports.filter { $0.size == .small }
+    DispatchQueue.main.async { [self] in
+      largeAirports = airportJSONModel.airports.filter { $0.size == .large }
+      print(largeAirports.count)
+      mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
+      print(mediumAirports.count)
+      smallAirports = airportJSONModel.airports.filter { $0.size == .small }
+      print(smallAirports.count)
+    }
   }
 }
 
@@ -158,16 +163,20 @@ struct MapScreen: View {
                 .clusterOptions(ClusterOptions(circleRadius: .constant(25.0), clusterMaxZoom: 8.0))
               }
               
+              // MARK: Annotations that receive updates (ownship and traffic)
               
               // MARK: Ownship Annotation
               if simConnect.ownship.coordinate.latitude != .zero {
-                PointAnnotation(coordinate: CLLocationCoordinate2DMake(simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude), isSelected: false, isDraggable: false)
-                  .image(named: "ShipArrow")
-                  .iconRotate(simConnect.ownship.heading)
-                  .textField(simbrief.ofp?.aircraft.reg ?? "ownship")
-                  .textOffset([0, 1.7])
-                  .textColor(StyleColor(.white))
-                  .textSize(12)
+                Puck2D()
+                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: simConnect.ownship.coordinate.latitude, longitude: simConnect.ownship.coordinate.longitude)) {
+                  VStack(spacing: 0) {
+                    Image("ShipArrow")
+                      .rotationEffect(.degrees(simConnect.ownship.heading))
+                    Text(simbrief.ofp?.aircraft.reg ?? "ownship")
+                      .font(.caption)
+                      .foregroundStyle(.white)
+                  }
+                }
               }
               
               // MARK: Traffic Annotations
