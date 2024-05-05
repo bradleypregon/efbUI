@@ -59,7 +59,6 @@ struct AirportRunwayView: View {
                 .font(.system(size: 55))
             }
           }
-//          .frame(width: 50, height: 200)
         }
       }
       
@@ -67,7 +66,6 @@ struct AirportRunwayView: View {
         .foregroundStyle(longest ? .orange : Color.Neumorphic.secondary)
         .fontWeight(.semibold)
     }
-//    .frame(width: 200, height: 230)
     .popover(isPresented: $popoverPresented, content: {
       List {
         Text("Thresh Elev: \(runway.landingThresholdElevation)")
