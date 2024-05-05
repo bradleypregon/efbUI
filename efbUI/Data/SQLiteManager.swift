@@ -70,10 +70,10 @@ class SQLiteManager {
     let ifrCapability = Expression<String?>("ifr_capability")
     let longestRunwaySurfaceCode = Expression<String>("longest_runway_surface_code")
     let elevation = Expression<Int64>("elevation")
-    let transitionAltitude = Expression<Int64>("transition_altitude")
-    let transitionLevel = Expression<Int64>("transition_level")
-    let speedLimit = Expression<Int64>("speed_limit")
-    let speedLimitAltitude = Expression<Int64>("speed_limit_altitude")
+    let transitionAltitude = Expression<Int64?>("transition_altitude")
+    let transitionLevel = Expression<Int64?>("transition_level")
+    let speedLimit = Expression<Int64?>("speed_limit")
+    let speedLimitAltitude = Expression<Int64?>("speed_limit_altitude")
     let iataAtaDesignator = Expression<String?>("iata_ata_designator")
     let id = Expression<String>("id")
     
@@ -91,10 +91,10 @@ class SQLiteManager {
           ifrCapibility: res[ifrCapability] ?? "N",
           longestRunwaySurfaceCode: res[longestRunwaySurfaceCode],
           elevation: res[elevation],
-          transitionAltitude: res[transitionAltitude],
-          transitionLevel: res[transitionLevel],
-          speedLimit: res[speedLimit],
-          speedLimitAltitude: res[speedLimitAltitude],
+          transitionAltitude: res[transitionAltitude] ?? .zero,
+          transitionLevel: res[transitionLevel] ?? .zero,
+          speedLimit: res[speedLimit] ?? .zero,
+          speedLimitAltitude: res[speedLimitAltitude] ?? .zero,
           iataAtaDesignator: res[iataAtaDesignator] ?? "",
           id: res[id]
         )
