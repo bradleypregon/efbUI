@@ -11,7 +11,7 @@ import CoreLocation
 import Combine
 import Observation
 
-struct SimConnectShip: Identifiable {
+struct SimConnectShip: Identifiable, Equatable {
   let id = UUID()
   
   var coordinate: CLLocationCoordinate2D
@@ -114,24 +114,27 @@ final class ServerListener {
   
   private func consumeData() {
     self.connection?.receive(minimumIncompleteLength: 1, maximumLength: 64000) { (data, _, isComplete, error) in
-      if let error = error {
-        print("NWError received in \(#function): \(error)")
-      }
-      guard let receivedData = data, !receivedData.isEmpty, isComplete else { return }
       
-      if let stringData = String(data: receivedData, encoding: .utf8) {
-        let components = stringData.components(separatedBy: ",")
+        if let error = error {
+          print("NWError received in \(#function): \(error)")
+        }
+        guard let receivedData = data, !receivedData.isEmpty, isComplete else { return }
         
-        // MARK: Ownship update
-        if components[0] == "XGPSMSFS" {
-          self.updateOwnship(components)
+        if let stringData = String(data: receivedData, encoding: .utf8) {
+          let components = stringData.components(separatedBy: ",")
+          
+          // MARK: Ownship update
+          if components[0] == "XGPSMSFS" {
+            self.updateOwnship(components)
+          }
+          if components[0] == "XTRAFFICMSFS" {
+            self.updateTraffic(components)
+          }
         }
-        if components[0] == "XTRAFFICMSFS" {
-          self.updateTraffic(components)
-        }
-      }
+        
+        self.consumeData()
       
-      self.consumeData()
+      
     }
   }
   
