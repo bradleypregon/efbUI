@@ -40,7 +40,6 @@ struct AirportScreen: View {
   @Binding var selectedTab: Int
   @Environment(AirportScreenViewModel.self) private var viewModel
   @State private var textFieldFocused: Bool = false
-  @FocusState private var isTextFieldFocused: Bool
   
   var body: some View {
     @Bindable var viewModel = viewModel
@@ -143,12 +142,10 @@ struct AirportScreen: View {
           TextField("Search Airports...", text: $viewModel.searchText)
             .autocorrectionDisabled()
             .textFieldStyle(.roundedBorder)
-          // TODO: Find better way to handle tap gesture to reveal popover
-//            .onTapGesture {
-//              textFieldFocused.toggle()
-//            }
-            .focused($isTextFieldFocused)
             .frame(width: 300)
+            .onTapGesture {
+              textFieldFocused = true
+            }
             .popover(isPresented: $textFieldFocused, content: {
               if viewModel.searchText.count > 1 {
                 List {
@@ -156,6 +153,7 @@ struct AirportScreen: View {
                     Button {
                       viewModel.selectedAirport = SQLiteManager.shared.selectAirport(result.airportIdentifier)
                       viewModel.selectedAirportICAO = result.airportIdentifier
+                      textFieldFocused = false
                     } label: {
                       Text("\(result.airportIdentifier) - \(result.airportName)")
                     }
