@@ -73,10 +73,10 @@ struct OFPSchema: Decodable {
     let routeIFPS: String
     let routeNavigraph: String
     let metar: String
-    let metarTime: Date
-    let metarCategory: String
-    let metarVisibility: String
-    let metarCeiling: String
+    let metarTime: Quantum
+    let metarCategory: Quantum
+    let metarVisibility: Quantum
+    let metarCeiling: Quantum
     let atis: [OFPATIS]?
     let notam: [OFPNOTAM]?
   }
@@ -142,10 +142,10 @@ struct OFPAirport: Decodable {
   let transAlt: String
   let transLevel: String
   let metar: String
-  let metarTime: Date
-  let metarCategory: String
-  let metarVisibility: String
-  let metarCeiling: String
+  let metarTime: Quantum
+  let metarCategory: Quantum
+  let metarVisibility: Quantum
+  let metarCeiling: Quantum
   let atis: [OFPATIS]?
   let notam: [OFPNOTAM]?
 }
@@ -201,5 +201,32 @@ struct OFPNavlog: Decodable, Identifiable, Hashable {
   
   enum CodingKeys: String, CodingKey {
     case ident, name, type, frequency, lat, long, stage, via, isSidStar, distance, track, altitude, windComponent, timeLeg, timeTotal, fuelLeg, fuelTotalUsed, oat, windDir, windSpd, shear
+  }
+}
+
+enum Quantum: Decodable {
+  case string(String), bool(Bool), date(Date)
+  
+  init(from decoder: Decoder) throws {
+    if let string = try? decoder.singleValueContainer().decode(String.self) {
+      self = .string(string)
+      return
+    }
+    
+    if let bool = try? decoder.singleValueContainer().decode(Bool.self) {
+      self = .bool(bool)
+      return
+    }
+    
+    if let date = try? decoder.singleValueContainer().decode(Date.self) {
+      self = .date(date)
+      return
+    }
+    
+    throw QuantumError.missingValue
+  }
+  
+  enum QuantumError: Error {
+    case missingValue
   }
 }
