@@ -37,13 +37,13 @@ struct WaypointsContainer: View {
   @State private var popover: Bool = false
   
   var body: some View {
-//      Ideal, but need Horizontal
-//      List {
-//        ForEach(waypointStore.waypoints) { waypoint in
-//          WptView(wpt: waypoint)
-//        }
-//        .onMove(perform: move)
-//      }
+    //      Ideal, but need Horizontal
+    //      List {
+    //        ForEach(waypointStore.waypoints) { waypoint in
+    //          WptView(wpt: waypoint)
+    //        }
+    //        .onMove(perform: move)
+    //      }
     //
     WrappingHStack(models: waypointStore.waypoints) { waypoint in
       WptView(wpt: waypoint)
@@ -87,22 +87,22 @@ struct CustomInputView: View {
   
   var body: some View {
     TextField("Wpt...", text: $currentInput)
-      // TODO: Query each db table (Airport, NBD, VOR) upon submission and return either an array or single object
-      // airports, enroute_airways, enroute_waypoints, pathpoints, sids, stars, terminal_waypoints, vhfnavaids
-      // TODO: How to handle airways?
-      // If an array is returned, its probbaly a matching name, user needs to select appropriate
-      // For instance, there are multiple VORs (or NBDs?) that have the same 3 letter identifier. Need to pick the right one
-    .onReceive(currentInput.publisher) { val in
-      if (val == " ") {
-        let wpt = Waypoint(name: currentInput.trimmingCharacters(in: .whitespaces))
-        waypointStore.waypoints.append(wpt)
-        currentInput = ""
+    // TODO: Query each db table (Airport, NBD, VOR) upon submission and return either an array or single object
+    // airports, enroute_airways, enroute_waypoints, pathpoints, sids, stars, terminal_waypoints, vhfnavaids
+    // TODO: How to handle airways?
+    // If an array is returned, its probbaly a matching name, user needs to select appropriate
+    // For instance, there are multiple VORs (or NBDs?) that have the same 3 letter identifier. Need to pick the right one
+      .onReceive(currentInput.publisher) { val in
+        if (val == " ") {
+          let wpt = Waypoint(name: currentInput.trimmingCharacters(in: .whitespaces))
+          waypointStore.waypoints.append(wpt)
+          currentInput = ""
+        }
       }
-    }
-    .textFieldStyle(.roundedBorder)
-    .frame(maxWidth: 300)
-    .autocorrectionDisabled()
-    .textInputAutocapitalization(.characters)
+      .textFieldStyle(.roundedBorder)
+      .frame(maxWidth: 300)
+      .autocorrectionDisabled()
+      .textInputAutocapitalization(.characters)
   }
 }
 
@@ -144,24 +144,27 @@ struct TopBarView: View {
           .padding([.leading, .trailing], 20)
         
         Spacer()
-          .frame(width: 40)
+          .frame(width: 20)
         
-        HStack {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]) {
           VStack {
             Text("Heading")
               .font(.caption)
             Text("\(roundToTenths(simConnect.ownship.heading))º")
           }
+          .frame(width: 100)
           VStack {
-            Text("GPS Altitude")
+            Text("GPS Alt")
               .font(.caption)
             Text("\(roundToTenths((simConnect.ownship.altitude) * 3.281))'") // meters to feet
           }
+          .frame(width: 100)
           VStack {
-            Text("Speed")
+            Text("Spd (GS)")
               .font(.caption)
             Text("\(roundToTenths((simConnect.ownship.speed) * 1.944))kt") // m/s to knots
           }
+          .frame(width: 100)
         }
         .fontWeight(.semibold)
         
@@ -176,7 +179,6 @@ struct TopBarView: View {
         //          Text("Speech")
         //        }
         //        .buttonStyle(.bordered)
-        
         Spacer()
         Text(currentZuluTime24)
         Spacer()
