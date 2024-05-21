@@ -26,14 +26,13 @@ class MapScreenViewModel {
   var displaySID: Bool = false
   var displaySTAR: Bool = false
   
+  var satelliteVisible: Bool = false
+  
   init() {
     DispatchQueue.main.async { [self] in
       largeAirports = airportJSONModel.airports.filter { $0.size == .large }
-      print(largeAirports.count)
       mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
-      print(mediumAirports.count)
       smallAirports = airportJSONModel.airports.filter { $0.size == .small }
-      print(smallAirports.count)
     }
   }
 }
@@ -56,12 +55,9 @@ struct MapScreen: View {
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
   @State private var proxyMap: MapProxy? = nil
   @State private var currentZoom: CGFloat = 3.0
-  
-  var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
   private let radarSourceID = "radar-source"
   @State private var rasterRadarAlertVisible: Bool = false
-  @State private var displayTrafficAltitude: Bool = true
   
   @State private var drawingEnabled: Bool = false
   @State private var canvas = PKCanvasView()
@@ -79,6 +75,7 @@ struct MapScreen: View {
   @State private var sidRoute: [[ProcedureTable]] = []
   @State private var starRoute: [[ProcedureTable]] = []
   
+  @State var updatingSimConnectShips: Bool = false
   
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
@@ -159,44 +156,47 @@ struct MapScreen: View {
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       columnVisibility = .all
                     }
+                    .textField(airport.icao)
+                    .textOffset([0.0, -1.6])
+                    .textColor(StyleColor(.white))
+                    .textSize(9)
                 }
-                .clusterOptions(ClusterOptions(circleRadius: .constant(25.0), clusterMaxZoom: 8.0))
+                .clusterOptions(ClusterOptions(circleRadius: .constant(12.0), clusterRadius: 75.0, clusterMaxZoom: 6.5))
               }
               
               // MARK: Annotations that receive updates (ownship and traffic)
               
               // MARK: Ownship Annotation
-              if simConnect.ownship.coordinate.latitude != .zero {
-                Puck2D()
-                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: simConnect.ownship.coordinate.latitude, longitude: simConnect.ownship.coordinate.longitude)) {
-                  VStack(spacing: 0) {
-                    Image("ShipArrow")
-                      .rotationEffect(.degrees(simConnect.ownship.heading))
-                    Text(simbrief.ofp?.aircraft.reg ?? "ownship")
-                      .font(.caption)
-                      .foregroundStyle(.white)
-                  }
-                }
-              }
+//              if simConnect.ownship.coordinate.latitude != .zero {
+//                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: simConnect.ownship.coordinate.latitude, longitude: simConnect.ownship.coordinate.longitude)) {
+//                  VStack(spacing: 0) {
+//                    Image("ShipArrow")
+//                      .rotationEffect(.degrees(simConnect.ownship.heading))
+//                    Text(simbrief.ofp?.aircraft.reg ?? "ownship")
+//                      .font(.caption)
+//                      .foregroundStyle(.white)
+//                  }
+//                }
+//              }
               
               // MARK: Traffic Annotations
-              ForEvery(simConnect.traffic, id: \.id) { traffic in
-                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: traffic.coordinate.latitude, longitude: traffic.coordinate.longitude)) {
-                  VStack(spacing: 0) {
-                    if displayTrafficAltitude {
-                      Text("\(traffic.altitude.string)'")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.lifr)
-                    }
-                    Image("TrafficArrow")
-                      .rotationEffect(.degrees(traffic.heading))
-                    Text(traffic.registration ?? "tfc")
-                      .font(.system(size: 9))
-                      .foregroundStyle(.lifr)
-                  }
-                }
-                .allowOverlap(true)
-              }
+//              ForEvery(simConnect.traffic, id: \.id) { traffic in
+//                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: traffic.coordinate.latitude, longitude: traffic.coordinate.longitude)) {
+//                  VStack(spacing: 0) {
+//                    if displayTrafficAltitude {
+//                      Text("\(traffic.altitude.string)'")
+//                        .font(.system(size: 9))
+//                        .foregroundStyle(.lifr)
+//                    }
+//                    Image("TrafficArrow")
+//                      .rotationEffect(.degrees(traffic.heading))
+//                    Text(traffic.registration ?? "tfc")
+//                      .font(.system(size: 9))
+//                      .foregroundStyle(.lifr)
+//                  }
+//                }
+//                .allowOverlap(true)
+//              }
               
               // MARK: Route Display
               if mapViewModel.displayRoute {
@@ -248,14 +248,8 @@ struct MapScreen: View {
                 }
               }
               
-              
-              // TODO: Filter waypoints. Too many are showing up, just want the route
-              // TODO: Have text label at end of route
-              // TODO: Fix multiple routes overlapping each other
-              
               //MARK: SID Chart
               if mapViewModel.displaySID {
-                
                 // Currently, waypoints for each runway on the sid are showing up
                 // Filter by 'EE'? Essential and End of Enroute??
                 //  - need to be careful though, as SID can have > 1 "ending" waypoint
@@ -284,7 +278,15 @@ struct MapScreen: View {
             }
             .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
             .ornamentOptions(ornamentOptions)
-            
+            .onStyleLoaded { _ in
+              do {
+                try proxy.map?.addImage(UIImage(named: "ShipArrow") ?? UIImage(), id: "ShipArrow")
+                try proxy.map?.addImage(UIImage(named: "TrafficArrow") ?? UIImage(), id: "TrafficArrow")
+              } catch {
+                print("Error adding image to map: \(error)")
+              }
+              
+            }
             // TODO: Follow Mapbox recommendation for .onCameraChanged
             // NO @State variable changes. Too much computation and redraws
 //            .onCameraChanged(action: { changed in
@@ -294,9 +296,11 @@ struct MapScreen: View {
 //                handleCameraChange(zoom: changed.cameraState.zoom, bounds: coordinateBounds)
 //              }
 //            })
-            
             .onAppear {
               proxyMap = proxy
+              if ServerStatus.shared.status == .running {
+                addOwnshipLayer()
+              }
             }
             .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
               Button("Ok") {
@@ -346,6 +350,11 @@ struct MapScreen: View {
             }
           }
           .ignoresSafeArea(.all)
+          .onChange(of: ServerStatus.shared.status) {
+            if ServerStatus.shared.status == .running {
+              addOwnshipLayer()
+            }
+          }
           
           // MARK: Menu
           VStack(spacing: 5) {
@@ -356,9 +365,7 @@ struct MapScreen: View {
               .labelStyle(.iconOnly)
               .contentTransition(.symbolEffect)
               .onChange(of: mapViewModel.displayRadar) {
-                if let proxyMap, let map = proxyMap.map {
-                  mapViewModel.displayRadar ? addRasterRadarSource(map) : removeRasterRadarSource(map)
-                }
+                mapViewModel.displayRadar ? addRasterRadarSource() : removeRasterRadarSource()
               }
             
             Toggle("Route", systemImage: mapViewModel.displayRoute ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $mapViewModel.displayRoute)
@@ -384,15 +391,6 @@ struct MapScreen: View {
               .onLongPressGesture {
                 sigmetMenuPopoverVisible.toggle()
               }
-//              .gesture(
-//                LongPressGesture(minimumDuration: 0.25)
-//                  .updating($sigmetLongPress) { currentState, gestureState, transaction in
-//                    gestureState = currentState
-//                  }
-//                  .onEnded { _ in
-//                    sigmetMenuPopoverVisible.toggle()
-//                  }
-//              )
               .popover(isPresented: $sigmetMenuPopoverVisible) {
                 VStack {
                   Text("Sigmet Altitudes")
@@ -401,6 +399,22 @@ struct MapScreen: View {
                 .frame(idealWidth: 250)
                 .padding()
                 .padding([.leading, .trailing, .bottom], 20)
+              }
+            
+            Toggle("Satellite", systemImage: mapViewModel.satelliteVisible ? "globe.americas.fill" : "globe.americas", isOn: $mapViewModel.satelliteVisible)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
+              .onChange(of: mapViewModel.satelliteVisible) {
+                do {
+                  try proxyMap?.map?.updateLayer(withId: "satellite", type: RasterLayer.self) { layer in
+                    layer.visibility = .constant(mapViewModel.satelliteVisible ? .visible : .none)
+                  }
+                } catch {
+                  print("Error changing visibility of Map Satellite layer: \(error)")
+                }
               }
             
             Spacer()
@@ -418,6 +432,7 @@ struct MapScreen: View {
               .font(.title2)
               .tint(.mvfr)
               .toggleStyle(.button)
+            
           }
           .padding([.leading], 5)
         }
@@ -430,27 +445,36 @@ struct MapScreen: View {
     
   }
   
-  // MARK: updateImageRotation
-  func updateImageRotation(for image: String, to heading: Double, size: CGFloat) {
-//    _ = ownshipImage?.rotationEffect(.degrees(heading))
-//    DispatchQueue.main.async {
+  func addOwnshipLayer() {
+    do {
+      var layer = LocationIndicatorLayer(id: "OwnshipLayer")
+      layer.topImage = .constant(ResolvedImage.name("ShipArrow"))
       
-//      if let img = UIImage(named: image), let rotated = img.rotate(angle: .degrees(heading)) {
-//        ownshipImage.rotation
-//      }
-//      let img = UIImage(named: image)
-//      if let resized = img?.resize(newWidth: size), let rotatedImg = resized.rotate(angle: .degrees(heading)) {
-//        ownshipImage = Image(uiImage: rotatedImg)
-//      } else {
-//        if let img {
-//          ownshipImage = Image(uiImage: img)
-//        }
-//      }
-//    }
+      try proxyMap?.map?.addLayer(layer)
+      updatingSimConnectShips = true
+      updateOwnshipLayer()
+    } catch {
+      print("Error adding ownship layer: \(error)")
+    }
+  }
+  
+  func updateOwnshipLayer() {
+    if updatingSimConnectShips {
+      _ = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+        do {
+          try proxyMap?.map?.updateLayer(withId: "OwnshipLayer", type: LocationIndicatorLayer.self) { layer in
+            layer.location = .constant([simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude, simConnect.ownship.altitude])
+            layer.bearing = .constant(simConnect.ownship.heading)
+          }
+        } catch let e {
+          print("Error updating ownship layer: \(e)")
+        }
+      }
+    }
   }
   
   // MARK: addRasterRadarSource
-  func addRasterRadarSource(_ map: MapboxMap) {
+  func addRasterRadarSource() {
     // https://api.rainviewer.com/public/weather-maps.json
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
     // TODO: Get current Radar API json string
@@ -473,8 +497,8 @@ struct MapScreen: View {
       rasterLayer.rasterOpacity = .constant(0.4)
       
       do {
-        try map.addSource(rasterSource)
-        try map.addLayer(rasterLayer)
+        try proxyMap?.map?.addSource(rasterSource)
+        try proxyMap?.map?.addLayer(rasterLayer)
       } catch {
         rasterRadarAlertVisible = true
         print("Failed to update style. Error: \(error)")
@@ -486,37 +510,13 @@ struct MapScreen: View {
   
   
   // MARK: removeRasterRadarSource
-  func removeRasterRadarSource(_ map: MapboxMap) {
-    
+  func removeRasterRadarSource() {
     do {
-      try map.removeLayer(withId: "radar-layer")
-      try map.removeSource(withId: radarSourceID)
+      try proxyMap?.map?.removeLayer(withId: "radar-layer")
+      try proxyMap?.map?.removeSource(withId: radarSourceID)
     } catch {
       print("Failed to remove radar source. Error: \(error)")
     }
-  }
-  
-  // MARK: getAirportIcon
-  func getAirportIcon(for size: String) -> PointAnnotation.Image? {
-    switch size {
-    case "Large":
-      if let temp = UIImage(named: "lg-airport-default"), let resized = temp.resize(newWidth: 42) {
-        return PointAnnotation.Image(image: resized, name: "lg")
-      }
-    case "Medium":
-      if let temp = UIImage(named: "md-airport-default"), let resized = temp.resize(newWidth: 38) {
-        return PointAnnotation.Image(image: resized, name: "md")
-      }
-    default:
-      if let temp = UIImage(named: "sm-airport-default"), let resized = temp.resize(newWidth: 32) {
-        return PointAnnotation.Image(image: resized, name: "sm")
-      }
-    }
-    
-    if let temp = UIImage(named: "sm-airport-default"), let resized = temp.resize(newWidth: 32) {
-      return PointAnnotation.Image(image: resized, name: "sm")
-    }
-    return nil
   }
   
   // MARK: handleCameraChange
@@ -561,31 +561,6 @@ struct MapScreen: View {
 //      mapViewModel.hideSmallAirports()
     }
     
-  }
-  
-  // MARK: removeAirports
-  func removeAirports(size: String) {
-//    airports.removeAll(where: { $0.properties.size.rawValue == size })
-    
-//    for airport in airportJSONModel.airports {
-//      if airport.properties.size.rawValue == size {
-//        airport.visible = false
-//      }
-//    }
-  }
-  
-  // MARK: loadAirports
-  func loadAirports(bounds: CoordinateBounds, size: String) {
-//    let prevVisibleAirports = cacheAirports
-//    let visibleAirports = airportJSONModel.fetchGeoJSON(size: size, bounds: bounds)
-//    cacheAirports = visibleAirports
-//    
-//    let removedAirports = prevVisibleAirports.filter { !visibleAirports.contains($0) }
-//    let addedAirports = visibleAirports.filter { !prevVisibleAirports.contains($0) }
-//
-//    airports.removeAll(where: { removedAirports.contains($0) })
-//    airports.append(contentsOf: addedAirports)
-//    airportJSONModel.fetchVisibleAirports(size: size, bounds: bounds)
   }
   
   // MARK: calculateVisibleMapRegion
