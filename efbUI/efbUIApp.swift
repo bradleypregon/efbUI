@@ -10,7 +10,7 @@ import SwiftData
 
 @main
 struct efbUIApp: App {
-  @State private var simConnect: SimConnectShipObserver = SimConnectShipObserver(traffic: [])
+  @State private var simConnectShip: SimConnectShipObserver = SimConnectShipObserver()
   @State private var settings: Settings = Settings()
   // TODO: This no longer needs to be Environment
   @State private var airportDetailViewModel: AirportScreenViewModel = AirportScreenViewModel()
@@ -31,7 +31,7 @@ struct efbUIApp: App {
             Spacer()
           }
         }
-        .environment(simConnect)
+        .environment(simConnectShip)
         .environment(settings)
         .environment(airportDetailViewModel)
         .environment(simbrief)
