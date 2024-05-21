@@ -24,14 +24,9 @@ struct SimConnectShip: Identifiable, Equatable {
 }
 
 @Observable
-class SimConnectShipObserver {
-  var ownship: SimConnectShip
-  var traffic: [SimConnectShip]
-  
-  init(ownship: SimConnectShip = SimConnectShip(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero), traffic: [SimConnectShip]) {
-    self.ownship = ownship
-    self.traffic = traffic
-  }
+final class SimConnectShipObserver {
+  var ownship: SimConnectShip = .init(coordinate: .init(latitude: .zero, longitude: .zero), altitude: .zero, heading: .zero, speed: .zero)
+  var traffic: [SimConnectShip] = []
 }
 
 class ServerStatus {
