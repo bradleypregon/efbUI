@@ -200,7 +200,7 @@ final class ServerListener {
   private func heartbeat() {
     let timestamp = Date()
     print("Heartbeat, timestamp: \(timestamp)")
-    let data = "heartbeat timestamp \(timestamp)\r\n"
+    let data = "{'App': 'ForeFlight'}"
     
     let endpoint = NWEndpoint.hostPort(host: .ipv4(IPv4Address.broadcast), port: 63093)
     let udpConnection = NWConnection(to: endpoint, using: .udp)
