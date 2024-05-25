@@ -14,12 +14,18 @@ struct AirportSunriseSunsetView: View {
   var body: some View {
     if let weather = weather {
       HStack(spacing: 1) {
-        Image(systemName: "sunrise.fill")
-        Text("\(convertTime(weather.current.sunrise))")
+        HStack {
+          Image(systemName: "sunrise.fill")
+          Text("\(convertTime(weather.current.sunrise))")
+        }
+        .foregroundStyle(.blue)
         Spacer()
           .frame(width: 5)
-        Image(systemName: "sunset.fill")
-        Text("\(convertTime(weather.current.sunset))")
+        HStack {
+          Image(systemName: "sunset.fill")
+          Text("\(convertTime(weather.current.sunset))")
+        }
+        .foregroundStyle(.orange)
       }
     }
     
@@ -65,7 +71,7 @@ struct AirportScreen: View {
               HStack {
                 Grid(alignment: .leading) {
                   GridRow {
-                    Text("Flight category")
+                    Text("Wx Category")
                       .font(.subheadline)
                     if !viewModel.faaMetar.isEmpty {
                       Text(viewModel.wxCategory.rawValue)
@@ -86,7 +92,14 @@ struct AirportScreen: View {
                     Button {
                       selectedTab = 2
                     } label: {
-                      Text("View Charts")
+                      Text("Charts")
+                    }
+                    .buttonStyle(.bordered)
+                    Button {
+                      viewModel.requestMap = true
+                      selectedTab = 3
+                    } label: {
+                      Image(systemName: "map")
                     }
                     .buttonStyle(.bordered)
                   }
