@@ -108,6 +108,10 @@ struct SettingsView: View {
             HStack {
               TextField("Celsius/Fahrenheitº", value: $calcInput, format: .number, prompt: Text("C/Fº"))
                 .textFieldStyle(.roundedBorder)
+<<<<<<< HEAD
+=======
+                .keyboardType(.decimalPad)
+>>>>>>> aacbb17 (New feature: celsius/fahrenheit converter)
                 .onChange(of: calcInput) {
                   if let calc = calcInput {
                     calcFOutput = (Double(calc)*1.8) + 32
