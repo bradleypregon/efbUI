@@ -110,8 +110,8 @@ struct MapScreen: View {
                   PointAnnotation(coordinate: CLLocationCoordinate2DMake(airport.lat, airport.long), isDraggable: false)
                     .image(named: "lg-airport-vfr")
                     .textField(airport.icao)
-                    .textOffset([0.0, -1.8])
-                    .textColor(StyleColor(.white))
+                    .textOffset(x: 0.0, y: -1.8)
+                    .textColor(.white)
                     .textSize(12)
                     .onTapGesture {
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
@@ -137,8 +137,8 @@ struct MapScreen: View {
                       columnVisibility = .all
                     }
                     .textField(airport.icao)
-                    .textOffset([0.0, -1.6])
-                    .textColor(StyleColor(.white))
+                    .textOffset(x: 0.0, y: -1.9)
+                    .textColor(.white)
                     .textSize(11)
                 }
                 .clusterOptions(ClusterOptions(clusterRadius: 75.0, clusterMaxZoom: 8.0))
@@ -155,8 +155,8 @@ struct MapScreen: View {
                       columnVisibility = .all
                     }
                     .textField(airport.icao)
-                    .textOffset([0.0, -1.6])
-                    .textColor(StyleColor(.white))
+                    .textOffset(x: 0.0, y: -1.9)
+                    .textColor(.white)
                     .textSize(9)
                 }
                 .clusterOptions(ClusterOptions(circleRadius: .constant(12.0), clusterRadius: 75.0, clusterMaxZoom: 6.5))
@@ -202,7 +202,7 @@ struct MapScreen: View {
                   PolylineAnnotationGroup {
                     PolylineAnnotation(lineCoordinates: navlog.map { CLLocationCoordinate2D(latitude: Double($0.lat) ?? .zero, longitude: Double($0.long) ?? .zero)})
                       .lineWidth(2)
-                      .lineColor(StyleColor(.blue))
+                      .lineColor(.blue)
                   }
                   ForEvery(navlog.filter { $0.type != "apt" }, id:\.id) { wpt in
                     MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: Double(wpt.lat) ?? .zero, longitude: Double(wpt.long) ?? .zero)) {
@@ -232,8 +232,7 @@ struct MapScreen: View {
                   let polygon = Polygon([polyCoords])
                   return PolygonAnnotation(polygon: polygon, isDraggable: false)
                     .fillOpacity(0.09)
-                    .fillColor(sigmet.hazard == "ICE" ? StyleColor(.blue) : sigmet.hazard == "TURB" ? StyleColor(.red) : sigmet.hazard == "CONVECTIVE" ? StyleColor(.orange) : StyleColor(.gray))
-                    .fillOutlineColor(StyleColor(.black))
+                    .fillColor(getSigmetFillColor(sigmet: sigmet.hazard))
                     .onTapGesture {
                       // testing purposes
                       print("hz: \(sigmet.hazard)")
@@ -458,6 +457,19 @@ struct MapScreen: View {
       }
     }
     
+  }
+  
+  func getSigmetFillColor(sigmet: String) -> StyleColor {
+    switch sigmet {
+    case "ICE":
+      return .init(.blue)
+    case "TURB":
+      return .init(.red)
+    case "CONVECTIVE":
+      return .init(.orange)
+    default:
+      return .init(.gray)
+    }
   }
   
   func addOwnshipLayer() {
