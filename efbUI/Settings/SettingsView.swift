@@ -10,64 +10,46 @@ import MapKit
 import Observation
 import SwiftData
 
-enum MapStyle: String, CaseIterable {
-  case standard = "Standard"
-  case mutedStandard = "Muted Standard"
-  case satellite = "Satellite"
-  case hybrid = "Hybrid"
-}
-
-@Observable
-class Settings {
-  
-}
-
 struct SettingsView: View {
-  @Environment(Settings.self) private var settings
   @Environment(\.modelContext) private var modelContext
+  @Query var userSettings: [UserSettings]
   
-  @State var mapStyle: MapStyle = .standard
-  
+  @State var ownshipRegistration: String = ""
   @State var simbriefUserIDString: String = ""
-  @State var mapOwnshipRegistration: String = ""
   @State var outboundNotificationDistance: Int = 20
   @State var inboundNotificationDistance: Int = 30
   @State var finalNotificationDistance: Int = 5
-  
-  @Query var simbriefUser: [SimBriefUser]
+  @State var keepAwake: Bool = false
   
   var body: some View {
-    
     NavigationStack {
       VStack {
         Form {
-          Section(header: Text("Map"), content: {
+          Section(header: Text("Map")) {
             HStack {
-              Text("Map Style")
-              Picker("Map Style", selection: $mapStyle) {
-                ForEach(MapStyle.allCases, id: \.self) { style in
-                  Text(style.rawValue).tag(style)
+              Text("Ownship Registration")
+              TextField("N123NA", text: $ownshipRegistration)
+                .onSubmit {
+                  if userSettings.isEmpty {
+                    let settings = UserSettings(ownshipRegistration: ownshipRegistration)
+                    modelContext.insert(settings)
+                  } else {
+                    userSettings.first?.ownshipRegistration = ownshipRegistration
+                  }
                 }
-              }
-              
             }
-            HStack {
-              Text("Default Ownship Registration")
-              TextField("N123NA", text: $mapOwnshipRegistration)
-            }
-          })
+          }
           Section(header: Text("Simbrief")) {
             HStack {
               Text("SimBrief User ID")
               TextField("SimBrief ID (123456)", text: $simbriefUserIDString)
                 .onSubmit {
-                  if simbriefUser.isEmpty {
-                    // new
-                    let user = SimBriefUser(userID: simbriefUserIDString)
-                    modelContext.insert(user)
+                  userSettings.first?.simbriefUserID = simbriefUserIDString
+                  if userSettings.isEmpty {
+                    let settings = UserSettings(simbriefUserID: simbriefUserIDString)
+                    modelContext.insert(settings)
                   } else {
-                    // edit
-                    simbriefUser.first?.userID = simbriefUserIDString
+                    userSettings.first?.simbriefUserID = simbriefUserIDString
                   }
                 }
             }
@@ -77,25 +59,53 @@ struct SettingsView: View {
               Text("Outbound")
               TextField("20 miles final call...", value: $outboundNotificationDistance, format: .number)
                 .keyboardType(.decimalPad)
+                .onSubmit {
+                  userSettings.first?.outboundDistance = outboundNotificationDistance
+                }
             }
             HStack {
               Text("Inbound")
               TextField("30 miles inb...", value: $inboundNotificationDistance, format: .number)
                 .keyboardType(.decimalPad)
+                .onSubmit {
+                  userSettings.first?.inboundDistance = inboundNotificationDistance
+                }
             }
             HStack {
               Text("Final")
               TextField("5 mile final...", value: $finalNotificationDistance, format: .number)
                 .keyboardType(.decimalPad)
+                .onSubmit {
+                  userSettings.first?.finalDistance = finalNotificationDistance
+                }
             }
           }
+          
+          Section {
+            HStack {
+              Toggle("Keep Awake", systemImage: keepAwake ? "bolt.fill" : "bolt.slash", isOn: $keepAwake)
+                .font(.title2)
+                .toggleStyle(.button)
+                .contentTransition(.symbolEffect)
+                .onChange(of: keepAwake) {
+                  UIApplication.shared.isIdleTimerDisabled = keepAwake
+                }
+            }
+          } header: {
+            Text("Misc Settings")
+          }
+
         }
       }
       .navigationTitle("Settings")
       .navigationBarTitleDisplayMode(.large)
     }
     .onAppear {
-      simbriefUserIDString = simbriefUser.first?.userID ?? ""
+      ownshipRegistration = userSettings.first?.ownshipRegistration ?? ""
+      simbriefUserIDString = userSettings.first?.simbriefUserID ?? ""
+      outboundNotificationDistance = userSettings.first?.outboundDistance ?? 20
+      inboundNotificationDistance = userSettings.first?.inboundDistance ?? 20
+      finalNotificationDistance = userSettings.first?.finalDistance ?? 5
     }
   }
 }
