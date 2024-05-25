@@ -10,11 +10,11 @@ import SwiftData
 
 struct SimbriefScreen: View {
   @Environment(SimBriefViewModel.self) var simbrief
-  @Query var simbriefID: [SimBriefUser]
+  @Query var simbriefID: [UserSettings]
   
   var body: some View {
     VStack {
-      if let sbID = simbriefID.first?.userID {
+      if let sbID = simbriefID.first?.simbriefUserID {
         HStack {
           Text("SimBrief OFP | \(sbID)")
           Button {
