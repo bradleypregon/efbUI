@@ -247,6 +247,7 @@ enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
 // cityServed, sunrise/sunset, charts, local weather, selectedInfoTab
 @Observable
 class AirportScreenViewModel: AirportDetails {
+  var requestMap: Bool = false
   var selectedAirport: AirportTable?
   var osmWeatherResults: OSMWeatherSchema?
   var cityServed = ""
@@ -303,7 +304,7 @@ class AirportScreenViewModel: AirportDetails {
   func formatAirportCoordinates(lat: Double, long: Double) -> String {
     let formattedLat = String(format: "%.2f", lat)
     let formattedLong = String(format: "%.2f", long)
-    return "\(formattedLat)/\(formattedLong)"
+    return "\(formattedLat) / \(formattedLong)"
   }
   
   func fetchAirportCharts(icao: String) {
