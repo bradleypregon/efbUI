@@ -9,6 +9,11 @@ import SwiftUI
 import CoreLocation
 import Combine
 
+@Observable
+class TabBarViewModel {
+  var selectedTab = 0
+}
+
 struct TabBar: View {
   @State var selectedTab = 0
   @Environment(SimConnectShipObserver.self) private var ship

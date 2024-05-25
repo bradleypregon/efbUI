@@ -123,6 +123,9 @@ struct TopBarView: View {
   @State private var halfExpanded: Bool = false
   @State private var fullExpanded: Bool = false
   
+  @State private var textFieldFocused: Bool = false
+  @State private var tempSearchText: String = ""
+  
   var server: ServerListener {
     ServerListener(ship: simConnect)
   }
@@ -130,6 +133,9 @@ struct TopBarView: View {
   var body: some View {
     VStack {
       HStack(alignment: .center, spacing: 20) {
+        Text(currentZuluTime24)
+          .padding(.leading, 10)
+        
         Toggle("SimConnect", systemImage: serverRunning ? "wifi" : "wifi.slash", isOn: $serverRunning)
           .font(.title2)
           .tint(getServerState())
@@ -141,7 +147,7 @@ struct TopBarView: View {
               server.start()
             }
           }
-          .padding([.leading, .trailing], 20)
+          .padding([.leading, .trailing], 10)
         
         Spacer()
           .frame(width: 20)
@@ -179,9 +185,19 @@ struct TopBarView: View {
         //          Text("Speech")
         //        }
         //        .buttonStyle(.bordered)
+        
         Spacer()
-        Text(currentZuluTime24)
-        Spacer()
+        TextField("Search Airports...", text: $tempSearchText)
+          .autocorrectionDisabled()
+          .textFieldStyle(.roundedBorder)
+          .frame(width: 350)
+          .onTapGesture {
+            textFieldFocused.toggle()
+          }
+          .popover(isPresented: $textFieldFocused) {
+            Text("Hello there")
+          }
+          .padding(.trailing, 10)
       }
       .padding([.top], 15)
       Spacer()
