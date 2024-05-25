@@ -79,6 +79,7 @@ final class ServerListener {
     // TODO: Find reliable way for code to figure out if packets have stopped incoming
     // IF packets have stopped, start heartbeat
     // if heartbeat is active and packets begin, stop heartbeat
+    
     self.timer.setEventHandler(handler: self.heartbeat)
     self.timer.schedule(deadline: .now() + 5.0, repeating: 5.0)
     self.timer.activate()
@@ -198,18 +199,34 @@ final class ServerListener {
 
   
   private func heartbeat() {
+    
     let timestamp = Date()
-    print("Heartbeat, timestamp: \(timestamp)")
-    let data = "{'App': 'ForeFlight'}"
+    print("Heartbeat: \(timestamp)")
     
-    let endpoint = NWEndpoint.hostPort(host: .ipv4(IPv4Address.broadcast), port: 63093)
-    let udpConnection = NWConnection(to: endpoint, using: .udp)
+    let temp = TestTemp(App: "ForeFlight")
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
     
-    udpConnection.send(content: data.data(using: .utf8), completion: .contentProcessed { error in
-      if let error = error {
-        print("Error sending heartbeat: \(error)")
-      }
-    })
+    do {
+      let tempData = try encoder.encode(temp)
+      let tempString = String(data: tempData, encoding: .utf8)
+      
+      let endpoint = NWEndpoint.hostPort(host: .ipv4(.broadcast), port: 63093)
+      let udpConnection = NWConnection(to: endpoint, using: .udp)
+      
+      udpConnection.send(content: tempString?.data(using: .ascii), completion: .contentProcessed { error in
+        if let error = error {
+          print("Error sending heartbeat: \(error)")
+        }
+      })
+    } catch {
+      print("Error encoding heartbeat message or sending in \(#function): \(error)")
+    }
+    
   }
   
+}
+
+struct TestTemp: Encodable {
+  let App: String
 }
