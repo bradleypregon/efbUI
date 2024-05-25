@@ -29,18 +29,16 @@ class MapScreenViewModel {
   var satelliteVisible: Bool = false
   
   init() {
-    DispatchQueue.main.async { [self] in
-      largeAirports = airportJSONModel.airports.filter { $0.size == .large }
-      mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
-      smallAirports = airportJSONModel.airports.filter { $0.size == .small }
-    }
+    largeAirports = airportJSONModel.airports.filter { $0.size == .large }
+    mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
+    smallAirports = airportJSONModel.airports.filter { $0.size == .small }
   }
 }
 
 struct MapScreen: View {
   @Binding var selectedTab: Int
   @Environment(SimConnectShipObserver.self) private var simConnect
-  @Environment(Settings.self) private var settings
+//  @Environment(Settings.self) private var settings
   @Environment(SimBriefViewModel.self) private var simbrief
   @Environment(AirportScreenViewModel.self) private var airportVM
   
@@ -301,6 +299,14 @@ struct MapScreen: View {
               if ServerStatus.shared.status == .running {
                 addOwnshipLayer()
               }
+              if airportVM.requestMap {
+                Task {
+                  guard let temp = airportVM.selectedAirport else { return }
+                  proxy.camera?.ease(to: CameraOptions(center: CLLocationCoordinate2DMake(temp.airportRefLat, temp.airportRefLong), zoom: 13), duration: 2)
+                  airportVM.requestMap = false
+                }
+                
+              }
             }
             .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
               Button("Ok") {
@@ -349,7 +355,7 @@ struct MapScreen: View {
               
             }
           }
-          .ignoresSafeArea(.all)
+          .ignoresSafeArea()
           .onChange(of: ServerStatus.shared.status) {
             if ServerStatus.shared.status == .running {
               addOwnshipLayer()
@@ -417,6 +423,13 @@ struct MapScreen: View {
                 }
               }
             
+            Toggle("Drawing", systemImage: drawingEnabled ? "pencil" : "pencil.slash", isOn: $drawingEnabled)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
+            
             Spacer()
               .frame(height: 15)
             
@@ -437,8 +450,10 @@ struct MapScreen: View {
           .padding([.leading], 5)
         }
         if (drawingEnabled) {
+          // TODO: make this better
           DrawingView(canvas: $canvas)
-            .allowsHitTesting(false)
+            .frame(width: 500, height: 1000)
+            .allowsHitTesting(true)
         }
       }
     }
