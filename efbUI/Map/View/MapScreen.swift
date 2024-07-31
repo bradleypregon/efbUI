@@ -25,13 +25,20 @@ class MapScreenViewModel {
   var displaySm: Bool = false
   var displaySID: Bool = false
   var displaySTAR: Bool = false
+  var gatesVisible: Bool = false
   
   var satelliteVisible: Bool = false
+  
+  var visibleGates: [GateTable] = []
   
   init() {
     largeAirports = airportJSONModel.airports.filter { $0.size == .large }
     mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
     smallAirports = airportJSONModel.airports.filter { $0.size == .small }
+  }
+  
+  func fetchVisibleGates() {
+    visibleGates = SQLiteManager.shared.getAirportGates("KLAX")
   }
 }
 
@@ -272,6 +279,15 @@ struct MapScreen: View {
                     }
                 }
               }
+              
+              if mapViewModel.gatesVisible {
+                PointAnnotationGroup(mapViewModel.visibleGates, id: \.gateIdentifier) { gate in
+                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(gate.gateLatitude, gate.gateLongitude))
+                    .textField(gate.name)
+                    .textColor(.white)
+                    .textSize(12)
+                }
+              }
             }
             .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
             .ornamentOptions(ornamentOptions)
@@ -286,6 +302,17 @@ struct MapScreen: View {
             }
             // TODO: Follow Mapbox recommendation for .onCameraChanged
             // NO @State variable changes. Too much computation and redraws
+            /*
+            .onCameraChanged { changed in
+              if changed.cameraState.zoom >= 7.5 {
+                mapViewModel.gatesVisible = true
+                // TODO: fetch visible airports in rect
+                mapViewModel.fetchVisibleGates()
+              } else {
+                mapViewModel.gatesVisible = false
+              }
+            }
+             */
 //            .onCameraChanged(action: { changed in
 //              currentZoom = changed.cameraState.zoom
 //              coordinateBounds = calculateVisibleMapRegion(center: changed.cameraState.center, zoom: changed.cameraState.zoom, geometry: geometry)
@@ -295,6 +322,7 @@ struct MapScreen: View {
 //            })
             .onAppear {
               proxyMap = proxy
+              // TODO: Add check if ownship layer already added
               if ServerStatus.shared.status == .running {
                 addOwnshipLayer()
               }
