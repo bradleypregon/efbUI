@@ -126,8 +126,7 @@ struct MapScreen: View {
                     }
                     .onLongPressGesture { context in
                       mapPopoverSelectedAirport = airport
-                      let point = context.point
-                      mapPopoverSelectedPoint = UnitPoint(x: (point.x / geometry.size.width), y: (point.y / geometry.size.height))
+                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
                       return true
                     }
                 }
@@ -280,6 +279,7 @@ struct MapScreen: View {
                 }
               }
               
+              // WIP
               if mapViewModel.gatesVisible {
                 PointAnnotationGroup(mapViewModel.visibleGates, id: \.gateIdentifier) { gate in
                   PointAnnotation(coordinate: CLLocationCoordinate2DMake(gate.gateLatitude, gate.gateLongitude))
@@ -526,6 +526,14 @@ struct MapScreen: View {
         }
       }
     }
+  }
+  
+  func initTrafficLayer() {
+    
+  }
+  
+  func updateTrafficLayer() {
+    
   }
   
   // MARK: addRasterRadarSource
