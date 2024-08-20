@@ -49,10 +49,10 @@ struct AirportAnnotationSidebarView: View {
           Section {
             Grid(alignment: .leading) {
               GridRow {
-                Text("CTAF")
-                  .font(.subheadline)
-                Text(vm.getCommunicationType(comms: vm.comms, type: "UNI"))
-                  .fontWeight(.semibold)
+              Text("TWR")
+                .font(.subheadline)
+              Text(vm.getCommunicationType(comms: vm.comms, type: "TWR"))
+                .fontWeight(.semibold)
               }
               GridRow {
                 Text("ATIS")
@@ -161,7 +161,7 @@ struct AirportAnnotationSidebarView: View {
                     .fontWeight(.semibold)
                 }
                 GridRow {
-                  Text("CTAF")
+                  Text("UNI")
                     .font(.subheadline)
                   Text(vm.getCommunicationType(comms: vm.comms, type: "UNI"))
                     .fontWeight(.semibold)
