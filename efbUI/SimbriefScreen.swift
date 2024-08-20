@@ -12,6 +12,16 @@ struct SimbriefScreen: View {
   @Environment(SimBriefViewModel.self) var simbrief
   @Query var simbriefID: [UserSettings]
   
+  enum SimbriefScreenPickerOptions: String, Identifiable, CaseIterable {
+    case dep = "Depature"
+    case arr = "Arrival"
+    case alt = "Alternate"
+    
+    var id: Self { self }
+  }
+  
+  @State private var selectedSimbriefPicker: SimbriefScreenPickerOptions = .dep
+  
   var body: some View {
     VStack {
       if let sbID = simbriefID.first?.simbriefUserID {
@@ -40,6 +50,15 @@ struct SimbriefScreen: View {
         
         if let temp = simbrief.ofp {
           Text("\(temp.origin.icaoCode)/\(temp.origin.planRwy) \(temp.general.routeNavigraph) \(temp.destination.icaoCode)/\(temp.destination.planRwy) | \(temp.alternate?.first?.icaoCode ?? "")/\(temp.alternate?.first?.planRwy ?? "")")
+          
+          Picker("Airport", selection: $selectedSimbriefPicker) {
+            ForEach(SimbriefScreenPickerOptions.allCases, id: \.id) { tab in
+              Text(tab.rawValue)
+                .tag(tab)
+            }
+          }
+            .pickerStyle(.segmented)
+          
           HStack {
             ScrollView(.vertical) {
               if let atis = temp.origin.atis {
@@ -80,6 +99,9 @@ struct SimbriefScreen: View {
           }
           
         }
+      } 
+      else {
+        ContentUnavailableView("Simbrief Unvailable", systemImage: "airplane.circle", description: Text("Enter Simbrief ID in Settings tab to pull data."))
       }
       
     }
