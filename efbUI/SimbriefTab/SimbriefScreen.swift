@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct SimbriefScreen: View {
+  @Environment(\.modelContext) private var modelContext
   @Environment(SimBriefViewModel.self) var simbrief
   @Query var simbriefID: [UserSettings]
   
@@ -51,55 +52,51 @@ struct SimbriefScreen: View {
         if let temp = simbrief.ofp {
           Text("\(temp.origin.icaoCode)/\(temp.origin.planRwy) \(temp.general.routeNavigraph) \(temp.destination.icaoCode)/\(temp.destination.planRwy) | \(temp.alternate?.first?.icaoCode ?? "")/\(temp.alternate?.first?.planRwy ?? "")")
           
+          VStack {
+            HStack {
+              Text(temp.aircraft.icaoCode)
+              Text(temp.general.airline + temp.general.flightNumber)
+              Text(temp.aircraft.reg)
+            }
+            HStack {
+              VStack {
+                Text("CI: \(temp.general.costIndex)")
+                Text("FL: \(temp.general.initialAltitude)")
+                Text("ETE: \(temp.times.ete)")
+                Text("Dep: \(convertDate(temp.times.schedDep))z")
+                Text("Arr: \(convertDate(temp.times.schedArr))z")
+              }
+              VStack {
+                Text("Pax: \(temp.weights.paxCountActual)")
+                Text("Cargo: \(temp.weights.cargo)")
+                Text("Block: \(temp.fuel.block)")
+                Text("eZFW: \(temp.weights.estZFW)")
+                Text("eTOW: \(temp.weights.estTOW)")
+                Text("eLDW: \(temp.weights.estLDW)")
+              }
+            }
+          }
+          
+          
           Picker("Airport", selection: $selectedSimbriefPicker) {
             ForEach(SimbriefScreenPickerOptions.allCases, id: \.id) { tab in
               Text(tab.rawValue)
                 .tag(tab)
             }
           }
-            .pickerStyle(.segmented)
+          .pickerStyle(.segmented)
           
-          HStack {
-            ScrollView(.vertical) {
-              if let atis = temp.origin.atis {
-                ForEach(atis, id:\.self) { ati in
-                  Text(ati.network)
-                  Text(ati.message)
-                  Divider()
-                }
-              }
-            }
-            VStack {
-              Text(temp.general.airline + temp.general.flightNumber)
-              Text(temp.aircraft.reg)
-              Text("CI: \(temp.general.costIndex)")
-              Text("FL: \(temp.general.initialAltitude)")
-              Text("ETE: \(temp.times.ete)")
-              Text("Dep: \(convertDate(temp.times.schedDep))z")
-              Text("Arr: \(convertDate(temp.times.schedArr))z")
-            }
-            VStack {
-              Text(temp.aircraft.icaoCode)
-              Text("Pax: \(temp.weights.paxCountActual)")
-              Text("Cargo: \(temp.weights.cargo)")
-              Text("Block: \(temp.fuel.block)")
-              Text("eZFW: \(temp.weights.estZFW)")
-              Text("eTOW: \(temp.weights.estTOW)")
-              Text("eLDW: \(temp.weights.estLDW)")
-            }
-            ScrollView(.vertical) {
-              if let atis = temp.destination.atis {
-                ForEach(atis, id:\.self) { ati in
-                  Text(ati.network)
-                  Text(ati.message)
-                  Divider()
-                }
-              }
-            }
+          switch selectedSimbriefPicker {
+          case .dep:
+            SimbriefTabDetails(airport: temp.origin)
+          case .arr:
+            SimbriefTabDetails(airport: temp.destination)
+          case .alt:
+            SimbriefTabDetails(alternates: temp.alternate)
           }
           
         }
-      } 
+      }
       else {
         ContentUnavailableView("Simbrief Unvailable", systemImage: "airplane.circle", description: Text("Enter Simbrief ID in Settings tab to pull data."))
       }
@@ -116,6 +113,18 @@ struct SimbriefScreen: View {
   
 }
 
+
+// For development
+@MainActor
+let previewContainer: ModelContainer = {
+  let container = try! ModelContainer(for: UserSettings.self, configurations: .init(isStoredInMemoryOnly: true))
+  container.mainContext.insert(UserSettings(simbriefUserID: "405981"))
+  return container
+}()
+
 #Preview {
   SimbriefScreen()
+    .environmentObject(SimBriefViewModel())
+    .modelContainer(previewContainer)
 }
+

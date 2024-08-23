@@ -50,37 +50,6 @@ struct OFPSchema: Decodable {
     let routeNavigraph: String
   }
   
-  struct OFPAlternate: Decodable {
-    let icaoCode: String
-    let iataCode: String
-    let faaCode: String
-    let elevation: String
-    let posLat: String
-    let posLong: String
-    let name: String
-    let planRwy: String
-    let transAlt: String
-    let transLevel: String
-    let cruiseAltitude: String
-    let airDistance: String
-    let trackTrue: String
-    let trackMag: String
-    let avgWindComp: String
-    let avgWindDir: String
-    let avgWindSpd: String
-    let ete: String
-    let route: String
-    let routeIFPS: String
-    let routeNavigraph: String
-    let metar: String
-    let metarTime: Quantum
-    let metarCategory: Quantum
-    let metarVisibility: Quantum
-    let metarCeiling: Quantum
-    let atis: [OFPATIS]?
-    let notam: [OFPNOTAM]?
-  }
-  
   struct OFPAircraft: Decodable {
     let icaoCode: String
     let iataCode: String
@@ -150,6 +119,37 @@ struct OFPAirport: Decodable {
   let notam: [OFPNOTAM]?
 }
 
+struct OFPAlternate: Decodable {
+  let icaoCode: String
+  let iataCode: String
+  let faaCode: String
+  let elevation: String
+  let posLat: String
+  let posLong: String
+  let name: String
+  let planRwy: String
+  let transAlt: String
+  let transLevel: String
+  let cruiseAltitude: String
+  let airDistance: String
+  let trackTrue: String
+  let trackMag: String
+  let avgWindComp: String
+  let avgWindDir: String
+  let avgWindSpd: String
+  let ete: String
+  let route: String
+  let routeIFPS: String
+  let routeNavigraph: String
+  let metar: String
+  let metarTime: Quantum
+  let metarCategory: Quantum
+  let metarVisibility: Quantum
+  let metarCeiling: Quantum
+  let atis: [OFPATIS]?
+  let notam: [OFPNOTAM]?
+}
+
 struct OFPATIS: Decodable, Hashable {
   let network: String
   let issued: Date
@@ -159,7 +159,7 @@ struct OFPATIS: Decodable, Hashable {
   let message: String
 }
 
-struct OFPNOTAM: Decodable {
+struct OFPNOTAM: Decodable, Hashable {
   let accountID: String
   let notamID: String
   let locationID: String

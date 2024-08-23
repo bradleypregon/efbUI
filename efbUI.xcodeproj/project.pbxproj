@@ -28,6 +28,7 @@
 		A20620222B49B61D0034D902 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A20620212B49B61D0034D902 /* SQLite */; };
 		A20620242B49B6AB0034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A20620232B49B6AB0034D902 /* MapboxMaps */; };
 		A20620262B49DC890034D902 /* AirportScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20620252B49DC890034D902 /* AirportScreenViewModel.swift */; };
+		A207E90A2C78ED8400E4C4EE /* SimbriefTabDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = A207E9092C78ED8400E4C4EE /* SimbriefTabDetails.swift */; };
 		A21B02372B5034850041D60B /* PDFKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02362B5034850041D60B /* PDFKitView.swift */; };
 		A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02382B55C8760041D60B /* SimBriefUserData.swift */; };
 		A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B023B2B55D4A00041D60B /* SimBriefAPI.swift */; };
@@ -93,6 +94,7 @@
 		3AE11B5227319480005974E5 /* SimConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimConnect.swift; sourceTree = "<group>"; };
 		A2046B0A2B28E58300E04BEA /* MKViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKViewRepresentable.swift; sourceTree = "<group>"; };
 		A20620252B49DC890034D902 /* AirportScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportScreenViewModel.swift; sourceTree = "<group>"; };
+		A207E9092C78ED8400E4C4EE /* SimbriefTabDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefTabDetails.swift; sourceTree = "<group>"; };
 		A21B02362B5034850041D60B /* PDFKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitView.swift; sourceTree = "<group>"; };
 		A21B02382B55C8760041D60B /* SimBriefUserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimBriefUserData.swift; sourceTree = "<group>"; };
 		A21B023B2B55D4A00041D60B /* SimBriefAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimBriefAPI.swift; sourceTree = "<group>"; };
@@ -240,7 +242,7 @@
 				A278ABE42BA64BEF00EC27FA /* Toast */,
 				A2EC6FD92B49AFF300F31364 /* TopBar */,
 				3A24A78C27321C15000D98E5 /* TabBar.swift */,
-				A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */,
+				A207E9082C78ED6B00E4C4EE /* SimbriefTab */,
 				3AE11B5227319480005974E5 /* SimConnect.swift */,
 				A237AF812B63490300646AAF /* ChartsView.swift */,
 				3A69AF41279BB46D00E29135 /* AirportDetails */,
@@ -263,6 +265,15 @@
 				3AE11B2F27319452005974E5 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		A207E9082C78ED6B00E4C4EE /* SimbriefTab */ = {
+			isa = PBXGroup;
+			children = (
+				A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */,
+				A207E9092C78ED8400E4C4EE /* SimbriefTabDetails.swift */,
+			);
+			path = SimbriefTab;
 			sourceTree = "<group>";
 		};
 		A21B023A2B55D48D0041D60B /* SimBrief */ = {
@@ -552,6 +563,7 @@
 				A20620262B49DC890034D902 /* AirportScreenViewModel.swift in Sources */,
 				A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */,
 				A2C6ED282B3763D800856381 /* AirportAnnotationSidebarView.swift in Sources */,
+				A207E90A2C78ED8400E4C4EE /* SimbriefTabDetails.swift in Sources */,
 				A2A243682B00368B00245A0F /* SettingsView.swift in Sources */,
 				3A1BB456278A5A0E001AC228 /* MapCalloutView.swift in Sources */,
 				3A24A78D27321C15000D98E5 /* TabBar.swift in Sources */,

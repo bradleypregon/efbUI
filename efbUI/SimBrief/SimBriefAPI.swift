@@ -9,7 +9,7 @@ import Foundation
 import Observation
 
 @Observable
-class SimBriefViewModel {
+class SimBriefViewModel: ObservableObject {
   var ofp: OFPSchema? {
     didSet {
       if let ofp {
