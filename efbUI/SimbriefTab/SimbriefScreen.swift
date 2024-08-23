@@ -26,28 +26,30 @@ struct SimbriefScreen: View {
   var body: some View {
     VStack {
       if let sbID = simbriefID.first?.simbriefUserID {
-        HStack {
-          Text("SimBrief OFP | \(sbID)")
-          Button {
-            simbrief.fetchOFP(for: sbID)
-            
-            // TODO: Process split variable -> Construct linked list with each route component
-            // TODO: Check airac and compare to current downloaded database
-            
-            // Query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
-            // Give error feedback if waypoint not found
-            // HOW TO: Multiple waypoints in world can have same name - how to differentiate?
-            
-            //                  let tempSplit = route.split(separator: " ")
-            //                  let linkedList = LinkedList()
-            //                  for item in tempSplit {
-            //                    linkedList.append(value: String(item))
-            //                  }
-            //                  linkedList.printList()
-          } label: {
-            Text("Fetch Route")
-          }
+        Button {
+          simbrief.fetchOFP(for: sbID)
+          
+          // TODO: Process split variable -> Construct linked list with each route component
+          // TODO: Check airac and compare to current downloaded database
+          
+          // Query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
+          // Give error feedback if waypoint not found
+          // HOW TO: Multiple waypoints in world can have same name - how to differentiate?
+          
+          //                  let tempSplit = route.split(separator: " ")
+          //                  let linkedList = LinkedList()
+          //                  for item in tempSplit {
+          //                    linkedList.append(value: String(item))
+          //                  }
+          //                  linkedList.printList()
+        } label: {
+          Text("Fetch Route")
         }
+        .padding()
+        .background(.blue)
+        .foregroundStyle(.white)
+        .fontWeight(.semibold)
+        .clipShape(Capsule())
         
         if let temp = simbrief.ofp {
           Text("\(temp.origin.icaoCode)/\(temp.origin.planRwy) \(temp.general.routeNavigraph) \(temp.destination.icaoCode)/\(temp.destination.planRwy) | \(temp.alternate?.first?.icaoCode ?? "")/\(temp.alternate?.first?.planRwy ?? "")")

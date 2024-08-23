@@ -13,30 +13,41 @@ struct SimbriefTabDetails: View {
   
   var body: some View {
     if let airport {
-      Text(airport.icaoCode)
-      Text(airport.name)
+      Text("\(airport.icaoCode) - \(airport.name)")
       
       HStack {
-        ScrollView(.vertical) {
-          if let atis = airport.atis {
-            ForEach(atis, id:\.self) { ati in
-              Text(ati.network)
-                .fontWeight(.semibold)
-              Text(ati.message)
-              Divider()
+        VStack {
+          Text("ATIS")
+            .fontWeight(.semibold)
+          ScrollView(.vertical) {
+            if let atis = airport.atis {
+              ForEach(atis, id:\.self) { ati in
+                Text(ati.network)
+                  .fontWeight(.semibold)
+                Text(ati.message)
+                Divider()
+              }
             }
           }
         }
-        ScrollView(.vertical) {
-          if let notam = airport.notam {
-            ForEach(notam, id:\.self) { notam in
-              notamNode(notam: notam)
-              Divider()
+        
+        VStack {
+          Text("NOTAM")
+            .fontWeight(.semibold)
+          ScrollView(.vertical) {
+            if let notam = airport.notam {
+              ForEach(notam, id:\.self) { notam in
+                notamNode(notam: notam)
+                Divider()
+              }
             }
           }
         }
+        
       }
       
+    } else if let alternates {
+      Text("")
     }
   }
   
