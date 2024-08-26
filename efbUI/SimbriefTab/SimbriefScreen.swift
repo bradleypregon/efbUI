@@ -58,27 +58,70 @@ struct SimbriefScreen: View {
             HStack {
               Text(temp.aircraft.icaoCode)
               Text(temp.general.airline + temp.general.flightNumber)
+                .fontWeight(.semibold)
               Text(temp.aircraft.reg)
             }
             HStack {
-              VStack {
-                Text("CI: \(temp.general.costIndex)")
-                Text("FL: \(temp.general.initialAltitude)")
-                Text("ETE: \(temp.times.ete)")
-                Text("Dep: \(convertDate(temp.times.schedDep))z")
-                Text("Arr: \(convertDate(temp.times.schedArr))z")
+              HStack {
+                VStack {
+                  Text("CI:")
+                  Text("FL:")
+                }
+                .frame(alignment: .leading)
+                VStack {
+                  Text(temp.general.costIndex)
+                  Text(temp.general.initialAltitude)
+                }
+                .frame(alignment: .trailing)
               }
-              VStack {
-                Text("Pax: \(temp.weights.paxCountActual)")
-                Text("Cargo: \(temp.weights.cargo)")
-                Text("Block: \(temp.fuel.block)")
-                Text("eZFW: \(temp.weights.estZFW)")
-                Text("eTOW: \(temp.weights.estTOW)")
-                Text("eLDW: \(temp.weights.estLDW)")
+              Divider()
+              HStack {
+                VStack {
+                  Text("Dep:")
+                  Text("Arr:")
+                  Text("ETE:")
+                }
+                .frame(alignment: .leading)
+                VStack {
+                  Text(convertDate(temp.times.schedDep) + "z")
+                  Text(convertDate(temp.times.schedArr) + "z")
+                  Text(temp.times.ete)
+                }
+                .frame(alignment: .trailing)
+              }
+              Divider()
+              HStack {
+                VStack {
+                  Text("Pax:")
+                  Text("Cargo:")
+                  Text("Block:")
+                }
+                .frame(alignment: .leading)
+                VStack {
+                  Text(temp.weights.paxCountActual)
+                  Text(temp.weights.cargo)
+                  Text(temp.fuel.block)
+                }
+                .frame(alignment: .trailing)
+              }
+              Divider()
+              HStack {
+                VStack {
+                  Text("eZFW:")
+                  Text("eTOW:")
+                  Text("eLDW:")
+                }
+                .frame(alignment: .leading)
+                VStack {
+                  Text(temp.weights.estZFW)
+                  Text(temp.weights.estTOW)
+                  Text(temp.weights.estLDW)
+                }
+                .frame(alignment: .trailing)
               }
             }
+            .frame(maxHeight: 50)
           }
-          
           
           Picker("Airport", selection: $selectedSimbriefPicker) {
             ForEach(SimbriefScreenPickerOptions.allCases, id: \.id) { tab in
