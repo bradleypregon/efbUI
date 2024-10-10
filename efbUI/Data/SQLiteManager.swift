@@ -7,6 +7,7 @@
 
 import Foundation
 import SQLite
+typealias Expression = SQLite.Expression
 
 struct QueryAirportTextResult: Equatable, Identifiable {
   let airportIdentifier: String
