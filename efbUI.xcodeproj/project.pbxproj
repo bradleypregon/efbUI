@@ -33,7 +33,8 @@
 		A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02382B55C8760041D60B /* SimBriefUserData.swift */; };
 		A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B023B2B55D4A00041D60B /* SimBriefAPI.swift */; };
 		A22322D52B20B74E001274CA /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22322D42B20B74E001274CA /* Extensions.swift */; };
-		A22696022CB8559C006CE148 /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = A22696012CB8559C006CE148 /* navdata.db */; };
+		A22696042CB85647006CE148 /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = A22696032CB85647006CE148 /* navdata.db */; };
+		A22696062CB8686F006CE148 /* OpenMeteoSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22696052CB8686F006CE148 /* OpenMeteoSchema.swift */; };
 		A232CCBC2B250659005C3E2E /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A232CCBB2B250659005C3E2E /* MapboxMaps */; };
 		A237AF802B5C7F3B00646AAF /* OFPSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A237AF7F2B5C7F3B00646AAF /* OFPSchema.swift */; };
 		A237AF822B63490300646AAF /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A237AF812B63490300646AAF /* ChartsView.swift */; };
@@ -99,7 +100,8 @@
 		A21B02382B55C8760041D60B /* SimBriefUserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimBriefUserData.swift; sourceTree = "<group>"; };
 		A21B023B2B55D4A00041D60B /* SimBriefAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimBriefAPI.swift; sourceTree = "<group>"; };
 		A22322D42B20B74E001274CA /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		A22696012CB8559C006CE148 /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = navdata.db; path = /Users/brad/Documents/Coding/efbData/navdata.db; sourceTree = "<absolute>"; };
+		A22696032CB85647006CE148 /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = navdata.db; sourceTree = "<group>"; };
+		A22696052CB8686F006CE148 /* OpenMeteoSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeteoSchema.swift; sourceTree = "<group>"; };
 		A237AF7F2B5C7F3B00646AAF /* OFPSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OFPSchema.swift; sourceTree = "<group>"; };
 		A237AF812B63490300646AAF /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		A23B5BB22BC3096800DA5A08 /* FaaAtisAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaaAtisAPI.swift; sourceTree = "<group>"; };
@@ -317,7 +319,7 @@
 				A2D13D202BA6357100E5AFEE /* Airports */,
 				A257E1B32B2A75C6003B1859 /* SQLiteManager.swift */,
 				A257E1B52B2AB514003B1859 /* DBTableStructs.swift */,
-				A22696012CB8559C006CE148 /* navdata.db */,
+				A22696032CB85647006CE148 /* navdata.db */,
 				A21B02382B55C8760041D60B /* SimBriefUserData.swift */,
 			);
 			path = Data;
@@ -381,6 +383,7 @@
 				A23B5BB62BCDD96A00DA5A08 /* FAA */,
 				A2C6ED142B2E3DA400856381 /* OSMWeatherAPI.swift */,
 				A2C6ED162B2E3DCE00856381 /* OSMWeatherSchema.swift */,
+				A22696052CB8686F006CE148 /* OpenMeteoSchema.swift */,
 			);
 			path = Weather;
 			sourceTree = "<group>";
@@ -534,7 +537,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3AE11B3027319452005974E5 /* Preview Assets.xcassets in Resources */,
-				A22696022CB8559C006CE148 /* navdata.db in Resources */,
+				A22696042CB85647006CE148 /* navdata.db in Resources */,
 				A29479BD2BDC3A2A00B89CE9 /* Airports.json in Resources */,
 				3AE11B2D27319452005974E5 /* Assets.xcassets in Resources */,
 			);
@@ -572,6 +575,7 @@
 				A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */,
 				A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */,
 				A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */,
+				A22696062CB8686F006CE148 /* OpenMeteoSchema.swift in Sources */,
 				A26E17AF2B9EA39E002B4090 /* SigmetSchema.swift in Sources */,
 				3AE11B2927319450005974E5 /* efbUIApp.swift in Sources */,
 				A2D5FE1B2BA7C7950084AE7E /* WrappingHStack.swift in Sources */,
