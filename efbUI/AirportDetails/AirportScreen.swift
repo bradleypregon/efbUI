@@ -9,21 +9,21 @@ import SwiftUI
 import CoreLocation
 
 struct AirportSunriseSunsetView: View {
-  var weather: OSMWeatherSchema?
+  var weather: OpenMeteoSchema?
   
   var body: some View {
     if let weather = weather {
       HStack(spacing: 1) {
         HStack {
           Image(systemName: "sunrise.fill")
-          Text("\(convertTime(weather.current.sunrise))")
+          Text("\(convertTime(weather.daily.sunrise[0]))")
         }
         .foregroundStyle(.blue)
         Spacer()
           .frame(width: 5)
         HStack {
           Image(systemName: "sunset.fill")
-          Text("\(convertTime(weather.current.sunset))")
+          Text("\(convertTime(weather.daily.sunset[0]))")
         }
         .foregroundStyle(.orange)
       }
@@ -366,14 +366,15 @@ struct AirportScreenRwyTab: View {
 }
 
 // TODO: Lots we can do here to stylize
+// TODO: Need to fix weather api and then fix these
 struct AirportScreenLocalWxTab: View {
-  let localwx: OSMWeatherSchema?
+  let localwx: OpenMeteoSchema?
   
   var body: some View {
     if let localwx {
-      Text("\(localwx.current.temp.string)")
-      Text("main: \(localwx.current.weather.first?.main ?? "")")
-      Text("desc: \(localwx.current.weather.first?.description ?? "")")
+      Text("\("wx string here")")
+      Text("main: \("main here")")
+      Text("desc: \("desc here")")
       
     }
   }

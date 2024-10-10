@@ -249,7 +249,7 @@ enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
 class AirportScreenViewModel: AirportDetails {
   var requestMap: Bool = false
   var selectedAirport: AirportTable?
-  var osmWeatherResults: OSMWeatherSchema?
+  var osmWeatherResults: OpenMeteoSchema?
   var cityServed = ""
   var selectedInfoTab: AirportsScreenInfoTabs = .freq
   var selectedAirportCharts: DecodedArray<AirportChartAPISchema>?

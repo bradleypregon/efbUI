@@ -6,6 +6,7 @@
 //
 
 import Foundation
+/*
 
 // MARK: - WeatherInfo
 struct OSMWeatherSchema: Decodable {
@@ -99,3 +100,4 @@ struct Temp: Decodable {
   let day, min, max, night: Double
   let eve, morn: Double
 }
+*/
