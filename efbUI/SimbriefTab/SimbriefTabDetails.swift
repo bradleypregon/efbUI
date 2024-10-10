@@ -17,6 +17,11 @@ struct SimbriefTabDetails: View {
       
       HStack {
         VStack {
+          Text("METAR")
+            .fontWeight(.semibold)
+          Text(airport.metar)
+          Spacer()
+            .frame(height: 20)
           Text("ATIS")
             .fontWeight(.semibold)
           ScrollView(.vertical) {
