@@ -20,8 +20,7 @@ struct SimbriefTabDetails: View {
           Text("METAR")
             .fontWeight(.semibold)
           Text(airport.metar)
-          Spacer()
-            .frame(height: 20)
+          Divider()
           Text("ATIS")
             .fontWeight(.semibold)
           ScrollView(.vertical) {
@@ -58,10 +57,24 @@ struct SimbriefTabDetails: View {
   
   func notamNode(notam: OFPNOTAM) -> some View {
     VStack {
-      Text("\(formatDate(notam.dateEffective)) - \(formatDate(notam.dateExpire))")
-        .fontWeight(.semibold)
+      HStack {
+        Text("\(formatDate(notam.dateEffective)) - \(formatDate(notam.dateExpire))")
+          .fontWeight(.semibold)
+          .foregroundStyle(notamColor(category: notam.notamQcodeCategory, subject: notam.notamQcodeSubject, status: notam.notamQcodeStatus))
+      }
       Text(notam.notamText)
     }
+  }
+  
+  func notamColor(category: String, subject: String, status: String) -> Color {
+    if category.isEmpty || subject.isEmpty || status.isEmpty { return .primary }
+    if category.lowercased() == "runway" && subject.lowercased() == "runway" && status.lowercased() == "closed" {
+      return .lifr
+    }
+    else if category.lowercased() == "airport" && subject.lowercased() == "taxiway" && status.lowercased() == "closed" {
+      return .ifr
+    }
+    return .primary
   }
   
   /// Convert ISO-8601 Date to friendly String

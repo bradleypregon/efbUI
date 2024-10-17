@@ -169,9 +169,9 @@ struct OFPNOTAM: Decodable, Hashable {
   let dateEffective: Date
   let dateExpire: Date
   let notamText: String
-  let notamQcodeCategory: String
-  let notamQcodeSubject: String
-  let notamQcodeStatus: String
+  let notamQcodeCategory: String /// Approach Procedures, Runway, Airport
+  let notamQcodeSubject: String /// Instrument approach procedure, standard instrument departure, Taxiway, Runway
+  let notamQcodeStatus: String /// Other, Closed, Changed
   let notamIsObstacle: Bool
 }
 
