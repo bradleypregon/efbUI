@@ -329,7 +329,7 @@ struct MapScreen: View {
               if airportVM.requestMap {
                 Task {
                   guard let temp = airportVM.selectedAirport else { return }
-                  proxy.camera?.ease(to: CameraOptions(center: CLLocationCoordinate2DMake(temp.airportRefLat, temp.airportRefLong), zoom: 13), duration: 2)
+                  proxy.camera?.ease(to: CameraOptions(center: CLLocationCoordinate2DMake(temp.airportRefLat, temp.airportRefLong), zoom: 13), duration: 1.25)
                   airportVM.requestMap = false
                 }
                 
