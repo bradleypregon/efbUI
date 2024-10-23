@@ -22,7 +22,7 @@ struct ChartsView: View {
   @State private var zoom: CGFloat = 1
   @GestureState private var pinchZoom: CGFloat = 1
   
-//  @State private var canvas = PKCanvasView()
+  @State private var canvas = PKCanvasView()
   
   @State private var selectedCharts: AirportChart = .Curr
   
@@ -45,23 +45,45 @@ struct ChartsView: View {
     } detail: {
       if let url = URL(string: selectedChartURL) {
         ZStack {
-          PDFKitView(url: url)
-//          DrawingView(canvas: $canvas)
+          ZStack {
+            PDFKitView(url: url)
+            DrawingView(canvas: $canvas)
+          }
+          .scaleEffect(zoom * pinchZoom)
+          .rotationEffect(rotation)
+          
+          VStack {
+            Spacer()
+            HStack(spacing: 15) {
+              Button {
+                rotation -= .degrees(90)
+              } label: {
+                Image(systemName: "arrowshape.turn.up.left.fill")
+                  .font(.title)
+                  .foregroundStyle(.mvfr)
+              }
+              Button {
+                rotation = .degrees(0)
+              } label: {
+                Image(systemName: "rectangle.portrait.fill")
+                  .font(.title)
+                  .foregroundStyle(.mvfr)
+              }
+              Button {
+                rotation += .degrees(90)
+              } label: {
+                Image(systemName: "arrowshape.turn.up.right.fill")
+                  .font(.title)
+                  .foregroundStyle(.mvfr)
+              }
+            }
+            Spacer()
+              .frame(height: 20)
+          }
         }
-        .scaleEffect(zoom * pinchZoom)
-        .rotationEffect(rotation + twistAngle)
-        .gesture(RotationGesture()
-          .updating($twistAngle, body: { value, state, _ in
-            state = value
-          })
-          .onEnded { self.rotation += $0 }
-          .simultaneously(with: MagnificationGesture()
-            .updating($pinchZoom, body: { value, state, _ in
-              state = value
-            })
-            .onEnded { self.zoom *= $0 }
-          )
-        )
+        .toolbar {
+          Text("Toolbar here")
+        }
       }
     }
   }
