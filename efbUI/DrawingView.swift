@@ -13,20 +13,18 @@ struct DrawingView: UIViewRepresentable {
   let picker = PKToolPicker.init()
   
   func makeUIView(context: Context) -> PKCanvasView {
-    canvas.drawingPolicy = .anyInput
     canvas.tool = PKInkingTool(.pen, color: .white)
     canvas.becomeFirstResponder()
+    canvas.backgroundColor = .clear
     canvas.isOpaque = false
     return canvas
   }
   
   func updateUIView(_ uiView: UIViewType, context: Context) {
+    canvas.drawingPolicy = .default
+    canvas.isUserInteractionEnabled = true
     picker.addObserver(canvas)
-    picker.setVisible(true, forFirstResponder: uiView)
-    
-    DispatchQueue.main.async {
-      uiView.becomeFirstResponder()
-    }
+    picker.setVisible(true, forFirstResponder: canvas)
   }
   
 }
