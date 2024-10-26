@@ -323,9 +323,6 @@ struct MapScreen: View {
             .onAppear {
               proxyMap = proxy
               // TODO: Add check if ownship layer already added
-              if ServerStatus.shared.status == .running {
-                addOwnshipLayer()
-              }
               if airportVM.requestMap {
                 Task {
                   guard let temp = airportVM.selectedAirport else { return }
@@ -481,6 +478,11 @@ struct MapScreen: View {
           DrawingView(canvas: $canvas)
             .frame(width: 500, height: 1000)
             .allowsHitTesting(true)
+        }
+      }
+      .onAppear {
+        if ServerStatus.shared.status == .running {
+          addOwnshipLayer()
         }
       }
     }
