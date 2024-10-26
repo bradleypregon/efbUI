@@ -199,34 +199,20 @@ final class ServerListener {
 
   
   private func heartbeat() {
-    
     let timestamp = Date()
     print("Heartbeat: \(timestamp)")
     
-    let temp = TestTemp(App: "ForeFlight")
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .withoutEscapingSlashes
+    let ff = "{'App': 'ForeFlight'}"
+    let ffData = ff.data(using: .utf16)
     
-    do {
-      let tempData = try encoder.encode(temp)
-      let tempString = String(data: tempData, encoding: .utf8)
-      
-      let endpoint = NWEndpoint.hostPort(host: .ipv4(.broadcast), port: 63093)
-      let udpConnection = NWConnection(to: endpoint, using: .udp)
-      
-      udpConnection.send(content: tempString?.data(using: .ascii), completion: .contentProcessed { error in
-        if let error = error {
-          print("Error sending heartbeat: \(error)")
-        }
-      })
-    } catch {
-      print("Error encoding heartbeat message or sending in \(#function): \(error)")
-    }
+    let endpoint = NWEndpoint.hostPort(host: .ipv4(.broadcast), port: 63093)
+    let udpConnection = NWConnection(to: endpoint, using: .udp)
     
+    udpConnection.send(content: ffData, completion: .contentProcessed { error in
+      if let error = error {
+        print("Error sending heartbeat: \(error)")
+      }
+    })
   }
   
-}
-
-struct TestTemp: Encodable {
-  let App: String
 }
