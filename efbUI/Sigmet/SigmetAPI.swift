@@ -8,24 +8,36 @@
 import Foundation
 
 class SigmetAPI {
-  func fetchSigmet(completion: @escaping (SigmetSchema) -> ()) {
+  func fetchSigmet() async throws -> SigmetSchema {
     let url = "https://aviationweather.gov/api/data/airsigmet?format=json&type=sigmet&hazard=conv,turb,ice,ifr&date=\(getDate())"
-    guard let url = URL(string: url) else { return }
     
-    URLSession.shared.dataTask(with: url) { data, response, error in
-      guard error == nil else { return }
-      guard let data = data else { return }
-      
-      do {
-        let result = try JSONDecoder().decode(SigmetSchema.self, from: data)
-        DispatchQueue.main.async {
-          completion(result)
-        }
-      } catch let error {
-        print("Error fetching Sigmet: \(error)")
-      }
-    }.resume()
+    guard let url = URL(string: url) else { fatalError("Error creating URL to fetch Sigmets.") }
+    
+    let (data, response) = try await URLSession.shared.data(from: url)
+    
+    guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Error fetching Sigmet API data")}
+    let sigmetData = try JSONDecoder().decode(SigmetSchema.self, from: data)
+    return sigmetData
   }
+  
+//  func fetchSigmet(completion: @escaping (SigmetSchema) -> ()) {
+//    let url = "https://aviationweather.gov/api/data/airsigmet?format=json&type=sigmet&hazard=conv,turb,ice,ifr&date=\(getDate())"
+//    guard let url = URL(string: url) else { return }
+//    
+//    URLSession.shared.dataTask(with: url) { data, response, error in
+//      guard error == nil else { return }
+//      guard let data = data else { return }
+//      
+//      do {
+//        let result = try JSONDecoder().decode(SigmetSchema.self, from: data)
+//        DispatchQueue.main.async {
+//          completion(result)
+//        }
+//      } catch let error {
+//        print("Error fetching Sigmet: \(error)")
+//      }
+//    }.resume()
+//  }
   
   // 20240309_171800Z
   // yyyymmdd_hhmmssZ
