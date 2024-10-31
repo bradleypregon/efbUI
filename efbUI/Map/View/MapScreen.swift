@@ -18,6 +18,9 @@ class MapScreenViewModel {
   var smallAirports: [AirportSchema] = []
   
   var displayRadar: Bool = false
+  var displaySatelliteRadar: Bool = false
+  var wxRadarSourceID: String = ""
+  var satelliteRadarSourceID: String = ""
   var displayRoute: Bool = false
   var displaySigmet: Bool = false
   var displayLg: Bool = true
@@ -30,6 +33,10 @@ class MapScreenViewModel {
   var satelliteVisible: Bool = false
   
   var visibleGates: [GateTable] = []
+  
+  var currentRadar: RainviewerSchema? = nil
+  
+  var sigmets: SigmetSchema = []
   
   init() {
     largeAirports = airportJSONModel.airports.filter { $0.size == .large }
@@ -61,15 +68,13 @@ struct MapScreen: View {
   @State private var proxyMap: MapProxy? = nil
   @State private var currentZoom: CGFloat = 3.0
 
-  private let radarSourceID = "radar-source"
   @State private var rasterRadarAlertVisible: Bool = false
   
   @State private var drawingEnabled: Bool = false
   @State private var canvas = PKCanvasView()
   
   @State private var waypointPopoverVisible: Bool = false
-  let sigmetAPI = SigmetAPI()
-  @State private var sigmets: SigmetSchema = []
+  
   @GestureState private var sigmetLongPress = false
   @State private var sigmetMenuPopoverVisible: Bool = false
   @State private var sigmetSliderRange: ClosedRange<Float> = 1000...41000
@@ -81,6 +86,8 @@ struct MapScreen: View {
   @State private var starRoute: [[ProcedureTable]] = []
   
   @State var updatingSimConnectShips: Bool = false
+  
+  @State var radarPopoverVisible: Bool = false
   
   var body: some View {
 //    let testVisibileAreaPolygonCoords = [
@@ -223,7 +230,7 @@ struct MapScreen: View {
               // MARK: Sigmet Data
               // CONVECTIVE: orange, IFR: blue, MTN OBSCN: gray, TURB: red
               if mapViewModel.displaySigmet {
-                PolygonAnnotationGroup(sigmets.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
+                PolygonAnnotationGroup(mapViewModel.sigmets.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
                   var polyCoords: [CLLocationCoordinate2D] = []
                   
                   for coord in sigmet.coords {
@@ -280,14 +287,14 @@ struct MapScreen: View {
               }
               
               // WIP
-              if mapViewModel.gatesVisible {
-                PointAnnotationGroup(mapViewModel.visibleGates, id: \.gateIdentifier) { gate in
-                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(gate.gateLatitude, gate.gateLongitude))
-                    .textField(gate.name)
-                    .textColor(.white)
-                    .textSize(12)
-                }
-              }
+//              if mapViewModel.gatesVisible {
+//                PointAnnotationGroup(mapViewModel.visibleGates, id: \.gateIdentifier) { gate in
+//                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(gate.gateLatitude, gate.gateLongitude))
+//                    .textField(gate.name)
+//                    .textColor(.white)
+//                    .textSize(12)
+//                }
+//              }
             }
             .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
             .ornamentOptions(ornamentOptions)
@@ -295,10 +302,10 @@ struct MapScreen: View {
               do {
                 try proxy.map?.addImage(UIImage(named: "ShipArrow") ?? UIImage(), id: "ShipArrow")
                 try proxy.map?.addImage(UIImage(named: "TrafficArrow") ?? UIImage(), id: "TrafficArrow")
+                addOwnshipLayer()
               } catch {
                 print("Error adding image to map: \(error)")
               }
-              
             }
             // TODO: Follow Mapbox recommendation for .onCameraChanged
             // NO @State variable changes. Too much computation and redraws
@@ -329,13 +336,15 @@ struct MapScreen: View {
                   proxy.camera?.ease(to: CameraOptions(center: CLLocationCoordinate2DMake(temp.airportRefLat, temp.airportRefLong), zoom: 13), duration: 1.25)
                   airportVM.requestMap = false
                 }
-                
+              }
+              if ServerStatus.shared.status == .running {
+                addOwnshipLayer()
               }
             }
             .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
               Button("Ok") {
                 // TODO: Handle retrying radar
-                mapViewModel.displayRadar.toggle()
+                mapViewModel.displayRadar = false
               }
             }
             .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
@@ -388,15 +397,50 @@ struct MapScreen: View {
           
           // MARK: Menu
           VStack(spacing: 5) {
-            Toggle("Radar", systemImage: mapViewModel.displayRadar ? "cloud.sun.fill" : "cloud.sun", isOn: $mapViewModel.displayRadar)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-              .labelStyle(.iconOnly)
-              .contentTransition(.symbolEffect)
-              .onChange(of: mapViewModel.displayRadar) {
-                mapViewModel.displayRadar ? addRasterRadarSource() : removeRasterRadarSource()
+            Button {
+              // display popover
+              fetchRadar()
+              radarPopoverVisible.toggle()
+            } label: {
+              Image(systemName: "cloud.sun")
+            }
+            .popover(isPresented: $radarPopoverVisible) {
+              VStack {
+                // Weather Radar
+                Button {
+                  mapViewModel.displayRadar.toggle()
+                  if mapViewModel.displayRadar {
+                    addRasterWxRadarSource()
+                  } else {
+                    removeRasterRadarSource()
+                  }
+                } label: {
+                  Text("Wx Radar")
+                }
+                // Satellite Radar
+                Button {
+                  mapViewModel.displaySatelliteRadar.toggle()
+                  if mapViewModel.displaySatelliteRadar {
+                    addSatelliteRadarSource()
+                  } else {
+                    removeSatelliteRadarSource()
+                  }
+                } label: {
+                  Text("Satellite")
+                }
               }
+              
+            }
+            
+//            Toggle("Radar", systemImage: mapViewModel.displayRadar ? "cloud.sun.fill" : "cloud.sun", isOn: $mapViewModel.displayRadar)
+//              .font(.title2)
+//              .tint(.mvfr)
+//              .toggleStyle(.button)
+//              .labelStyle(.iconOnly)
+//              .contentTransition(.symbolEffect)
+//              .onChange(of: mapViewModel.displayRadar) {
+//                mapViewModel.displayRadar ? addRasterWxRadarSource() : removeRasterRadarSource()
+//              }
             
             Toggle("Route", systemImage: mapViewModel.displayRoute ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $mapViewModel.displayRoute)
               .font(.title2)
@@ -413,11 +457,18 @@ struct MapScreen: View {
               .labelStyle(.iconOnly)
               .contentTransition(.symbolEffect)
               .onChange(of: mapViewModel.displaySigmet) {
-                // TODO: stash fetch as to not call api every time is tapped
-                sigmetAPI.fetchSigmet { sigmets in
-                  self.sigmets = sigmets
+                // TODO: reuse sigmet api call if tapping in rapid succession to avoid a bunch of api calls
+                if !mapViewModel.displaySigmet { mapViewModel.sigmets = []; return }
+                let sigmetAPI = SigmetAPI()
+                Task {
+                  do {
+                    mapViewModel.sigmets = try await sigmetAPI.fetchSigmet()
+                  } catch {
+                    print("Error fetching Sigmet API: \(error)")
+                  }
                 }
               }
+              
               .onLongPressGesture {
                 sigmetMenuPopoverVisible.toggle()
               }
@@ -480,11 +531,6 @@ struct MapScreen: View {
             .allowsHitTesting(true)
         }
       }
-      .onAppear {
-        if ServerStatus.shared.status == .running {
-          addOwnshipLayer()
-        }
-      }
     }
     
   }
@@ -538,37 +584,75 @@ struct MapScreen: View {
     
   }
   
+  // MARK: fetchRadar()
+  func fetchRadar() {
+    let rainviewer = RainviewerAPI()
+    Task {
+      do {
+        mapViewModel.currentRadar = try await rainviewer.fetchRadar()
+      } catch {
+        print("Error fetching Rainviewer API: \(error)")
+      }
+    }
+  }
+  
   // MARK: addRasterRadarSource
-  func addRasterRadarSource() {
+  func addRasterWxRadarSource() {
     // https://api.rainviewer.com/public/weather-maps.json
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
-    // TODO: Get current Radar API json string
-    let rainviewer = RainviewerAPI()
-    
-    rainviewer.fetchRadar { radar in
-      let jsonPath = radar.radar?.nowcast?.first?.path ?? ""
-      
+    if let currentRadar = mapViewModel.currentRadar {
+      let radarData = currentRadar.radar?.nowcast?.first?.path ?? ""
       let stringPaths = "{z}/{x}/{y}"
       let mapColor = "4"
       let options = "1_1" // smooth_snow
+      let url = String("https://tilecache.rainviewer.com\(radarData)/512/\(stringPaths)/\(mapColor)/\(options).png")
       
-      let url = String("https://tilecache.rainviewer.com\(jsonPath)/512/\(stringPaths)/\(mapColor)/\(options).png")
-      
-      var rasterSource = RasterSource(id: radarSourceID)
+      var rasterSource = RasterSource(id: mapViewModel.wxRadarSourceID)
       rasterSource.tiles = [url]
       rasterSource.tileSize = 512
       
-      var rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
+      var rasterLayer = RasterLayer(id: mapViewModel.wxRadarSourceID, source: rasterSource.id)
       rasterLayer.rasterOpacity = .constant(0.4)
+      
+      if mapViewModel.displaySatelliteRadar {
+        removeSatelliteRadarSource()
+      }
       
       do {
         try proxyMap?.map?.addSource(rasterSource)
         try proxyMap?.map?.addLayer(rasterLayer)
       } catch {
         rasterRadarAlertVisible = true
-        print("Failed to update style. Error: \(error)")
+        print("Failed to update map style with Satellite or Wx Radar: \(error)")
       }
     }
+    // TODO: Get current Radar API json string
+//    let rainviewer = RainviewerAPI()
+//    
+//    rainviewer.fetchRadar { radar in
+//      let jsonPath = radar.radar?.nowcast?.first?.path ?? ""
+//      
+//      let stringPaths = "{z}/{x}/{y}"
+//      let mapColor = "4"
+//      let options = "1_1" // smooth_snow
+//      
+//      let url = String("https://tilecache.rainviewer.com/\(jsonPath)/512/\(stringPaths)/\(mapColor)/\(options).png")
+//      
+//      var rasterSource = RasterSource(id: mapViewModel.wxRadarSourceID)
+//      rasterSource.tiles = [url]
+//      rasterSource.tileSize = 512
+//      
+//      var rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
+//      rasterLayer.rasterOpacity = .constant(0.4)
+//      
+//      do {
+//        try proxyMap?.map?.addSource(rasterSource)
+//        try proxyMap?.map?.addLayer(rasterLayer)
+//      } catch {
+//        rasterRadarAlertVisible = true
+//        print("Failed to update style. Error: \(error)")
+//      }
+//    }
     
   }
   
@@ -577,10 +661,50 @@ struct MapScreen: View {
   // MARK: removeRasterRadarSource
   func removeRasterRadarSource() {
     do {
-      try proxyMap?.map?.removeLayer(withId: "radar-layer")
-      try proxyMap?.map?.removeSource(withId: radarSourceID)
+      try proxyMap?.map?.removeLayer(withId: mapViewModel.wxRadarSourceID)
+      try proxyMap?.map?.removeSource(withId: mapViewModel.wxRadarSourceID)
     } catch {
       print("Failed to remove radar source. Error: \(error)")
+    }
+  }
+  
+  func addSatelliteRadarSource() {
+    if let currentRadar = mapViewModel.currentRadar {
+
+      let radarData = currentRadar.satellite?.infrared?.first?.path ?? ""
+      let stringPaths = "{z}/{x}/{y}"
+      let mapColor = "0"
+      let options = "0_0" // smooth_snow always 0 for satellite
+      let url = String("https://tilecache.rainviewer.com\(radarData)/512/\(stringPaths)/\(mapColor)/\(options).png")
+      
+      var rasterSource = RasterSource(id: mapViewModel.satelliteRadarSourceID)
+      rasterSource.tiles = [url]
+      rasterSource.tileSize = 512
+      
+      var rasterLayer = RasterLayer(id: mapViewModel.satelliteRadarSourceID, source: rasterSource.id)
+      rasterLayer.rasterOpacity = .constant(0.4)
+      
+      // fix to be: if source exists, remove
+      if mapViewModel.displayRadar {
+        removeRasterRadarSource()
+      }
+      
+      do {
+        try proxyMap?.map?.addSource(rasterSource)
+        try proxyMap?.map?.addLayer(rasterLayer)
+      } catch {
+        rasterRadarAlertVisible = true
+        print("Failed to update map style with Satellite or Wx Radar: \(error)")
+      }
+    }
+  }
+  
+  func removeSatelliteRadarSource() {
+    do {
+      try proxyMap?.map?.removeLayer(withId: mapViewModel.satelliteRadarSourceID)
+      try proxyMap?.map?.removeSource(withId: mapViewModel.satelliteRadarSourceID)
+    } catch {
+      print("Failed to remove satellite source: \(error)")
     }
   }
   
