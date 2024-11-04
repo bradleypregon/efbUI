@@ -25,6 +25,7 @@ struct ChartsView: View {
   @State private var canvas = PKCanvasView()
   
   @State private var selectedCharts: AirportChart = .Curr
+  @State private var drawingEnabled: Bool = false
   
   var body: some View {
     NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -47,7 +48,9 @@ struct ChartsView: View {
         ZStack {
           ZStack {
             PDFKitView(url: url)
-            DrawingView(canvas: $canvas)
+            if drawingEnabled {
+              DrawingView(canvas: $canvas)
+            }
           }
           .scaleEffect(zoom * pinchZoom)
           .rotationEffect(rotation)
@@ -82,7 +85,12 @@ struct ChartsView: View {
           }
         }
         .toolbar {
-          Text("Toolbar here")
+          Toggle("Drawing View", systemImage: drawingEnabled ? "pencil" : "pencil.slash", isOn: $drawingEnabled)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .contentTransition(.symbolEffect)
         }
       }
     }
@@ -107,11 +115,10 @@ struct ChartsView: View {
     }
   }
   
-  @MainActor 
+  @MainActor
   func starredCharts() -> some View {
     List {
       ForEach(starred, id: \.id) { chart in
-        // TODO: swipe to remove chart
         HStack {
           Button {
             starred.removeAll { $0.id == chart.id }
@@ -128,6 +135,13 @@ struct ChartsView: View {
             Text(chart.chartName)
           }
           .buttonStyle(BorderedButtonStyle())
+        }
+        .swipeActions(edge: .trailing) {
+          Button(role: .destructive) {
+            starred.removeAll { $0.id == chart.id }
+          } label: {
+            Label("Delete", systemImage: "trash")
+          }
         }
       }
     }
