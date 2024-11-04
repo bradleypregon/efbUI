@@ -230,7 +230,7 @@ struct MapScreen: View {
                     .lineColor(StyleColor( UIColor(red: .random(in: 0.0...1.0), green: .random(in: 0.0...1.0), blue: .random(in: 0.0...1.0), alpha: 1.0) ))
                     .onTapGesture {
                       // TODO: popover with route details?
-                      print(route.first?.procedureIdentifier)
+                      print(route.first?.procedureIdentifier ?? "no SID procedure identifier")
                     }
                 }
               }
@@ -242,7 +242,7 @@ struct MapScreen: View {
                     .lineWidth(3.0)
                     .lineColor(StyleColor( UIColor(red: .random(in: 0.0...1.0), green: .random(in: 0.0...1.0), blue: .random(in: 0.0...1.0), alpha: 1.0) ))
                     .onTapGesture {
-                      print(route.first?.procedureIdentifier)
+                      print(route.first?.procedureIdentifier ?? "no STAR procedure identifier")
                     }
                 }
               }
