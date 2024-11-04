@@ -360,8 +360,8 @@ struct MapScreen: View {
           VStack(spacing: 5) {
             Button {
               // display popover
-              fetchRadar()
               radarPopoverVisible.toggle()
+              mapViewModel.fetchRadar()
             } label: {
               Image(systemName: "cloud.sun")
             }
@@ -370,7 +370,7 @@ struct MapScreen: View {
                 // Weather Radar
                 Button {
                   mapViewModel.displayRadar.toggle()
-                  mapViewModel.displayRadar ? addRasterWxRadarSource() : removeRasterRadarSource()
+                  mapViewModel.displayRadar ? addWeatherRadarSource() : removeWeatherRadarSource()
                 } label: {
                   Text("Wx Radar")
                 }
@@ -385,16 +385,16 @@ struct MapScreen: View {
               
             }
             
-            Toggle("Radar", systemImage: mapViewModel.displayRadar ? "cloud.sun.fill" : "cloud.sun", isOn: $mapViewModel.displayRadar)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-              .labelStyle(.iconOnly)
-              .contentTransition(.symbolEffect)
-              .onChange(of: mapViewModel.displayRadar) {
-                fetchRadar()
-                mapViewModel.displayRadar ? addRasterWxRadarSource() : removeRasterRadarSource()
-              }
+//            Toggle("Radar", systemImage: mapViewModel.displayRadar ? "cloud.sun.fill" : "cloud.sun", isOn: $mapViewModel.displayRadar)
+//              .font(.title2)
+//              .tint(.mvfr)
+//              .toggleStyle(.button)
+//              .labelStyle(.iconOnly)
+//              .contentTransition(.symbolEffect)
+//              .onChange(of: mapViewModel.displayRadar) {
+//                fetchRadar()
+//                mapViewModel.displayRadar ? addRasterWxRadarSource() : removeRasterRadarSource()
+//              }
             
             Toggle("Route", systemImage: mapViewModel.displayRoute ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $mapViewModel.displayRoute)
               .font(.title2)
@@ -551,7 +551,7 @@ extension MapScreen {
     }
   }
   
-  func initTrafficLayer() {
+  func addTrafficLayer() {
     
   }
   
@@ -562,20 +562,8 @@ extension MapScreen {
 
 // MARK: Weather and Satellite Radar
 extension MapScreen {
-  // MARK: fetchRadar()
-  func fetchRadar() {
-    let rainviewer = RainviewerAPI()
-    Task {
-      do {
-        mapViewModel.currentRadar = try await rainviewer.fetchRadar()
-      } catch {
-        print("Error fetching Rainviewer API: \(error)")
-      }
-    }
-  }
-  
   // MARK: addRasterRadarSource
-  func addRasterWxRadarSource() {
+  func addWeatherRadarSource() {
     // https://api.rainviewer.com/public/weather-maps.json
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
     if let currentRadar = mapViewModel.currentRadar {
@@ -600,40 +588,10 @@ extension MapScreen {
         print("Failed to update map style with Wx Radar: \(error)")
       }
     }
-    // TODO: Get current Radar API json string
-//    let rainviewer = RainviewerAPI()
-//
-//    rainviewer.fetchRadar { radar in
-//      let jsonPath = radar.radar?.nowcast?.first?.path ?? ""
-//
-//      let stringPaths = "{z}/{x}/{y}"
-//      let mapColor = "4"
-//      let options = "1_1" // smooth_snow
-//
-//      let url = String("https://tilecache.rainviewer.com/\(jsonPath)/512/\(stringPaths)/\(mapColor)/\(options).png")
-//
-//      var rasterSource = RasterSource(id: mapViewModel.wxRadarSourceID)
-//      rasterSource.tiles = [url]
-//      rasterSource.tileSize = 512
-//
-//      var rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
-//      rasterLayer.rasterOpacity = .constant(0.4)
-//
-//      do {
-//        try proxyMap?.map?.addSource(rasterSource)
-//        try proxyMap?.map?.addLayer(rasterLayer)
-//      } catch {
-//        rasterRadarAlertVisible = true
-//        print("Failed to update style. Error: \(error)")
-//      }
-//    }
-    
   }
   
-  
-  
   // MARK: removeRasterRadarSource
-  func removeRasterRadarSource() {
+  func removeWeatherRadarSource() {
     do {
       try proxyMap?.map?.removeLayer(withId: mapViewModel.wxRadarSourceID)
       try proxyMap?.map?.removeSource(withId: mapViewModel.wxRadarSourceID)
