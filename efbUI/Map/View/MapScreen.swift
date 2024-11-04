@@ -6,48 +6,9 @@
 //
 
 import SwiftUI
-@_spi(Experimental) import MapboxMaps
+import MapboxMaps
 import Observation
 import PencilKit
-
-@Observable
-class MapScreenViewModel {
-  var airportJSONModel = AirportJSONModel()
-  var largeAirports: [AirportSchema] = []
-  var mediumAirports: [AirportSchema] = []
-  var smallAirports: [AirportSchema] = []
-  
-  var displayRadar: Bool = false
-  var displaySatelliteRadar: Bool = false
-  var wxRadarSourceID: String = ""
-  var satelliteRadarSourceID: String = ""
-  var displayRoute: Bool = false
-  var displaySigmet: Bool = false
-  var displayLg: Bool = true
-  var displayMd: Bool = false
-  var displaySm: Bool = false
-  var displaySID: Bool = false
-  var displaySTAR: Bool = false
-  var gatesVisible: Bool = false
-  
-  var satelliteVisible: Bool = false
-  
-  var visibleGates: [GateTable] = []
-  
-  var currentRadar: RainviewerSchema? = nil
-  
-  var sigmets: SigmetSchema = []
-  
-  init() {
-    largeAirports = airportJSONModel.airports.filter { $0.size == .large }
-    mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
-    smallAirports = airportJSONModel.airports.filter { $0.size == .small }
-  }
-  
-  func fetchVisibleGates() {
-    visibleGates = SQLiteManager.shared.getAirportGates("KLAX")
-  }
-}
 
 struct MapScreen: View {
   @Binding var selectedTab: Int
@@ -409,22 +370,14 @@ struct MapScreen: View {
                 // Weather Radar
                 Button {
                   mapViewModel.displayRadar.toggle()
-                  if mapViewModel.displayRadar {
-                    addRasterWxRadarSource()
-                  } else {
-                    removeRasterRadarSource()
-                  }
+                  mapViewModel.displayRadar ? addRasterWxRadarSource() : removeRasterRadarSource()
                 } label: {
                   Text("Wx Radar")
                 }
                 // Satellite Radar
                 Button {
                   mapViewModel.displaySatelliteRadar.toggle()
-                  if mapViewModel.displaySatelliteRadar {
-                    addSatelliteRadarSource()
-                  } else {
-                    removeSatelliteRadarSource()
-                  }
+                  mapViewModel.displaySatelliteRadar ? addSatelliteRadarSource() : removeSatelliteRadarSource()
                 } label: {
                   Text("Satellite")
                 }
@@ -432,15 +385,16 @@ struct MapScreen: View {
               
             }
             
-//            Toggle("Radar", systemImage: mapViewModel.displayRadar ? "cloud.sun.fill" : "cloud.sun", isOn: $mapViewModel.displayRadar)
-//              .font(.title2)
-//              .tint(.mvfr)
-//              .toggleStyle(.button)
-//              .labelStyle(.iconOnly)
-//              .contentTransition(.symbolEffect)
-//              .onChange(of: mapViewModel.displayRadar) {
-//                mapViewModel.displayRadar ? addRasterWxRadarSource() : removeRasterRadarSource()
-//              }
+            Toggle("Radar", systemImage: mapViewModel.displayRadar ? "cloud.sun.fill" : "cloud.sun", isOn: $mapViewModel.displayRadar)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
+              .onChange(of: mapViewModel.displayRadar) {
+                fetchRadar()
+                mapViewModel.displayRadar ? addRasterWxRadarSource() : removeRasterRadarSource()
+              }
             
             Toggle("Route", systemImage: mapViewModel.displayRoute ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $mapViewModel.displayRoute)
               .font(.title2)
@@ -450,6 +404,7 @@ struct MapScreen: View {
               .contentTransition(.symbolEffect)
             
             // TODO: Fix long press gesture not working properly
+            // Fixed: Added button in bottom-left to control altitudes
             Toggle("Sigmet", systemImage: mapViewModel.displaySigmet ? "hazardsign.fill" : "hazardsign", isOn: $mapViewModel.displaySigmet)
               .font(.title2)
               .tint(.mvfr)
@@ -457,7 +412,6 @@ struct MapScreen: View {
               .labelStyle(.iconOnly)
               .contentTransition(.symbolEffect)
               .onChange(of: mapViewModel.displaySigmet) {
-                // TODO: reuse sigmet api call if tapping in rapid succession to avoid a bunch of api calls
                 if !mapViewModel.displaySigmet { mapViewModel.sigmets = []; return }
                 let sigmetAPI = SigmetAPI()
                 Task {
@@ -469,18 +423,6 @@ struct MapScreen: View {
                 }
               }
               
-              .onLongPressGesture {
-                sigmetMenuPopoverVisible.toggle()
-              }
-              .popover(isPresented: $sigmetMenuPopoverVisible) {
-                VStack {
-                  Text("Sigmet Altitudes")
-                  RangedSliderView(value: $sigmetSliderRange, bounds: 0...50000,  step: 1000)
-                }
-                .frame(idealWidth: 250)
-                .padding()
-                .padding([.leading, .trailing, .bottom], 20)
-              }
             
             Toggle("Satellite", systemImage: mapViewModel.satelliteVisible ? "globe.americas.fill" : "globe.americas", isOn: $mapViewModel.satelliteVisible)
               .font(.title2)
@@ -523,12 +465,38 @@ struct MapScreen: View {
             
           }
           .padding([.leading], 5)
+          
+          /// Bottom-Right VStack of Buttons to control map features
+          VStack(spacing: 5) {
+            if(mapViewModel.displaySigmet) {
+              Button {
+                sigmetMenuPopoverVisible.toggle()
+              } label: {
+                Image(systemName: "hazardsign.fill")
+                  .font(.title2)
+                  .foregroundStyle(.mvfr)
+              }
+              .popover(isPresented: $sigmetMenuPopoverVisible) {
+                VStack {
+                  Text("Sigmet Altitudes")
+                  RangedSliderView(value: $sigmetSliderRange, bounds: 0...50000,  step: 1000)
+                }
+                .frame(idealWidth: 250)
+                .padding()
+                .padding([.leading, .trailing, .bottom], 10)
+              }
+            }
+            
+            }
+          .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+          .padding([.bottom], 100)
+          .padding([.trailing], 16)
+            
         }
         if (drawingEnabled) {
           // TODO: make this better
           DrawingView(canvas: $canvas)
             .frame(width: 500, height: 1000)
-            .allowsHitTesting(true)
         }
       }
     }
@@ -547,7 +515,14 @@ struct MapScreen: View {
       return .init(.gray)
     }
   }
-  
+}
+
+#Preview {
+  MapScreen(selectedTab: .constant(1))
+}
+
+// MARK: SimConnect Traffic
+extension MapScreen {
   func addOwnshipLayer() {
     do {
       var layer = LocationIndicatorLayer(id: "OwnshipLayer")
@@ -583,7 +558,10 @@ struct MapScreen: View {
   func updateTrafficLayer() {
     
   }
-  
+}
+
+// MARK: Weather and Satellite Radar
+extension MapScreen {
   // MARK: fetchRadar()
   func fetchRadar() {
     let rainviewer = RainviewerAPI()
@@ -614,37 +592,33 @@ struct MapScreen: View {
       var rasterLayer = RasterLayer(id: mapViewModel.wxRadarSourceID, source: rasterSource.id)
       rasterLayer.rasterOpacity = .constant(0.4)
       
-      if mapViewModel.displaySatelliteRadar {
-        removeSatelliteRadarSource()
-      }
-      
       do {
         try proxyMap?.map?.addSource(rasterSource)
         try proxyMap?.map?.addLayer(rasterLayer)
       } catch {
         rasterRadarAlertVisible = true
-        print("Failed to update map style with Satellite or Wx Radar: \(error)")
+        print("Failed to update map style with Wx Radar: \(error)")
       }
     }
     // TODO: Get current Radar API json string
 //    let rainviewer = RainviewerAPI()
-//    
+//
 //    rainviewer.fetchRadar { radar in
 //      let jsonPath = radar.radar?.nowcast?.first?.path ?? ""
-//      
+//
 //      let stringPaths = "{z}/{x}/{y}"
 //      let mapColor = "4"
 //      let options = "1_1" // smooth_snow
-//      
+//
 //      let url = String("https://tilecache.rainviewer.com/\(jsonPath)/512/\(stringPaths)/\(mapColor)/\(options).png")
-//      
+//
 //      var rasterSource = RasterSource(id: mapViewModel.wxRadarSourceID)
 //      rasterSource.tiles = [url]
 //      rasterSource.tileSize = 512
-//      
+//
 //      var rasterLayer = RasterLayer(id: "radar-layer", source: rasterSource.id)
 //      rasterLayer.rasterOpacity = .constant(0.4)
-//      
+//
 //      do {
 //        try proxyMap?.map?.addSource(rasterSource)
 //        try proxyMap?.map?.addLayer(rasterLayer)
@@ -684,11 +658,6 @@ struct MapScreen: View {
       var rasterLayer = RasterLayer(id: mapViewModel.satelliteRadarSourceID, source: rasterSource.id)
       rasterLayer.rasterOpacity = .constant(0.4)
       
-      // fix to be: if source exists, remove
-      if mapViewModel.displayRadar {
-        removeRasterRadarSource()
-      }
-      
       do {
         try proxyMap?.map?.addSource(rasterSource)
         try proxyMap?.map?.addLayer(rasterLayer)
@@ -707,8 +676,11 @@ struct MapScreen: View {
       print("Failed to remove satellite source: \(error)")
     }
   }
-  
-  // MARK: handleCameraChange
+}
+
+// MARK: Deprecated Functions
+extension MapScreen {
+  // handleCameraChange
   /**
    Handle zoom level changes and load map annotations
    - Large  Airport Threshold: 5.25
@@ -776,51 +748,4 @@ struct MapScreen: View {
     return coordBounds
   }
   
-}
-
-struct MapScreenWaypointView: View {
-  @State private var popoverPresented: Bool = false
-  var wpt: OFPNavlog
-  
-  var body: some View {
-    Button {
-      popoverPresented.toggle()
-    } label: {
-      VStack {
-        Image(systemName: wpt.ident == "TOC" || wpt.ident == "TOD" ? "bolt.horizontal.fill" : "triangle.fill")
-          .foregroundStyle(wpt.ident == "TOC" || wpt.ident == "TOD" ? .green : .blue)
-        Text(wpt.ident)
-          .padding(6)
-          .background(.blue)
-          .foregroundStyle(.white)
-          .clipShape(Capsule())
-          .font(.caption)
-      }
-    }
-    .popover(isPresented: $popoverPresented) {
-      List {
-        Text("Ident: \(wpt.ident)")
-        Text("Name: \(wpt.name)")
-        Text("Type: \(wpt.type)")
-        Text("Freq: \(wpt.frequency)")
-        Text("Via: \(wpt.via)")
-        Text("Alt: \(wpt.altitude)")
-        Text("W/C: \(wpt.windComponent)")
-        Text("Time leg: \(wpt.timeLeg)")
-        Text("Time Total: \(wpt.timeTotal)")
-        Text("Fuel Leg: \(wpt.fuelLeg)")
-        Text("Fuel Total: \(wpt.fuelTotalUsed)")
-        Text("Wind: \(wpt.windDir)/\(wpt.windSpd)")
-        Text("Shear: \(wpt.shear)")
-      }
-      .font(.caption)
-      .listStyle(.plain)
-      .background(.bar)
-      .frame(idealWidth: 200, idealHeight: 400)
-    }
-  }
-}
-
-#Preview {
-  MapScreen(selectedTab: .constant(1))
 }
