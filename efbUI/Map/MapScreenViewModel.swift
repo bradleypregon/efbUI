@@ -18,8 +18,8 @@ class MapScreenViewModel {
   
   var displayRadar: Bool = false
   var displaySatelliteRadar: Bool = false
-  var wxRadarSourceID: String = ""
-  var satelliteRadarSourceID: String = ""
+  var wxRadarSourceID: String = "wx-radar-source"
+  var satelliteRadarSourceID: String = "satellite-radar-source"
   var displayRoute: Bool = false
   var displaySigmet: Bool = false
   var displayLg: Bool = true
@@ -41,6 +41,17 @@ class MapScreenViewModel {
     largeAirports = airportJSONModel.airports.filter { $0.size == .large }
     mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
     smallAirports = airportJSONModel.airports.filter { $0.size == .small }
+  }
+  
+  func fetchRadar() {
+    let rainviewer = RainviewerAPI()
+    Task {
+      do {
+        currentRadar = try await rainviewer.fetchRadar()
+      } catch {
+        print("Error fetching Rainviewer API: \(error)")
+      }
+    }
   }
   
   func fetchVisibleGates() {
