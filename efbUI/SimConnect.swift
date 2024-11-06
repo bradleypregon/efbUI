@@ -44,13 +44,11 @@ final class ServerListener {
   private let port: NWEndpoint.Port = 49002
   private var listener: NWListener?
   private var connection: NWConnection?
-  private let timer: DispatchSourceTimer
   private var listening: Bool = true
   
   init(ship: SimConnectShipObserver) {
     self.ship = ship
     self.listener = try? NWListener(using: .udp, on: port)
-    self.timer = DispatchSource.makeTimerSource(queue: .main)
   }
   
   func start() {
@@ -73,16 +71,7 @@ final class ServerListener {
     self.listener?.newConnectionHandler = { [self] connection in
       createConnection(connection: connection)
     }
-    
     self.listener?.start(queue: DispatchQueue.global(qos: .userInitiated))
-    
-    // TODO: Find reliable way for code to figure out if packets have stopped incoming
-    // IF packets have stopped, start heartbeat
-    // if heartbeat is active and packets begin, stop heartbeat
-    
-    self.timer.setEventHandler(handler: self.heartbeat)
-    self.timer.schedule(deadline: .now() + 5.0, repeating: 5.0)
-    self.timer.activate()
   }
   
   private func createConnection(connection: NWConnection) {
@@ -129,8 +118,6 @@ final class ServerListener {
         }
         
         self.consumeData()
-      
-      
     }
   }
   
@@ -143,7 +130,6 @@ final class ServerListener {
     let heading = Double(components[4]) ?? .zero
     let speed = Double(components[5]) ?? .zero
     
-//    self.simConnect.ownship = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed)
     self.ship.ownship.coordinate = coordinate
     self.ship.ownship.altitude = altitude
     self.ship.ownship.heading = heading
@@ -184,7 +170,6 @@ final class ServerListener {
 //    self.listener?.stateUpdateHandler = nil
 //    self.listener?.newConnectionHandler = nil
     self.listener?.cancel()
-    self.timer.cancel()
   }
   
   private func stopConnection() {
@@ -195,24 +180,6 @@ final class ServerListener {
   func stop() {
     stopListener()
     stopConnection()
-  }
-
-  
-  private func heartbeat() {
-    let timestamp = Date()
-    print("Heartbeat: \(timestamp)")
-    
-    let ff = "{'App': 'ForeFlight'}"
-    let ffData = ff.data(using: .utf16)
-    
-    let endpoint = NWEndpoint.hostPort(host: .ipv4(.broadcast), port: 63093)
-    let udpConnection = NWConnection(to: endpoint, using: .udp)
-    
-    udpConnection.send(content: ffData, completion: .contentProcessed { error in
-      if let error = error {
-        print("Error sending heartbeat: \(error)")
-      }
-    })
   }
   
 }
