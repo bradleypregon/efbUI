@@ -247,6 +247,21 @@ struct MapScreen: View {
                 }
               }
               
+//              if updatingSimConnectShips {
+//                ForEvery(Array(simConnect.traffic.values)) { traffic in
+//                  SymbolLayer(id: String(describing: traffic.fs2ffid), source: String(describing: traffic.fs2ffid))
+//                    .textField(traffic.registration ?? "TFC")
+//                    .textSize(12)
+//                    .textOffset(x: 0, y: 1.0)
+//                }
+//                do {
+//                  try SymbolLayer(jsonObject: simConnect.traffic)
+//                } catch {
+//                  
+//                }
+//                
+//              }
+              
               // WIP
 //              if mapViewModel.gatesVisible {
 //                PointAnnotationGroup(mapViewModel.visibleGates, id: \.gateIdentifier) { gate in
@@ -300,6 +315,7 @@ struct MapScreen: View {
               }
               if ServerStatus.shared.status == .running {
                 addOwnshipLayer()
+                updateTrafficLayers()
               }
             }
             .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
@@ -353,6 +369,12 @@ struct MapScreen: View {
           .onChange(of: ServerStatus.shared.status) {
             if ServerStatus.shared.status == .running {
               addOwnshipLayer()
+              updateTrafficLayers()
+            }
+          }
+          .task {
+            if updatingSimConnectShips {
+              updateTrafficLayers()
             }
           }
           
@@ -361,9 +383,20 @@ struct MapScreen: View {
             Button {
               // display popover
               radarPopoverVisible.toggle()
-              mapViewModel.fetchRadar()
             } label: {
               Image(systemName: "cloud.sun")
+            }
+            .task(id: radarPopoverVisible) {
+              // TODO: Cleanup the currentRadar optional date comparison
+              // TODO: Use ViewModel fetchRadar function instead of using View
+              if radarPopoverVisible && mapViewModel.currentRadar?.generated ?? Int(Date().timeIntervalSinceNow) < (Int(Date().timeIntervalSinceNow) + Int(5*60)) {
+                let rainviewerAPI = RainviewerAPI()
+                do {
+                  mapViewModel.currentRadar = try await rainviewerAPI.fetchRadar()
+                } catch {
+                  print("Error fetching current radar: \(error)")
+                }
+              }
             }
             .popover(isPresented: $radarPopoverVisible) {
               VStack {
@@ -411,15 +444,16 @@ struct MapScreen: View {
               .toggleStyle(.button)
               .labelStyle(.iconOnly)
               .contentTransition(.symbolEffect)
-              .onChange(of: mapViewModel.displaySigmet) {
-                if !mapViewModel.displaySigmet { mapViewModel.sigmets = []; return }
-                let sigmetAPI = SigmetAPI()
-                Task {
+              .task(id: mapViewModel.displaySigmet) {
+                if mapViewModel.displaySigmet {
+                  let sigmetAPI = SigmetAPI()
                   do {
                     mapViewModel.sigmets = try await sigmetAPI.fetchSigmet()
                   } catch {
                     print("Error fetching Sigmet API: \(error)")
                   }
+                } else {
+                  mapViewModel.sigmets = []
                 }
               }
               
@@ -538,25 +572,82 @@ extension MapScreen {
   
   func updateOwnshipLayer() {
     if updatingSimConnectShips {
-      _ = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-        do {
-          try proxyMap?.map?.updateLayer(withId: "OwnshipLayer", type: LocationIndicatorLayer.self) { layer in
-            layer.location = .constant([simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude, simConnect.ownship.altitude])
-            layer.bearing = .constant(simConnect.ownship.heading)
-          }
-        } catch let e {
-          print("Error updating ownship layer: \(e)")
-        }
+      Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+        updateOwnshipLayer(id: "OwnshipLayer")
       }
     }
   }
   
-  func addTrafficLayer() {
-    
+  func updateOwnshipLayer(id: String) {
+    do {
+      try proxyMap?.map?.updateLayer(withId: id, type: LocationIndicatorLayer.self) { layer in
+        layer.location = .constant([simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude, simConnect.ownship.altitude])
+        layer.bearing = .constant(simConnect.ownship.heading)
+      }
+    } catch {
+      print("Error updating ownship layer: \(error)")
+    }
   }
   
-  func updateTrafficLayer() {
-    
+  func addTrafficSymbolLayer() {
+    do {
+      let layer = try SymbolLayer(jsonObject: simConnect.traffic)
+      try proxyMap?.map?.addLayer(layer)
+    } catch {
+      print("Error with traffic symbol layer: \(error)")
+    }
+  }
+  
+  func updateTrafficLayers() {
+    Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { _ in
+      updateTrafficLayerDelegate()
+    }
+  }
+  
+  func updateTrafficLayerDelegate() {
+    guard simConnect.traffic != [:] else { return }
+    for (id, ship) in simConnect.traffic {
+      if (proxyMap?.map?.layerExists(withId: id) != nil) {
+        updateTrafficLayer(id: id, ship: ship)
+      } else {
+        addTrafficLayer(id: id)
+      }
+    }
+    for (id, ship) in simConnect.pruneTraffic {
+      if (proxyMap?.map?.layerExists(withId: id) != nil) {
+        pruneTrafficLayer(id: id)
+      }
+    }
+  }
+  
+  func updateTrafficLayer(id: String, ship: SimConnectShip) {
+    do {
+      try proxyMap?.map?.updateLayer(withId: id, type: LocationIndicatorLayer.self) { layer in
+        layer.location = .constant([ship.coordinate.latitude, ship.coordinate.longitude, ship.altitude])
+        layer.bearing = .constant(ship.heading)
+      }
+    } catch {
+      print("Error updating traffic layer for ID: \(id): \(error)")
+    }
+  }
+  
+  func addTrafficLayer(id: String) {
+    do {
+      var layer = LocationIndicatorLayer(id: id)
+      layer.topImage = .constant(ResolvedImage.name("TrafficArrow"))
+      try proxyMap?.map?.addLayer(layer)
+    } catch {
+      print("Error adding traffic layer for id: \(id): \(error)")
+    }
+  }
+  
+  func pruneTrafficLayer(id: String) {
+    do {
+      try proxyMap?.map?.removeLayer(withId: id)
+    } catch {
+      print("Unable to remove pruned traffic layer for id: \(id): \(error)")
+    }
+    simConnect.pruneTraffic.removeValue(forKey: id)
   }
 }
 
