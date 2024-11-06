@@ -24,7 +24,7 @@ struct TabBar: View {
   @State private var tenMileInbd: Bool = false
   @State private var fiveMileInbd: Bool = false
   
-  private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
+  private let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
   
   var body: some View {
     TabView(selection: $selectedTab) {
@@ -66,6 +66,7 @@ struct TabBar: View {
         }
         .tag(5)
     }
+    .tabViewStyle(.sidebarAdaptable)
     .onReceive(timer) { _ in
       guard let ofp = simbrief.ofp else { return }
       guard ship.ownship.coordinate.latitude != .zero else { return }
