@@ -13,21 +13,13 @@ struct SimbriefScreen: View {
   @Environment(SimBriefViewModel.self) var simbrief
   @Query var simbriefID: [UserSettings]
   
-  enum SimbriefScreenPickerOptions: String, Identifiable, CaseIterable {
-    case dep = "Depature"
-    case arr = "Arrival"
-    case alt = "Alternate"
-    
-    var id: Self { self }
-  }
-  
-  @State private var selectedSimbriefPicker: SimbriefScreenPickerOptions = .dep
-  
   var body: some View {
     VStack {
       if let sbID = simbriefID.first?.simbriefUserID {
         Button {
-          simbrief.fetchOFP(for: sbID)
+          Task {
+            await simbrief.fetchOFP(for: sbID)
+          }
           
           // TODO: Process split variable -> Construct linked list with each route component
           // TODO: Check airac and compare to current downloaded database
@@ -43,7 +35,7 @@ struct SimbriefScreen: View {
           //                  }
           //                  linkedList.printList()
         } label: {
-          Text("Fetch Route")
+          Text("Fetch SimBrief")
         }
         .padding()
         .background(.blue)
@@ -51,101 +43,120 @@ struct SimbriefScreen: View {
         .fontWeight(.semibold)
         .clipShape(Capsule())
         
-        if let temp = simbrief.ofp {
-          Text("\(temp.origin.icaoCode)/\(temp.origin.planRwy) \(temp.general.routeNavigraph) \(temp.destination.icaoCode)/\(temp.destination.planRwy) | \(temp.alternate?.first?.icaoCode ?? "")/\(temp.alternate?.first?.planRwy ?? "")")
-          
-          VStack {
-            HStack {
-              Text(temp.aircraft.icaoCode)
-              Text(temp.general.airline + temp.general.flightNumber)
-                .fontWeight(.semibold)
-              Text(temp.aircraft.reg)
-            }
-            HStack {
-              HStack {
-                VStack {
-                  Text("CI:")
-                  Text("FL:")
-                }
-                .frame(alignment: .leading)
-                VStack {
-                  Text(temp.general.costIndex)
-                  Text(temp.general.initialAltitude)
-                }
-                .frame(alignment: .trailing)
-              }
-              Divider()
-              HStack {
-                VStack {
-                  Text("Dep:")
-                  Text("Arr:")
-                  Text("ETE:")
-                }
-                .frame(alignment: .leading)
-                VStack {
-                  Text(convertDate(temp.times.schedDep) + "z")
-                  Text(convertDate(temp.times.schedArr) + "z")
-                  Text(temp.times.ete)
-                }
-                .frame(alignment: .trailing)
-              }
-              Divider()
-              HStack {
-                VStack {
-                  Text("Pax:")
-                  Text("Cargo:")
-                  Text("Block:")
-                }
-                .frame(alignment: .leading)
-                VStack {
-                  Text(temp.weights.paxCountActual)
-                  Text(temp.weights.cargo)
-                  Text(temp.fuel.block)
-                }
-                .frame(alignment: .trailing)
-              }
-              Divider()
-              HStack {
-                VStack {
-                  Text("eZFW:")
-                  Text("eTOW:")
-                  Text("eLDW:")
-                }
-                .frame(alignment: .leading)
-                VStack {
-                  Text(temp.weights.estZFW)
-                  Text(temp.weights.estTOW)
-                  Text(temp.weights.estLDW)
-                }
-                .frame(alignment: .trailing)
-              }
-            }
-            .frame(maxHeight: 50)
-          }
-          
-          Picker("Airport", selection: $selectedSimbriefPicker) {
-            ForEach(SimbriefScreenPickerOptions.allCases, id: \.id) { tab in
-              Text(tab.rawValue)
-                .tag(tab)
-            }
-          }
-          .pickerStyle(.segmented)
-          
-          switch selectedSimbriefPicker {
-          case .dep:
-            SimbriefTabDetails(airport: temp.origin)
-          case .arr:
-            SimbriefTabDetails(airport: temp.destination)
-          case .alt:
-            SimbriefTabDetails(alternates: temp.alternate)
-          }
-          
+        if let ofp = simbrief.ofp {
+          SimbriefDetails(ofp: ofp)
+        } else if let errorMessage = simbrief.sbAPIErrorMessage {
+          Text(errorMessage)
         }
       }
       else {
         ContentUnavailableView("Simbrief Unvailable", systemImage: "airplane.circle", description: Text("Enter Simbrief ID in Settings tab to pull data."))
       }
       
+    }
+  }
+}
+
+struct SimbriefDetails: View {
+  let ofp: OFPSchema
+  
+  enum SimbriefScreenPickerOptions: String, Identifiable, CaseIterable {
+    case dep = "Depature"
+    case arr = "Arrival"
+    case alt = "Alternate"
+    
+    var id: Self { self }
+  }
+  
+  @State private var selectedSimbriefPicker: SimbriefScreenPickerOptions = .dep
+  
+  var body: some View {
+    Text("\(ofp.origin.icaoCode)/\(ofp.origin.planRwy) \(ofp.general.routeNavigraph) \(ofp.destination.icaoCode)/\(ofp.destination.planRwy) | \(ofp.alternate?.first?.icaoCode ?? "")/\(ofp.alternate?.first?.planRwy ?? "")")
+    
+    VStack {
+      HStack {
+        Text(ofp.aircraft.icaoCode)
+        Text(ofp.general.airline + ofp.general.flightNumber)
+          .fontWeight(.semibold)
+        Text(ofp.aircraft.reg)
+      }
+      HStack {
+        HStack {
+          VStack {
+            Text("CI:")
+            Text("FL:")
+          }
+          .frame(alignment: .leading)
+          VStack {
+            Text(ofp.general.costIndex)
+            Text(ofp.general.initialAltitude)
+          }
+          .frame(alignment: .trailing)
+        }
+        Divider()
+        HStack {
+          VStack {
+            Text("Dep:")
+            Text("Arr:")
+            Text("ETE:")
+          }
+          .frame(alignment: .leading)
+          VStack {
+            Text(convertDate(ofp.times.schedDep) + "z")
+            Text(convertDate(ofp.times.schedArr) + "z")
+            Text(ofp.times.ete)
+          }
+          .frame(alignment: .trailing)
+        }
+        Divider()
+        HStack {
+          VStack {
+            Text("Pax:")
+            Text("Cargo:")
+            Text("Block:")
+          }
+          .frame(alignment: .leading)
+          VStack {
+            Text(ofp.weights.paxCountActual)
+            Text(ofp.weights.cargo)
+            Text(ofp.fuel.block)
+          }
+          .frame(alignment: .trailing)
+        }
+        Divider()
+        HStack {
+          VStack {
+            Text("eZFW:")
+            Text("eTOW:")
+            Text("eLDW:")
+          }
+          .frame(alignment: .leading)
+          VStack {
+            Text(ofp.weights.estZFW)
+            Text(ofp.weights.estTOW)
+            Text(ofp.weights.estLDW)
+          }
+          .frame(alignment: .trailing)
+        }
+      }
+      .frame(maxHeight: 50)
+    }
+    
+    Picker("Airport", selection: $selectedSimbriefPicker) {
+      ForEach(SimbriefScreenPickerOptions.allCases, id: \.id) { tab in
+        Text(tab.rawValue)
+          .tag(tab)
+      }
+    }
+    .pickerStyle(.segmented)
+    
+    switch selectedSimbriefPicker {
+    case .dep:
+      SimbriefTabDetails(airport: ofp.origin)
+    case .arr:
+      SimbriefTabDetails(airport: ofp.destination)
+    case .alt:
+      SimbriefTabDetails(alternates: ofp.alternate)
     }
   }
   
@@ -155,9 +166,7 @@ struct SimbriefScreen: View {
     df.timeZone = TimeZone(identifier: "UTC")
     return df.string(from: date)
   }
-  
 }
-
 
 // For development
 @MainActor
@@ -169,7 +178,7 @@ let previewContainer: ModelContainer = {
 
 #Preview {
   SimbriefScreen()
-    .environmentObject(SimBriefViewModel())
+//    .environmentObject(SimBriefViewModel())
     .modelContainer(previewContainer)
 }
 
