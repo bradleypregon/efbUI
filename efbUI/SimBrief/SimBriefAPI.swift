@@ -9,7 +9,7 @@ import Foundation
 import Observation
 
 @Observable
-class SimBriefViewModel: ObservableObject {
+final class SimBriefViewModel: Sendable {
   var ofp: OFPSchema? {
     didSet {
       if let ofp {
@@ -21,16 +21,22 @@ class SimBriefViewModel: ObservableObject {
       }
     }
   }
+
   let api = SimBriefAPI()
-  let chartsAPI = FetchAirportCharts()
+  var sbAPIErrorMessage: String?
   
+  let chartsAPI = FetchAirportCharts()
   var depCharts: DecodedArray<AirportChartAPISchema>?
   var arrCharts: DecodedArray<AirportChartAPISchema>?
   var altnCharts: DecodedArray<AirportChartAPISchema>?
   
-  func fetchOFP(for id: String) {
-    api.fetchLastFlightPlan(for: id) { schema in
-      self.ofp = schema
+  func fetchOFP(for id: String) async {
+    do {
+      self.ofp = try await SimBriefAPI().fetchFlightPlan(for: id)
+    } catch let error as SimBriefError {
+      self.sbAPIErrorMessage = error.localizedDescription
+    } catch {
+      self.sbAPIErrorMessage = "SimBrief API Error: An unknown error occured."
     }
   }
   
@@ -51,39 +57,43 @@ class SimBriefViewModel: ObservableObject {
   }
 }
 
-class SimBriefAPI {
-  func fetchLastFlightPlan(for userID: String, completion: @escaping (OFPSchema) -> ()) {
-//    let url = "https://www.simbrief.com/api/xml.fetcher.php?userid=\(userID)&json=v2"
-    let url = "https://efb.pregonlabs.xyz/latest/\(userID)"
+enum SimBriefError: Error, LocalizedError {
+  case badURL
+  case badResponse
+  case badDecode
+  
+  var errorDescription: String? {
+    switch self {
+    case .badURL:
+      return "SimBrief API Error: Invalid URL. Simbrief ID may be invalid."
+    case .badResponse:
+      return "SimBrief API Error: Invalid Response. Simbrief may be offline."
+    case .badDecode:
+      return "SimBrief API Error: Invalid Decode. Simbrief ID may be invalid, or there is no route."
+    }
+  }
+}
 
+class SimBriefAPI {
+  func fetchFlightPlan(for userID: String) async throws -> OFPSchema {
+    let url = "https://efb.pregonlabs.xyz/latest/\(userID)"
     guard let url = URL(string: url) else {
-      print("Bad URL")
-      return
+      throw SimBriefError.badURL
     }
     
-    URLSession.shared.dataTask(with: url) { (data, response, error) in
-      guard error == nil else {
-        print("Error in URLSession: \(String(describing: error?.localizedDescription))")
-        return
-      }
-      guard let data = data else {
-        print("Error in data")
-        return
-      }
-      
-      do {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        
-        let data = try decoder.decode(OFPSchema.self, from: data)
-        DispatchQueue.main.async {
-          completion(data)
-        }
-      } catch let error {
-        print("Error fetching SimBrief Route: \(error)")
-      }
-      
-    }.resume()
+    let request = URLRequest(url: url)
+    let (data, response) = try await URLSession.shared.data(for: request)
     
+    guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+      throw SimBriefError.badResponse
+    }
+    
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    guard let ofp = try? decoder.decode(OFPSchema.self, from: data) else {
+      throw SimBriefError.badDecode
+    }
+    return ofp
   }
+  
 }
