@@ -104,26 +104,31 @@ struct CustomInputView: View {
 }
 
 struct RouteScreen: View {
-  @State var ofp: OFPSchema
+  @Environment(SimBriefViewModel.self) private var simbrief
   
   var body: some View {
     // TODO: build array from ofp including origin, waypoints, destination
     // TODO: Color for Airports, color for Departures, color for Arrivals, color for TOC/TOD
     VStack {
-      WrappingHStack(models: ofp.navlog.filter { $0.type != "apt" }) { wpt in
-        Button {
-          print("\(wpt.ident) tapped")
-        } label: {
-          Text(wpt.isSidStar == "1" && wpt.ident != "TOC" && wpt.ident != "TOD" ? "\(wpt.via).\(wpt.ident)" : wpt.ident)
-            .padding(8)
-            .background(wpt.ident == "TOC" || wpt.ident == "TOD" ? Color.green : Color.blue)
-            .foregroundStyle(.white)
-            .clipShape(Capsule())
-            .font(.caption)
+      if let ofp = simbrief.ofp {
+        WrappingHStack(models: ofp.navlog.filter { $0.type != "apt" }) { wpt in
+          Button {
+            print("\(wpt.ident) tapped")
+          } label: {
+            Text(wpt.isSidStar == "1" && wpt.ident != "TOC" && wpt.ident != "TOD" ? "\(wpt.via).\(wpt.ident)" : wpt.ident)
+              .padding(8)
+              .background(wpt.ident == "TOC" || wpt.ident == "TOD" ? Color.green : Color.blue)
+              .foregroundStyle(.white)
+              .clipShape(Capsule())
+              .font(.caption)
+          }
         }
+        .frame(maxWidth: 600, maxHeight: 400)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+      } else {
+        Text("No simbrief ofp")
       }
-      .frame(maxWidth: 600, maxHeight: 400)
-      .clipShape(RoundedRectangle(cornerRadius: 8))
+      
       
       WaypointsContainer()
       CustomInputView()
