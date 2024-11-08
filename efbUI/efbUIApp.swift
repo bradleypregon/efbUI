@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SwiftData
+//import SwiftData
 
 @main
 struct efbUIApp: App {
@@ -19,23 +19,24 @@ struct efbUIApp: App {
   var body: some Scene {
     WindowGroup {
       RootToastView {
-        ZStack {
+        VStack {
+          TopBarView()
+            .background(.bar)
+            .clipShape(
+              UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 10, bottomTrailingRadius: 10, topTrailingRadius: 0)
+            )
+            .frame(height: 60)
+            .padding(.top, 20)
+            .ignoresSafeArea(edges: .top)
           TabBar()
-            .frame(maxHeight: .infinity)
-            .padding(.top, 65)
-          VStack {
-            TopBarView()
-              .background(.bar)
-              .clipShape(RoundedRectangle(cornerRadius: 8))
-            Spacer()
-          }
+            .offset(y: -40)
+            .padding(.bottom, -40)
         }
         .environment(simConnectShip)
         .environment(airportDetailViewModel)
         .environment(simbrief)
         .environment(waypointStore)
       }
-      
     }
     .modelContainer(for: UserSettings.self)
   }
