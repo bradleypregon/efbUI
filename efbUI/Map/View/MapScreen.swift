@@ -11,7 +11,7 @@ import Observation
 import PencilKit
 
 struct MapScreen: View {
-  @Binding var selectedTab: Int
+  @Binding var selectedTab: efbTab
   @Environment(SimConnectShipObserver.self) private var simConnect
 //  @Environment(Settings.self) private var settings
   @Environment(SimBriefViewModel.self) private var simbrief
@@ -552,7 +552,7 @@ struct MapScreen: View {
 }
 
 #Preview {
-  MapScreen(selectedTab: .constant(1))
+  MapScreen(selectedTab: .constant(.map))
 }
 
 // MARK: SimConnect Traffic
@@ -573,12 +573,14 @@ extension MapScreen {
   func updateOwnshipLayer() {
     if updatingSimConnectShips {
       Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-        updateOwnshipLayer(id: "OwnshipLayer")
+        Task {
+          await updateOwnshipLayer(id: "OwnshipLayer")
+        }
       }
     }
   }
   
-  func updateOwnshipLayer(id: String) {
+  func updateOwnshipLayer(id: String) async {
     do {
       try proxyMap?.map?.updateLayer(withId: id, type: LocationIndicatorLayer.self) { layer in
         layer.location = .constant([simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude, simConnect.ownship.altitude])
@@ -600,11 +602,13 @@ extension MapScreen {
   
   func updateTrafficLayers() {
     Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { _ in
-      updateTrafficLayerDelegate()
+      Task {
+        await updateTrafficLayerDelegate()
+      }
     }
   }
   
-  func updateTrafficLayerDelegate() {
+  func updateTrafficLayerDelegate() async {
     guard simConnect.traffic != [:] else { return }
     for (id, ship) in simConnect.traffic {
       if (proxyMap?.map?.layerExists(withId: id) != nil) {
@@ -613,7 +617,7 @@ extension MapScreen {
         addTrafficLayer(id: id)
       }
     }
-    for (id, ship) in simConnect.pruneTraffic {
+    for (id, _) in simConnect.pruneTraffic {
       if (proxyMap?.map?.layerExists(withId: id) != nil) {
         pruneTrafficLayer(id: id)
       }
