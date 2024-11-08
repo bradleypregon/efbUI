@@ -9,13 +9,22 @@ import SwiftUI
 import CoreLocation
 import Combine
 
-@Observable
-class TabBarViewModel {
-  var selectedTab = 0
+enum efbTab: Equatable, Hashable {
+  case airports
+  case charts
+  case routeCategories(RouteCategory)
+  case map
+  case scratchPad
+  case settings
+}
+
+enum RouteCategory: Equatable, Hashable {
+  case route
+  case simbrief
 }
 
 struct TabBar: View {
-  @State var selectedTab = 0
+  @State var selectedTab: efbTab = .airports
   @Environment(SimConnectShipObserver.self) private var ship
   @Environment(SimBriefViewModel.self) private var simbrief
   
@@ -28,45 +37,47 @@ struct TabBar: View {
   
   var body: some View {
     TabView(selection: $selectedTab) {
+      Tab("Airports", systemImage: "scope", value: .airports) {
+        AirportScreen(selectedTab: $selectedTab)
+          .offset(y: 40)
+          .padding(.bottom, -40)
+      }
+      Tab("Charts", systemImage: "doc.on.doc", value: .charts) {
+        ChartsView(selectedTab: $selectedTab)
+          .offset(y: 40)
+          .padding(.bottom, -40)
+      }
       
-      AirportScreen(selectedTab: $selectedTab)
-        .tabItem {
-          Label("Airports", systemImage: "scope")
-        }
-        .tag(0)
+      // MARK: Saving TabSection for a later date when fixed/functions better
+//      TabSection {
+//        Tab("Route", systemImage: "point.topleft.down.to.point.bottomright.curvepath", value: efbTab.routeCategories(.route)) {
+//          RouteScreen()
+//        }
+//        Tab("Simbrief", systemImage: "point.topleft.down.to.point.bottomright.curvepath", value: .routeCategories(.simbrief)) {
+//          SimbriefScreen()
+//        }
+//      } header: {
+//        Label("Route", systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+//      }
       
-      SimbriefScreen()
-        .tabItem {
-          Label("Simbrief", systemImage: "list.bullet.clipboard")
-        }
-        .tag(1)
+      Tab("Simbrief", systemImage: "point.topleft.down.to.point.bottomright.curvepath", value: .routeCategories(.simbrief)) {
+        SimbriefScreen()
+      }
       
-      ChartsView(selectedTab: $selectedTab)
-        .tabItem {
-          Label("Charts", systemImage: "doc.on.doc")
-        }
-        .tag(2)
-      
-      MapScreen(selectedTab: $selectedTab)
-        .ignoresSafeArea(.all)
-        .tabItem {
-          Label("Map", systemImage: "map")
-        }
-        .tag(3)
-      
-      ScratchPadView()
-        .tabItem {
-          Label("Scratch Pad", systemImage:"square.and.pencil")
-        }
-        .tag(4)
-      
-      SettingsView()
-        .tabItem {
-          Label("Settings", systemImage: "gear")
-        }
-        .tag(5)
+      Tab("Map", systemImage: "map", value: .map) {
+        MapScreen(selectedTab: $selectedTab)
+          .padding(.top, 40)
+      }
+      Tab("ScratchPad", systemImage: "square.and.pencil", value: .scratchPad) {
+        ScratchPadView()
+      }
+      Tab("Route", systemImage: "point.topleft.down.to.point.bottomright.curvepath", value: efbTab.routeCategories(.route)) {
+        RouteScreen()
+      }
+      Tab("Settings", systemImage: "gear", value: .settings) {
+        SettingsView()
+      }
     }
-    .tabViewStyle(.sidebarAdaptable)
     .onReceive(timer) { _ in
       guard let ofp = simbrief.ofp else { return }
       guard ship.ownship.coordinate.latitude != .zero else { return }
