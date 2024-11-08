@@ -43,7 +43,7 @@ struct AirportSunriseSunsetView: View {
 }
 
 struct AirportScreen: View {
-  @Binding var selectedTab: Int
+  @Binding var selectedTab: efbTab
   @Environment(AirportScreenViewModel.self) private var viewModel
   @State private var textFieldFocused: Bool = false
   
@@ -90,14 +90,14 @@ struct AirportScreen: View {
                   }
                   GridRow(alignment: .center) {
                     Button {
-                      selectedTab = 2
+                      selectedTab = .charts
                     } label: {
                       Text("Charts")
                     }
                     .buttonStyle(.bordered)
                     Button {
                       viewModel.requestMap = true
-                      selectedTab = 3
+                      selectedTab = .map
                     } label: {
                       Image(systemName: "map")
                     }

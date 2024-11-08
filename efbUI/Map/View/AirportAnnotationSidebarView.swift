@@ -16,7 +16,7 @@ import Neumorphic
 //    - Simply just update properties from SidebarView
 
 struct AirportAnnotationSidebarView: View {
-  @Binding var selectedTab: Int
+  @Binding var selectedTab: efbTab
   @Binding var selectedAirport: AirportTable?
   
   @Environment(AirportScreenViewModel.self) private var airportVM
@@ -189,7 +189,7 @@ struct AirportAnnotationSidebarView: View {
           // TODO: Make button bigger
           Button {
             airportVM.selectedAirportICAO = selectedAirport.airportIdentifier
-            selectedTab = 0
+            selectedTab = .airports
           } label: {
             Text("View Airport")
               .font(.system(size: 12))

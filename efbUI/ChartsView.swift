@@ -9,7 +9,7 @@ import SwiftUI
 import PencilKit
 
 struct ChartsView: View {
-  @Binding var selectedTab: Int
+  @Binding var selectedTab: efbTab
   @Environment(AirportScreenViewModel.self) private var airportDetailViewModel
   @Environment(SimBriefViewModel.self) private var sbViewModel
   
@@ -296,5 +296,5 @@ struct ChartsView: View {
 }
 
 #Preview {
-  ChartsView(selectedTab: .constant(1))
+  ChartsView(selectedTab: .constant(.charts))
 }
