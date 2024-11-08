@@ -19,7 +19,7 @@ struct QueryAirportTextResult: Equatable, Identifiable {
 }
 
 class SQLiteManager {
-  static let shared = SQLiteManager()
+  @MainActor static let shared = SQLiteManager()
   private var db: Connection? = nil
   
   private init() {

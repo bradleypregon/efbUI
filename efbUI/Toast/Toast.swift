@@ -44,7 +44,7 @@ fileprivate class PassthroughWindow: UIWindow {
 
 @Observable
 class Toast {
-  static let shared = Toast()
+  @MainActor static let shared = Toast()
   fileprivate var toasts: [ToastItem] = []
   
   func present(title: String, symbol: String, tint: Color = Color.Neumorphic.main, isUserInteractionEnabled: Bool = false, timing: CGFloat = 15) {
