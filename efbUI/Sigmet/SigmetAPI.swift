@@ -7,16 +7,37 @@
 
 import Foundation
 
+enum SigmetAPIError: Error, LocalizedError {
+  case badURL
+  case badResponse
+  case badDecode
+  
+  var errorDescription: String? {
+    switch self {
+    case .badURL:
+      return "Sigmet API Error: Invalid URL."
+    case .badResponse:
+      return "Sigmet API Error: Invalid Response."
+    case .badDecode:
+      return "SIgmet API Error: Invalid Decode."
+    }
+  }
+}
+
 class SigmetAPI {
   func fetchSigmet() async throws -> SigmetSchema {
     let url = "https://aviationweather.gov/api/data/airsigmet?format=json&type=sigmet&hazard=conv,turb,ice,ifr&date=\(getDate())"
     
-    guard let url = URL(string: url) else { fatalError("Error creating URL to fetch Sigmets.") }
+    guard let url = URL(string: url) else { throw SigmetAPIError.badURL }
     
     let (data, response) = try await URLSession.shared.data(from: url)
     
-    guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Error fetching Sigmet API data")}
-    let sigmetData = try JSONDecoder().decode(SigmetSchema.self, from: data)
+    guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw SigmetAPIError.badResponse }
+    
+    guard let sigmetData = try? JSONDecoder().decode(SigmetSchema.self, from: data) else {
+      throw SigmetAPIError.badDecode
+    }
+    
     return sigmetData
   }
   
