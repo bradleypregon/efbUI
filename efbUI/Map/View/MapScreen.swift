@@ -617,10 +617,9 @@ extension MapScreen {
         addTrafficLayer(id: id)
       }
     }
+    // prune traffic from layers
     for (id, _) in simConnect.pruneTraffic {
-      if (proxyMap?.map?.layerExists(withId: id) != nil) {
-        pruneTrafficLayer(id: id)
-      }
+      pruneTrafficLayer(id: id)
     }
   }
   
@@ -632,6 +631,7 @@ extension MapScreen {
       }
     } catch {
       print("Error updating traffic layer for ID: \(id): \(error)")
+      addTrafficLayer(id: id)
     }
   }
   
@@ -648,6 +648,8 @@ extension MapScreen {
   func pruneTrafficLayer(id: String) {
     do {
       try proxyMap?.map?.removeLayer(withId: id)
+      simConnect.pruneTraffic.removeValue(forKey: id)
+      print("Pruned traffic in MapScreen: \(id)")
     } catch {
       print("Unable to remove pruned traffic layer for id: \(id): \(error)")
     }
