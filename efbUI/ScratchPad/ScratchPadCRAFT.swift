@@ -6,8 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ScratchPadCRAFT: View {
+  @Environment(SimBriefViewModel.self) private var simbrief
+  var TESTroute = "DCT BJC DCT DBL DCT UTI DCT LAX"
+  
   struct Item: Identifiable, Hashable {
     let letter: String
     let desc: String
@@ -45,6 +49,50 @@ struct ScratchPadCRAFT: View {
             .font(.caption)
             .fontWeight(.light)
         }
+        
+        
+        if letter == "C", let arrival = simbrief.ofp?.origin.icaoCode {
+          VStack {
+            Text(arrival)
+              .font(.title2)
+              .fontDesign(.rounded)
+            Spacer()
+          }
+          .padding(.leading, 50)
+          .padding(.top, 20)
+        }
+        if letter == "R", let route = simbrief.ofp?.general.routeNavigraph {
+          VStack {
+            Text(route)
+              .font(.title2)
+              .fontDesign(.rounded)
+            Spacer()
+          }
+          .padding(.leading, 50)
+          .padding(.top, 20)
+        }
+        
+        
+//        if letter == "C" {
+//          VStack {
+//            Text("KLAX")
+//              .font(.title2)
+//            Spacer()
+//          }
+//          .padding(.leading, 50)
+//          .padding(.top, 20)
+//        }
+//        if letter == "R" {
+//          VStack {
+//            Text(TESTroute)
+//              .font(.title2)
+//            Spacer()
+//          }
+//          .padding(.leading, 50)
+//          .padding(.top, 20)
+//        }
+        
+        
         Spacer()
       }
       .padding()
