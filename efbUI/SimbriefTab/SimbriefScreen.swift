@@ -64,6 +64,7 @@ struct SimbriefDetails: View {
     case dep = "Depature"
     case arr = "Arrival"
     case alt = "Alternate"
+    case route = "Route"
     
     var id: Self { self }
   }
@@ -157,6 +158,8 @@ struct SimbriefDetails: View {
       SimbriefTabDetails(airport: ofp.destination)
     case .alt:
       SimbriefTabDetails(alternates: ofp.alternate)
+    case .route:
+      SimbriefTabRoute(route: ofp.navlog)
     }
   }
   
@@ -169,16 +172,15 @@ struct SimbriefDetails: View {
 }
 
 // For development
-@MainActor
-let previewContainer: ModelContainer = {
-  let container = try! ModelContainer(for: UserSettings.self, configurations: .init(isStoredInMemoryOnly: true))
-  container.mainContext.insert(UserSettings(simbriefUserID: "405981"))
-  return container
-}()
-
-#Preview {
-  SimbriefScreen()
-//    .environmentObject(SimBriefViewModel())
-    .modelContainer(previewContainer)
-}
+//@MainActor
+//let previewContainer: ModelContainer = {
+//  let container = try! ModelContainer(for: UserSettings.self, configurations: .init(isStoredInMemoryOnly: true))
+//  container.mainContext.insert(UserSettings(simbriefUserID: "405981"))
+//  return container
+//}()
+//
+//#Preview {
+//  SimbriefScreen()
+//    .modelContainer(previewContainer)
+//}
 
