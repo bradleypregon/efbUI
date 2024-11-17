@@ -13,10 +13,12 @@ final class SimBriefViewModel: Sendable {
   var ofp: OFPSchema? {
     didSet {
       if let ofp {
-        fetchOriginCharts(icao: ofp.origin.icaoCode)
-        fetchDestCharts(icao: ofp.destination.icaoCode)
-        if let altn = ofp.alternate?.first {
-          fetchAltnCharts(icao: altn.icaoCode)
+        Task {
+          depCharts = await fetchCharts(icao: ofp.origin.icaoCode)
+          arrCharts = await fetchCharts(icao: ofp.destination.icaoCode)
+          if let altn = ofp.alternate?.first {
+            altnCharts = await fetchCharts(icao: altn.icaoCode)
+          }
         }
       }
     }
@@ -25,7 +27,6 @@ final class SimBriefViewModel: Sendable {
   let api = SimBriefAPI()
   var sbAPIErrorMessage: String?
   
-  let chartsAPI = FetchAirportCharts()
   var depCharts: DecodedArray<AirportChartAPISchema>?
   var arrCharts: DecodedArray<AirportChartAPISchema>?
   var altnCharts: DecodedArray<AirportChartAPISchema>?
@@ -40,21 +41,14 @@ final class SimBriefViewModel: Sendable {
     }
   }
   
-  func fetchOriginCharts(icao: String) {
-    chartsAPI.fetchCharts(icao: icao) { charts in
-      self.depCharts = charts
+  func fetchCharts(icao: String) async -> DecodedArray<AirportChartAPISchema>? {
+    do {
+      return try await AirportChartAPI().fetchCharts(icao: icao)
+    } catch {
+      return nil
     }
   }
-  func fetchDestCharts(icao: String) {
-    chartsAPI.fetchCharts(icao: icao) { charts in
-      self.arrCharts = charts
-    }
-  }
-  func fetchAltnCharts(icao: String) {
-    chartsAPI.fetchCharts(icao: icao) { charts in
-      self.altnCharts = charts
-    }
-  }
+
 }
 
 enum SimBriefError: Error, LocalizedError {
