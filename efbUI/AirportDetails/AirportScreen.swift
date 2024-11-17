@@ -184,10 +184,10 @@ struct AirportScreen: View {
       }
       
     }
-    .onAppear {
+    .task {
       // fetch metar, weather, local weather, etc
       if viewModel.selectedAirportICAO != viewModel.prevICAO {
-        viewModel.fetchFaaMetar(icao: viewModel.selectedAirportICAO)
+        await viewModel.fetchFaaMetar(icao: viewModel.selectedAirportICAO)
       }
     }
   }
@@ -265,7 +265,9 @@ struct AirportScreenWxTab: View {
     @Bindable var airportVM = airportVM
     VStack {
       Button {
-        airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: true)
+        Task {
+          await airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: true)
+        }
       } label: {
         Text("Refresh")
       }
@@ -295,11 +297,16 @@ struct AirportScreenWxTab: View {
 //      airportVM.fetchAirportWx(icao: airportVM.selectedAirportICAO)
     }
     .onChange(of: airportVM.wxSource) {
-      airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: false)
+      Task {
+        await airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: false)
+      }
     }
     .onChange(of: airportVM.wxType) {
-      airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: false)
+      Task {
+        await airportVM.fetchWx(for: airportVM.wxSource, type: airportVM.wxType, icao: airportVM.selectedAirportICAO, refresh: false)
+      }
     }
+
   }
 }
 
