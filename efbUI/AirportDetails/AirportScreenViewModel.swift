@@ -48,19 +48,17 @@ class AirportDetails {
     fetchAirportDetails(icao: String)
     fetches runways, comms
    */
-  func fetchAirportDetails(icao: String) {
-    Task.detached {
-      self.fetchRunways(icao: icao)
-      self.fetchComms(icao: icao)
-    }
+  func fetchAirportDetails(icao: String) async {
+    await self.fetchRunways(icao: icao)
+    await self.fetchComms(icao: icao)
   }
   
-  func fetchRunways(icao: String) {
+  func fetchRunways(icao: String) async {
     let runways = SQLiteManager.shared.getAirportRunways(icao)
     self.runways = runways
   }
   
-  func fetchComms(icao: String) {
+  func fetchComms(icao: String) async {
     let comms = SQLiteManager.shared.getAirportComms(icao)
     self.comms = comms
   }
@@ -77,20 +75,37 @@ class AirportDetails {
   }
   
   /// fetch faa/noaa metar and calculate wx category
-  func fetchFaaMetar(icao: String) {
-    let wx = FetchAirportWx()
-    wx.fetchMetar(icao: icao) { metar in
-      self.faaMetar = metar
-      self.wxCategory = self.calculateWxCategory(wx: metar)
-      self.currentWxString = metar.first?.rawOb ?? "n/a"
+  func fetchFaaMetar(icao: String) async {
+    do {
+      let metars = try await AirportWxAPI().fetchMetar(icao: icao)
+      self.faaMetar = metars
+      self.wxCategory = self.calculateWxCategory(wx: metars)
+      self.currentWxString = metars.first?.rawOb ?? "metar n/a"
+    } catch AirportWxError.invalidURL {
+      // TODO: Handle AirportWxError types
+      print(AirportWxError.invalidURL.localizedDescription)
+    } catch AirportWxError.invalidResponse {
+      print(AirportWxError.invalidResponse.localizedDescription)
+    } catch (AirportWxError.invalidDecode) {
+      print(AirportWxError.invalidDecode.localizedDescription)
+    } catch {
+      print("An unexpected issue ocurred fetching AirportWxAPI METARs for Airport.")
     }
   }
   
-  func fetchFaaTaf(icao: String) {
-    let wx = FetchAirportWx()
-    wx.fetchTAF(icao: icao) { taf in
-      self.faaTaf = taf
-      self.currentWxString = taf.joined(separator: "\n")
+  func fetchFaaTaf(icao: String) async {
+    do {
+      let tafs = try await AirportWxAPI().fetchTAF(icao: icao)
+      self.faaTaf = tafs
+    } catch AirportWxError.invalidURL {
+      // TODO: Handle AirportWxError types
+      print(AirportWxError.invalidURL.localizedDescription)
+    } catch AirportWxError.invalidResponse {
+      print(AirportWxError.invalidResponse.localizedDescription)
+    } catch (AirportWxError.invalidDecode) {
+      print(AirportWxError.invalidDecode.localizedDescription)
+    } catch {
+      print("An unexpected issue ocurred fetching AirportWxAPI TAFs for Airport.")
     }
   }
 
@@ -190,27 +205,25 @@ class AirportDetails {
   
   // TODO: no need to re-call api, if you JUST looked at the tab. How to implement that...
   // Refresh parameter?
-  func fetchWx(for source: WxSources, type: WxTabs, icao: String, refresh: Bool) {
+  func fetchWx(for source: WxSources, type: WxTabs, icao: String, refresh: Bool) async {
     switch (source, type) {
     case (.faa, .metar):
       if prevICAO == icao && !refresh && !self.faaMetar.isEmpty {
         self.currentWxString = self.faaMetar.first?.rawOb ?? "n/a"
       } else {
-        self.fetchFaaMetar(icao: icao)
+        await self.fetchFaaMetar(icao: icao)
       }
     case (.faa, .taf):
       if prevICAO == icao && !refresh && !self.faaTaf.isEmpty {
         self.currentWxString = self.faaTaf.joined(separator: "\n")
       } else {
-        self.fetchFaaTaf(icao: icao)
+        await self.fetchFaaTaf(icao: icao)
       }
     case (.faa, .atis):
       if prevICAO == icao && !refresh && !self.faaAtis.isEmpty {
         self.currentWxString = self.faaAtis.map { $0.datis }.joined(separator: "\n")
       } else {
-        Task {
-          await fetchFaaAtis(icao: icao)
-        }
+        await fetchFaaAtis(icao: icao)
       }
     case (.ivao, .metar):
       self.currentWxString = "ivao metar"
@@ -259,10 +272,10 @@ class AirportScreenViewModel: AirportDetails {
       // Get selected airport
       selectedAirport = SQLiteManager.shared.selectAirport(selectedAirportICAO)
       if let selectedAirport {
-        Task.detached {
-          self.fetchAirportDetails(icao: self.selectedAirportICAO)
-          self.queryAirportData(airport: selectedAirport)
-          self.fetchFaaMetar(icao: self.selectedAirportICAO)
+        Task {
+          await self.fetchAirportDetails(icao: self.selectedAirportICAO)
+          await self.queryAirportData(airport: selectedAirport)
+          await self.fetchFaaMetar(icao: self.selectedAirportICAO)
         }
       }
     }
@@ -279,10 +292,10 @@ class AirportScreenViewModel: AirportDetails {
   /**
    Fetch Weather, fetch airport communications, fetch city/state
    */
-  private func queryAirportData(airport: AirportTable) {
+  private func queryAirportData(airport: AirportTable) async {
     fetchLocalWeather(lat: airport.airportRefLat, long: airport.airportRefLong)
     fetchCityState(lat: airport.airportRefLat, long: airport.airportRefLong)
-    fetchAirportCharts(icao: airport.airportIdentifier)
+    await fetchAirportCharts(icao: airport.airportIdentifier)
   }
   
   func fetchLocalWeather(lat: Double, long: Double) {
@@ -307,10 +320,11 @@ class AirportScreenViewModel: AirportDetails {
     return "\(formattedLat) / \(formattedLong)"
   }
   
-  func fetchAirportCharts(icao: String) {
-    let airportCharts = FetchAirportCharts()
-    airportCharts.fetchCharts(icao: icao) { charts in
-      self.selectedAirportCharts = charts
+  func fetchAirportCharts(icao: String) async {
+    do {
+      self.selectedAirportCharts = try await AirportChartAPI().fetchCharts(icao: icao)
+    } catch {
+      print("err")
     }
   }
   
