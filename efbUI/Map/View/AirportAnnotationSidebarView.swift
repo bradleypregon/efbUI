@@ -82,7 +82,9 @@ struct AirportAnnotationSidebarView: View {
                   .fontWeight(.semibold)
                   .foregroundStyle(vm.wxCategoryColor(for: vm.wxCategory))
                 Button {
-                  vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: true)
+                  Task {
+                    await vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: true)
+                  }
                 } label: {
                   Text("Refresh")
                 }
@@ -109,10 +111,15 @@ struct AirportAnnotationSidebarView: View {
                 .font(.system(size: 14))
             }
             .onChange(of: vm.wxSource.rawValue) {
-              vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: false)
+              Task {
+                await vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: false)
+              }
+              
             }
             .onChange(of: vm.wxType.rawValue) {
-              vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: false)
+              Task {
+                await vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: selectedAirport.airportIdentifier, refresh: false)
+              }
             }
           } header: {
             Text("Wx")
@@ -202,11 +209,11 @@ struct AirportAnnotationSidebarView: View {
         }
         
       }
-      .onAppear {
+      .task {
         if selectedAirport.airportIdentifier != vm.prevICAO {
-          vm.fetchFaaMetar(icao: selectedAirport.airportIdentifier)
+          await vm.fetchFaaMetar(icao: selectedAirport.airportIdentifier)
         }
-        vm.fetchAirportDetails(icao: selectedAirport.airportIdentifier)
+        await vm.fetchAirportDetails(icao: selectedAirport.airportIdentifier)
       }
       .onDisappear {
         vm.wxSource = .faa
