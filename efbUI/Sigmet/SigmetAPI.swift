@@ -19,7 +19,7 @@ enum SigmetAPIError: Error, LocalizedError {
     case .badResponse:
       return "Sigmet API Error: Invalid Response."
     case .badDecode:
-      return "SIgmet API Error: Invalid Decode."
+      return "Sigmet API Error: Invalid Decode."
     }
   }
 }
@@ -40,25 +40,6 @@ class SigmetAPI {
     
     return sigmetData
   }
-  
-//  func fetchSigmet(completion: @escaping (SigmetSchema) -> ()) {
-//    let url = "https://aviationweather.gov/api/data/airsigmet?format=json&type=sigmet&hazard=conv,turb,ice,ifr&date=\(getDate())"
-//    guard let url = URL(string: url) else { return }
-//    
-//    URLSession.shared.dataTask(with: url) { data, response, error in
-//      guard error == nil else { return }
-//      guard let data = data else { return }
-//      
-//      do {
-//        let result = try JSONDecoder().decode(SigmetSchema.self, from: data)
-//        DispatchQueue.main.async {
-//          completion(result)
-//        }
-//      } catch let error {
-//        print("Error fetching Sigmet: \(error)")
-//      }
-//    }.resume()
-//  }
   
   // 20240309_171800Z
   // yyyymmdd_hhmmssZ
