@@ -56,6 +56,7 @@
 		A2710D052BCEB1BB0034889B /* IvaoAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2710D042BCEB1BB0034889B /* IvaoAPI.swift */; };
 		A283DBC32CDE88680022CFF8 /* RouteScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A283DBC22CDE88680022CFF8 /* RouteScreen.swift */; };
 		A283DBC52CDE8A440022CFF8 /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = A283DBC42CDE8A440022CFF8 /* navdata.db */; };
+		A283DBC72CE51B620022CFF8 /* SimbriefTabRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = A283DBC62CE51B620022CFF8 /* SimbriefTabRoute.swift */; };
 		A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */; };
 		A29479BD2BDC3A2A00B89CE9 /* Airports.json in Resources */ = {isa = PBXBuildFile; fileRef = A29479BC2BDC3A2A00B89CE9 /* Airports.json */; };
 		A2A243682B00368B00245A0F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A243672B00368B00245A0F /* SettingsView.swift */; };
@@ -124,6 +125,7 @@
 		A273A6012B261EE100D2979B /* Keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Keys.xcconfig; sourceTree = "<group>"; };
 		A283DBC22CDE88680022CFF8 /* RouteScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteScreen.swift; sourceTree = "<group>"; };
 		A283DBC42CDE8A440022CFF8 /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = navdata.db; sourceTree = "<group>"; };
+		A283DBC62CE51B620022CFF8 /* SimbriefTabRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefTabRoute.swift; sourceTree = "<group>"; };
 		A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AirplaneAnnotation.swift; sourceTree = "<group>"; };
 		A29479BC2BDC3A2A00B89CE9 /* Airports.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Airports.json; sourceTree = "<group>"; };
 		A2A243672B00368B00245A0F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -283,6 +285,7 @@
 			children = (
 				A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */,
 				A207E9092C78ED8400E4C4EE /* SimbriefTabDetails.swift */,
+				A283DBC62CE51B620022CFF8 /* SimbriefTabRoute.swift */,
 			);
 			path = SimbriefTab;
 			sourceTree = "<group>";
@@ -583,6 +586,7 @@
 				A2B98D6E2B9BBFF600A91977 /* ToastTestContentView.swift in Sources */,
 				3A81763F27339AA100445CDA /* TopBarView.swift in Sources */,
 				A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */,
+				A283DBC72CE51B620022CFF8 /* SimbriefTabRoute.swift in Sources */,
 				A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */,
 				A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */,
 				A22696062CB8686F006CE148 /* OpenMeteoSchema.swift in Sources */,
