@@ -28,6 +28,7 @@
 		A20620222B49B61D0034D902 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A20620212B49B61D0034D902 /* SQLite */; };
 		A20620242B49B6AB0034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A20620232B49B6AB0034D902 /* MapboxMaps */; };
 		A20620262B49DC890034D902 /* AirportScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20620252B49DC890034D902 /* AirportScreenViewModel.swift */; };
+		A206A69C2CEFEB4A00BAB2D9 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A206A69B2CEFEB4A00BAB2D9 /* SearchView.swift */; };
 		A207E90A2C78ED8400E4C4EE /* SimbriefTabDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = A207E9092C78ED8400E4C4EE /* SimbriefTabDetails.swift */; };
 		A21B02372B5034850041D60B /* PDFKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02362B5034850041D60B /* PDFKitView.swift */; };
 		A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02382B55C8760041D60B /* SimBriefUserData.swift */; };
@@ -99,6 +100,7 @@
 		3AE11B5227319480005974E5 /* SimConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimConnect.swift; sourceTree = "<group>"; };
 		A2046B0A2B28E58300E04BEA /* MKViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKViewRepresentable.swift; sourceTree = "<group>"; };
 		A20620252B49DC890034D902 /* AirportScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportScreenViewModel.swift; sourceTree = "<group>"; };
+		A206A69B2CEFEB4A00BAB2D9 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		A207E9092C78ED8400E4C4EE /* SimbriefTabDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefTabDetails.swift; sourceTree = "<group>"; };
 		A21B02362B5034850041D60B /* PDFKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitView.swift; sourceTree = "<group>"; };
 		A21B02382B55C8760041D60B /* SimBriefUserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimBriefUserData.swift; sourceTree = "<group>"; };
@@ -268,6 +270,7 @@
 				A2EC6FD72B49AF9A00F31364 /* Deprecated */,
 				A24692F22B8E3A6B00A10A7F /* DrawingView.swift */,
 				A25CC0602B97A25D00716E1A /* RouteManager.swift */,
+				A206A69B2CEFEB4A00BAB2D9 /* SearchView.swift */,
 			);
 			path = efbUI;
 			sourceTree = "<group>";
@@ -563,6 +566,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3AA03FC92853C4C80086DBDA /* AirportJSONModel.swift in Sources */,
+				A206A69C2CEFEB4A00BAB2D9 /* SearchView.swift in Sources */,
 				A257E1B62B2AB514003B1859 /* DBTableStructs.swift in Sources */,
 				A283DBC32CDE88680022CFF8 /* RouteScreen.swift in Sources */,
 				A23B5BB92BCDDA0100DA5A08 /* PilotedgeAPI.swift in Sources */,

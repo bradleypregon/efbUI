@@ -16,6 +16,7 @@ enum efbTab: Equatable, Hashable {
   case map
   case scratchPad
   case settings
+  case search
 }
 
 enum RouteCategory: Equatable, Hashable {
@@ -37,7 +38,10 @@ struct TabBar: View {
   
   var body: some View {
     TabView(selection: $selectedTab) {
-      Tab("Airports", systemImage: "scope", value: .airports) {
+      Tab(value: .search, role: .search) {
+        SearchView(tab: $selectedTab)
+      }
+      Tab("Airport", systemImage: "scope", value: .airports) {
         AirportScreen(selectedTab: $selectedTab)
           .offset(y: 40)
           .padding(.bottom, -40)
