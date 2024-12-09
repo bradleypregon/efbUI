@@ -8,6 +8,11 @@
 import SwiftUI
 import PencilKit
 
+enum TestChartType: String, CaseIterable, Identifiable {
+  case favorite, current, route
+  var id: Self { self }
+}
+
 struct ChartsView: View {
   @Binding var selectedTab: efbTab
   @Environment(AirportScreenViewModel.self) private var airportDetailViewModel
@@ -27,21 +32,42 @@ struct ChartsView: View {
   @State private var selectedCharts: AirportChart = .Curr
   @State private var drawingEnabled: Bool = false
   
+  @State var searchText: String = ""
+  @State var testPickerType: TestChartType = .current
+  
   var body: some View {
     NavigationSplitView(columnVisibility: $columnVisibility) {
-      Picker("Airport", selection: $selectedCharts) {
-        ForEach(AirportChart.allCases) { airport in
-          if airport.rawValue == AirportChart.Star.rawValue {
-            Image(systemName: "star.fill")
-              .resizable()
-          } else {
-            Text(airport.rawValue)
+      VStack {
+        TextField("Search (INOP)", text: $searchText)
+          .textFieldStyle(.roundedBorder)
+          .padding([.leading, .trailing])
+        
+        Picker("Airport", selection: $selectedCharts) {
+          ForEach(AirportChart.allCases) { airport in
+            if airport.rawValue == AirportChart.Star.rawValue {
+              Image(systemName: "star.fill")
+                .resizable()
+            } else {
+              Text(airport.rawValue)
+            }
           }
         }
+        .pickerStyle(.segmented)
+        
+        Picker("Type", selection: $testPickerType) {
+          ForEach(TestChartType.allCases) { type in
+            if type == TestChartType.favorite {
+              Image(systemName: "star.fill")
+                .resizable()
+            } else {
+              Text(type.rawValue.capitalized)
+            }
+          }
+        }
+        .pickerStyle(.segmented)
+        
+        chartViewBuilder()
       }
-      .pickerStyle(.segmented)
-      
-      chartViewBuilder()
       
     } detail: {
       if let url = URL(string: selectedChartURL) {
@@ -272,7 +298,7 @@ struct ChartsView: View {
         }
       }
     }
-    .listStyle(.sidebar)
+    .listStyle(.insetGrouped)
   }
   
   @MainActor
