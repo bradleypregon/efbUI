@@ -7,10 +7,12 @@
 
 import SwiftUI
 import SwiftData
+import CoreLocation
 
 struct SimbriefScreen: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(SimBriefViewModel.self) var simbrief
+  @Environment(RouteManager.self) var routeManager
   @Query var simbriefID: [UserSettings]
   
   var body: some View {
@@ -19,6 +21,7 @@ struct SimbriefScreen: View {
         Button {
           Task {
             await simbrief.fetchOFP(for: sbID)
+            createRoute(navlog: simbrief.ofp?.navlog ?? [])
           }
           
           // TODO: Process split variable -> Construct linked list with each route component
@@ -53,6 +56,16 @@ struct SimbriefScreen: View {
         ContentUnavailableView("Simbrief Unvailable", systemImage: "airplane.circle", description: Text("Enter Simbrief ID in Settings tab to pull data."))
       }
       
+    }
+  }
+  
+  func createRoute(navlog: [OFPNavlog]) {
+    guard !navlog.isEmpty else { return }
+    // query database
+    for nav in navlog {
+      guard let lat = Double(nav.lat), let long = Double(nav.long) else { return }
+      let waypoint: MyWaypoint = .init(lat: lat, long: long, type: .gps, name: nav.name)
+      routeManager.waypoints.append(waypoint)
     }
   }
 }
