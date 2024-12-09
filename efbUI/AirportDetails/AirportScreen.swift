@@ -45,15 +45,15 @@ struct AirportSunriseSunsetView: View {
 struct AirportScreen: View {
   @Binding var selectedTab: efbTab
   @Environment(AirportScreenViewModel.self) private var viewModel
-  @State private var textFieldFocused: Bool = false
+//  @State private var textFieldFocused: Bool = false
   
   var body: some View {
     @Bindable var viewModel = viewModel
     
     NavigationStack {
       ZStack {
-        VStack(spacing: 30) {
-          if viewModel.selectedAirport != nil {
+        if viewModel.selectedAirport != nil {
+          VStack(spacing: 20) {
             HStack {
               Grid(alignment: .leading) {
                 GridRow {
@@ -134,54 +134,61 @@ struct AirportScreen: View {
               .frame(maxWidth: .infinity, alignment: .center)
               
             }
-          } else {
-            ContentUnavailableView("Airport Details Unvailable", systemImage: "airplane.circle", description: Text("Select an airport to view details."))
-              .frame(maxHeight: 200)
-          }
-          
-          Picker(selection: $viewModel.selectedInfoTab, label: Text("Picker")) {
-            ForEach(AirportsScreenInfoTabs.allCases, id: \.id) { tab in
-              Text(tab.rawValue)
-                .tag(tab)
-            }
-          }
-          .pickerStyle(.segmented)
-          AirportScreenInfoTabBuilder(selectedTab: viewModel.selectedInfoTab, airportVM: viewModel)
-          Spacer()
-        }
-        .navigationTitle("\(viewModel.selectedAirport?.airportName ?? "Airport Details")")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-          TextField("Search Airports...", text: $viewModel.searchText)
-            .autocorrectionDisabled()
-            .textFieldStyle(.roundedBorder)
-            .frame(width: 300)
-            .onTapGesture {
-              textFieldFocused = true
-            }
-            .popover(isPresented: $textFieldFocused, content: {
-              if viewModel.searchText.count > 1 {
-                List {
-                  ForEach(viewModel.airportSearchResults) { result in
-                    Button {
-                      viewModel.selectedAirport = SQLiteManager.shared.selectAirport(result.airportIdentifier)
-                      viewModel.selectedAirportICAO = result.airportIdentifier
-                      textFieldFocused = false
-                    } label: {
-                      Text("\(result.airportIdentifier) - \(result.airportName)")
-                    }
-                    .listRowSeparator(.visible)
-                  }
-                }
-                .listStyle(.plain)
-                .frame(idealWidth: 300, idealHeight: 300, maxHeight: 500)
-              } else {
-                EmptyView()
-                  .frame(idealWidth: 300, idealHeight: 300)
+            
+            Picker(selection: $viewModel.selectedInfoTab, label: Text("Picker")) {
+              ForEach(AirportsScreenInfoTabs.allCases, id: \.id) { tab in
+                Text(tab.rawValue)
+                  .tag(tab)
               }
-            })
+            }
+            .pickerStyle(.segmented)
+            AirportScreenInfoTabBuilder(selectedTab: viewModel.selectedInfoTab, airportVM: viewModel)
+            Spacer()
+          }
+        } else {
+          VStack {
+            ContentUnavailableView("Airport Details Unvailable", systemImage: "airplane.circle", description: Text("Search or Select an airport to view details."))
+              .frame(maxHeight: 300)
+            // TODO: Frequently visited airports view here
+            Text("TODO: Frequently visited airports view here")
+          }
         }
       }
+      .navigationTitle("\(viewModel.selectedAirport?.airportName ?? "Airport Details")")
+      .navigationBarTitleDisplayMode(.large)
+        
+        
+//        .toolbar {
+//          TextField("Search Airports...", text: $viewModel.searchText)
+//            .autocorrectionDisabled()
+//            .textFieldStyle(.roundedBorder)
+//            .frame(width: 300)
+//            .onTapGesture {
+//              textFieldFocused = true
+//            }
+//            .popover(isPresented: $textFieldFocused, content: {
+//              if viewModel.searchText.count > 1 {
+//                List {
+//                  ForEach(viewModel.airportSearchResults) { result in
+//                    Button {
+//                      viewModel.selectedAirport = SQLiteManager.shared.selectAirport(result.airportIdentifier)
+//                      viewModel.selectedAirportICAO = result.airportIdentifier
+//                      textFieldFocused = false
+//                    } label: {
+//                      Text("\(result.airportIdentifier) - \(result.airportName)")
+//                    }
+//                    .listRowSeparator(.visible)
+//                  }
+//                }
+//                .listStyle(.plain)
+//                .frame(idealWidth: 300, idealHeight: 300, maxHeight: 500)
+//              } else {
+//                EmptyView()
+//                  .frame(idealWidth: 300, idealHeight: 300)
+//              }
+//            })
+//        }
+      
       
     }
     .task {
