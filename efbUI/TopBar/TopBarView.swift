@@ -14,6 +14,7 @@ struct TopBarView: View {
   @State private var currentZuluTime24: String = "00:00z"
   @Environment(SimConnectShipObserver.self) var simConnect
   @State private var serverRunning: Bool = false
+  @State var ship: SimConnectShip = .init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero)
   
   var server: ServerListener {
     ServerListener(ship: simConnect)
@@ -44,19 +45,19 @@ struct TopBarView: View {
         VStack {
           Text("Heading")
             .font(.caption)
-          Text("\(roundToTenths(simConnect.ownship.heading))º")
+          Text("\(roundToTenths(ship.heading))º")
         }
         .frame(width: 100)
         VStack {
           Text("GPS Alt")
             .font(.caption)
-          Text("\(roundToTenths((simConnect.ownship.altitude) * 3.281))'") // meters to feet
+          Text("\(roundToTenths((ship.altitude) * 3.281))'") // meters to feet
         }
         .frame(width: 100)
         VStack {
           Text("Spd (GS)")
             .font(.caption)
-          Text("\(roundToTenths((simConnect.ownship.speed) * 1.944))kt") // m/s to knots
+          Text("\(roundToTenths((ship.speed) * 1.944))kt") // m/s to knots
         }
         .frame(width: 100)
       }
@@ -78,6 +79,9 @@ struct TopBarView: View {
     .padding(.top, 15)
     .onReceive(timer) { _ in
       getCurrentZuluTime24()
+    }
+    .onReceive(simConnect.ownship) { ship in
+      self.ship = ship
     }
   }
   
