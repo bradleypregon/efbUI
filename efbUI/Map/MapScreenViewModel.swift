@@ -21,6 +21,7 @@ class MapScreenViewModel {
   var wxRadarSourceID: String = "wx-radar-source"
   var satelliteRadarSourceID: String = "satellite-radar-source"
   var displayRoute: Bool = false
+  var displayNewRoute: Bool = false
   var displaySigmet: Bool = false
   var displayLg: Bool = true
   var displayMd: Bool = false
