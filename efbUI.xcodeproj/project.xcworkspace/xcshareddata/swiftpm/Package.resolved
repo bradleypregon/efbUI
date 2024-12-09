@@ -1,5 +1,5 @@
 {
-  "originHash" : "6de3396bb124bf8b364c796cedc69d6a8078f2c6844d7b052122360db079c36a",
+  "originHash" : "8aa27feb38be7a9f8554e5bf2f032ef6473c8a87e50669eb77b85899f5a5314a",
   "pins" : [
     {
       "identity" : "mapbox-common-ios",
@@ -44,6 +44,24 @@
       "state" : {
         "revision" : "a95fc6df17d108bd99210db5e8a9bac90fe984b8",
         "version" : "0.15.3"
+      }
+    },
+    {
+      "identity" : "swift-async-algorithms",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-async-algorithms.git",
+      "state" : {
+        "revision" : "5c8bd186f48c16af0775972700626f0b74588278",
+        "version" : "1.0.2"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "revision" : "671108c96644956dddcd89dd59c203dcdb36cec7",
+        "version" : "1.1.4"
       }
     },
     {
