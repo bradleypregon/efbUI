@@ -6,13 +6,13 @@
 //
 
 import Foundation
-// TODO: Handle 500, 404, etc statusCodes
+// TODO: Handle data
 
 class IvaoAPI {
   func fetchATIS(icao: String) async throws -> String {
     let endpoint = ""
     guard let url = URL(string: endpoint) else { throw IVAOError.badURL }
-    let (data, response) = try await URLSession.shared.data(from: url)
+    let (_, response) = try await URLSession.shared.data(from: url)
     guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
       throw IVAOError.badResponse
     }
@@ -22,7 +22,7 @@ class IvaoAPI {
   func fetchMETAR(icao: String) async throws -> String {
     let endpoint = ""
     guard let url = URL(string: endpoint) else { throw IVAOError.badURL }
-    let (data, response) = try await URLSession.shared.data(from: url)
+    let (_, response) = try await URLSession.shared.data(from: url)
     guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
       throw IVAOError.badResponse
     }
@@ -32,7 +32,7 @@ class IvaoAPI {
   func fetchTAF(icao: String) async throws -> String {
     let endpoint = ""
     guard let url = URL(string: endpoint) else { throw IVAOError.badURL }
-    let (data, response) = try await URLSession.shared.data(from: url)
+    let (_, response) = try await URLSession.shared.data(from: url)
     guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
       throw IVAOError.badResponse
     }
