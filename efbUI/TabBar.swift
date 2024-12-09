@@ -43,13 +43,10 @@ struct TabBar: View {
       }
       Tab("Airport", systemImage: "scope", value: .airports) {
         AirportScreen(selectedTab: $selectedTab)
-          .offset(y: 40)
-          .padding(.bottom, -40)
       }
       Tab("Charts", systemImage: "doc.on.doc", value: .charts) {
         ChartsView(selectedTab: $selectedTab)
-          .offset(y: 40)
-          .padding(.bottom, -40)
+          .ignoresSafeArea(edges: .top)
       }
       
       // MARK: Saving TabSection for a later date when fixed/functions better
@@ -70,7 +67,7 @@ struct TabBar: View {
       
       Tab("Map", systemImage: "map", value: .map) {
         MapScreen(selectedTab: $selectedTab)
-          .padding(.top, 40)
+          .ignoresSafeArea(edges: .top)
       }
       Tab("ScratchPad", systemImage: "square.and.pencil", value: .scratchPad) {
         ScratchPadView()
@@ -84,9 +81,9 @@ struct TabBar: View {
     }
     .onReceive(timer) { _ in
       guard let ofp = simbrief.ofp else { return }
-      guard ship.ownship.coordinate.latitude != .zero else { return }
+      guard ship.ownship.value.coordinate.latitude != .zero else { return }
       
-      let shipLocation = CLLocation(latitude: ship.ownship.coordinate.latitude, longitude: ship.ownship.coordinate.longitude)
+      let shipLocation = CLLocation(latitude: ship.ownship.value.coordinate.latitude, longitude: ship.ownship.value.coordinate.longitude)
       let originCoord = CLLocation(latitude: Double(ofp.origin.posLat) ?? .zero, longitude: Double(ofp.origin.posLong) ?? .zero)
       let destCoord = CLLocation(latitude: Double(ofp.destination.posLat) ?? .zero, longitude: Double(ofp.destination.posLong) ?? .zero)
       
