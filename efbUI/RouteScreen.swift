@@ -6,48 +6,19 @@
 //
 
 import SwiftUI
+import CoreLocation
 
-// Linked list
-// Each node can be an airport, vor, navaid, departure, arrival, any type of navigation aid with a coordinate
-// upon simbrief api fetch, compile route and load it into LinkedList
-
-// Typical route format:
-// head -> Airport
-// nodes -> each route component
-// tail -> Airport
-
-
-// TODO: Instead of a heterogeneous list, create a custom type, and when the database is queried, just create custom object from what is returned from db
-@Observable
-class WaypointStore {
-  var waypoints: [Waypoint] = []
-}
-
-struct Waypoint: Identifiable, Hashable {
-  let id: String = UUID().uuidString
-  let name: String
-}
-
-// TODO: Add Move and Delete functions like a normal vertical SwiftUI List
 struct WaypointsContainer: View {
-  @Environment(WaypointStore.self) private var waypointStore
+  @Environment(RouteManager.self) private var routeManager
   @State private var popover: Bool = false
   
   var body: some View {
-    //      Ideal, but need Horizontal
-    //      List {
-    //        ForEach(waypointStore.waypoints) { waypoint in
-    //          WptView(wpt: waypoint)
-    //        }
-    //        .onMove(perform: move)
-    //      }
-    //
-    WrappingHStack(models: waypointStore.waypoints) { waypoint in
+    WrappingHStack(models: routeManager.waypoints) { waypoint in
       WptView(wpt: waypoint)
     }
   }
   
-  func WptView(wpt: Waypoint) -> some View {
+  func WptView(wpt: MyWaypoint) -> some View {
     Button {
       print(wpt)
     } label: {
@@ -69,17 +40,17 @@ struct WaypointsContainer: View {
     }
   }
   
-  func remove(_ waypoint: Waypoint) {
-    waypointStore.waypoints.removeAll { $0 == waypoint }
+  func remove(_ waypoint: MyWaypoint) {
+    routeManager.waypoints.removeAll { $0 == waypoint }
   }
   
   func move(from source: IndexSet, to destination: Int) {
-    waypointStore.waypoints.move(fromOffsets: source, toOffset: destination)
+    routeManager.waypoints.move(fromOffsets: source, toOffset: destination)
   }
 }
 
 struct CustomInputView: View {
-  @Environment(WaypointStore.self) private var waypointStore
+  @Environment(RouteManager.self) private var routeManager
   @State private var currentInput: String = ""
   
   var body: some View {
@@ -91,8 +62,8 @@ struct CustomInputView: View {
     // For instance, there are multiple VORs (or NBDs?) that have the same 3 letter identifier. Need to pick the right one
       .onReceive(currentInput.publisher) { val in
         if (val == " ") {
-          let wpt = Waypoint(name: currentInput.trimmingCharacters(in: .whitespaces))
-          waypointStore.waypoints.append(wpt)
+          let temp = MyWaypoint(lat: 41.4090, long: -92.9154, type: .gps, name: currentInput.trimmingCharacters(in: .whitespaces))
+          routeManager.waypoints.append(temp)
           currentInput = ""
         }
       }
