@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AirportTable {
+struct AirportTable: Identifiable {
   let areaCode: String
   let icaoCode: String
   let airportIdentifier: String
@@ -23,7 +23,7 @@ struct AirportTable {
   let speedLimit: Int64
   let speedLimitAltitude: Int64
   let iataAtaDesignator: String
-  let id: String
+  var id: String
 }
 
 struct AirportCommunicationTable: Hashable {
