@@ -14,28 +14,23 @@ struct efbUIApp: App {
   // TODO: This no longer needs to be Environment
   @State private var airportDetailViewModel: AirportScreenViewModel = AirportScreenViewModel()
   @State private var simbrief: SimBriefViewModel = SimBriefViewModel()
-  @State private var waypointStore: WaypointStore = WaypointStore()
+  @State private var routeManager: RouteManager = RouteManager()
   
   var body: some Scene {
     WindowGroup {
       RootToastView {
         VStack {
+          TabBar()
           TopBarView()
-            .background(.bar)
             .clipShape(
               UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 10, bottomTrailingRadius: 10, topTrailingRadius: 0)
             )
-            .frame(height: 60)
-            .padding(.top, 20)
-            .ignoresSafeArea(edges: .top)
-          TabBar()
-            .offset(y: -40)
-            .padding(.bottom, -40)
+            .frame(height: 50)
         }
         .environment(simConnectShip)
         .environment(airportDetailViewModel)
         .environment(simbrief)
-        .environment(waypointStore)
+        .environment(routeManager)
       }
     }
     .modelContainer(for: UserSettings.self)
