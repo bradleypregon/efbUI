@@ -282,12 +282,12 @@ class AirportScreenViewModel: AirportDetails {
   }
   
   // MARK: AirportScreen search bar
-  var airportSearchResults = [QueryAirportTextResult]()
-  var searchText: String = "" {
-    didSet {
-      airportSearchResults = SQLiteManager.shared.queryAirports(searchText)
-    }
-  }
+//  var airportSearchResults = [QueryAirportTextResult]()
+//  var searchText: String = "" {
+//    didSet {
+//      airportSearchResults = SQLiteManager.shared.queryAirports(searchText)
+//    }
+//  }
   
   /**
    Fetch Weather, fetch airport communications, fetch city/state
