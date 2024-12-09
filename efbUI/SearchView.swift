@@ -6,16 +6,61 @@
 //
 
 import SwiftUI
+import Observation
+import Combine
+
+@MainActor
+@Observable final class SearchViewModel {
+  var airports: [AirportTable] = []
+  
+  var searchTask: Task<Void, Never>?
+  var searchTextSubject = CurrentValueSubject<String, Never>("")
+  var cancellables: Set<AnyCancellable> = []
+  
+  init() {
+    searchTextSubject
+      .filter { $0.isEmpty }
+      .sink { _ in
+        self.searchTask?.cancel()
+        self.airports = []
+      }
+      .store(in: &cancellables)
+    
+    searchTextSubject
+      .debounce(for: .seconds(0.2), scheduler: RunLoop.main)
+      .filter { !$0.isEmpty }
+      .sink { [weak self] text in
+        guard let self else { return }
+        self.searchTask?.cancel()
+        self.searchTask = createSearchTask(text)
+      }
+      .store(in: &cancellables)
+  }
+  
+  func createSearchTask(_ text: String) -> Task<Void, Never> {
+    Task { @MainActor in
+      airports = await SQLiteManager.shared.queryAirportsAsync(text)
+    }
+  }
+  
+  var searchText: String = "" {
+    didSet {
+      searchTextSubject.send(searchText)
+    }
+  }
+}
 
 struct SearchView: View {
   @Binding var tab: efbTab
-  @State var searchText: String = ""
+  @State private var viewModel = SearchViewModel()
   
   var body: some View {
     NavigationStack {
-      List(1...10, id: \.self) { item in
+      Text("TODO: Favorite/common airports here?")
+      List(viewModel.airports) { airport in
         HStack {
-          Text("Thing \(item)")
+          Text(airport.airportIdentifier)
+          Text(airport.airportName)
           Button {
             print("")
           } label: {
@@ -23,7 +68,7 @@ struct SearchView: View {
           }
         }
       }
-      .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+      .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
       .navigationTitle("Search")
       .navigationBarTitleDisplayMode(.large)
     }
