@@ -36,9 +36,9 @@ class SQLiteManager {
     }
   }
   
-  func queryAirports(_ query: String) -> [QueryAirportTextResult] {
+  func queryAirports(_ query: String) -> [AirportTable] {
     guard let database = db else { return [] }
-    var airports: [QueryAirportTextResult] = []
+    var airports: [AirportTable] = []
     
     do {
       let table = Table("tbl_airports")
@@ -46,9 +46,32 @@ class SQLiteManager {
       let airportIdentifier = Expression<String>("airport_identifier")
       
       let queryCondition = airportName.like("%\(query)%") || airportIdentifier.like("%\(query)%")
-      for temp in try database.prepare(table.filter(queryCondition).limit(20)) {
-        let res = QueryAirportTextResult(airportIdentifier: temp[airportIdentifier], airportName: temp[airportName])
-        airports.append(res)
+      for temp in try database.prepare(table.filter(queryCondition).limit(100)) {
+        
+        guard let airport = selectAirport(temp[airportIdentifier]) else { return [] }
+        airports.append(airport)
+      }
+      return airports
+    } catch let error {
+      print("Error querying AirportTable: \(error)")
+      return []
+    }
+  }
+  
+  func queryAirportsAsync(_ query: String) async -> [AirportTable] {
+    guard let database = db else { return [] }
+    var airports: [AirportTable] = []
+    
+    do {
+      let table = Table("tbl_airports")
+      let airportName = Expression<String>("airport_name")
+      let airportIdentifier = Expression<String>("airport_identifier")
+      
+      let queryCondition = airportName.like("%\(query)%") || airportIdentifier.like("%\(query)%")
+      for temp in try database.prepare(table.filter(queryCondition).limit(100)) {
+        
+        guard let airport = selectAirport(temp[airportIdentifier]) else { return [] }
+        airports.append(airport)
       }
       return airports
     } catch let error {
@@ -414,7 +437,7 @@ class SQLiteManager {
       }
       return airports
     } catch let error {
-      print("Error in getAirpors(): \(error)")
+      print("Error in getAirports(): \(error)")
       return []
     }
   }
