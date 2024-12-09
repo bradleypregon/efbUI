@@ -21,18 +21,18 @@ struct SimConnectShip: Identifiable, Equatable {
   var fs2ffid: Int?
   var onGround: Bool?
   var registration: String?
-  var lastUpdated: Int?
+  var lastUpdated: Date?
 }
 
 @Observable
 final class SimConnectShipObserver {
-  var ownship: SimConnectShip = .init(coordinate: .init(latitude: .zero, longitude: .zero), altitude: .zero, heading: .zero, speed: .zero)
-  var traffic: [String: SimConnectShip] = [:]
-  var pruneTraffic: [String: SimConnectShip] = [:]
+  var ownship = CurrentValueSubject<SimConnectShip, Never>(.init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero))
+  var trafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
+  var pruneTrafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
 }
 
 class ServerStatus {
-  static let shared = ServerStatus()
+  @MainActor static let shared = ServerStatus()
   var status: Status = .stopped
   
   enum Status {
@@ -102,24 +102,20 @@ final class ServerListener {
   private func consumeData() {
     self.connection?.receive(minimumIncompleteLength: 1, maximumLength: 64000) { (data, _, isComplete, error) in
       
-        if let error = error {
-          print("NWError received in \(#function): \(error)")
-        }
-        guard let receivedData = data, !receivedData.isEmpty, isComplete else { return }
-        
-        if let stringData = String(data: receivedData, encoding: .utf8) {
-          let components = stringData.components(separatedBy: ",")
-          
-          // MARK: Ownship update
-          if components[0] == "XGPSMSFS" {
-            self.updateOwnship(components)
-          }
-          if components[0] == "XTRAFFICMSFS" {
-            self.updateTraffic(components)
-          }
-        }
-        
-        self.consumeData()
+      if let error = error {
+        print("NWError received in \(#function): \(error)")
+      }
+      guard let receivedData = data, !receivedData.isEmpty, isComplete else { return }
+      guard let stringData = String(data: receivedData, encoding: .utf8) else { return }
+      let components = stringData.components(separatedBy: ",")
+      
+      if components[0] == "XGPSMSFS" {
+        self.updateOwnship(components)
+      } else if components[0] == "XTRAFFICMSFS" {
+        self.updateTraffic(components)
+      }
+      
+      self.consumeData()
     }
   }
   
@@ -132,10 +128,8 @@ final class ServerListener {
     let heading = Double(components[4]) ?? .zero
     let speed = Double(components[5]) ?? .zero
     
-    self.ship.ownship.coordinate = coordinate
-    self.ship.ownship.altitude = altitude
-    self.ship.ownship.heading = heading
-    self.ship.ownship.speed = speed
+    let ship = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed)
+    self.ship.ownship.send(ship)
   }
   
   private func updateTraffic(_ components: [String]) {
@@ -150,8 +144,7 @@ final class ServerListener {
     let speed = Double(components[8]) ?? .zero
     let callsign = String(components[9])
     let onGround = components[6] == "1" ? true : false
-    
-    let plane: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: fs2ffID, onGround: onGround, registration: callsign, lastUpdated: Int(Date().timeIntervalSinceNow))
+    let plane: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: fs2ffID, onGround: onGround, registration: callsign, lastUpdated: Date())
     
     // How to handle planes no longer here? If the leave the game, their annotation will persist
     // Add timestamp property to SimConnectShip
@@ -168,14 +161,35 @@ final class ServerListener {
 //    }
 //    self.ship.traffic.append(plane)
     
-    self.ship.traffic[String(describing: plane.fs2ffid)] = plane
-    for (ffid, traffic) in self.ship.traffic {
-      guard let trafficTimestamp = traffic.lastUpdated else { return }
-      if trafficTimestamp < Int(Date().timeIntervalSinceNow) - 60 {
-        self.ship.pruneTraffic[ffid] = traffic
-        self.ship.traffic.removeValue(forKey: ffid)
+//    self.ship.traffic[String(describing: plane.fs2ffid)] = plane
+    
+    self.ship.trafficArray.send([plane])
+    for traffic in self.ship.trafficArray.value {
+      guard let tfcTS = traffic.lastUpdated else { return }
+      // if traffic is on ground, do a longer time interval
+      // if not on the ground, do a shorter interval
+      if Date().timeIntervalSince(tfcTS) > 30 {
+        self.ship.pruneTrafficArray.send([traffic])
+        self.ship.trafficArray.value.removeAll(where: { $0.fs2ffid == traffic.fs2ffid })
       }
     }
+    
+//    for traffic in self.ship.trafficArray {
+//      guard let trafficTimestamp = traffic.lastUpdated else { return }
+//      if trafficTimestamp < Int(Date().timeIntervalSinceNow) - 60 {
+//        self.ship.pruneTrafficArray.append(traffic)
+//        self.ship.trafficArray.removeAll(where: { $0.fs2ffid == traffic.fs2ffid })
+//      }
+//    }
+    
+//    for (ffid, traffic) in self.ship.traffic {
+//      guard let trafficTimestamp = traffic.lastUpdated else { return }
+//      if trafficTimestamp < Int(Date().timeIntervalSinceNow) - 60 {
+//        self.ship.pruneTraffic[ffid] = traffic
+//        self.ship.traffic.removeValue(forKey: ffid)
+//      }
+//    }
+    
   }
   
   private func stopListener() {
