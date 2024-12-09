@@ -7,6 +7,23 @@
 
 import Foundation
 
+enum OpenMeteoError: Error, LocalizedError {
+  case invalidURL
+  case invalidResponse
+  case invalidDecode
+  
+  var errorDescription: String? {
+    switch self {
+    case .invalidURL:
+      return "Invalid URL"
+    case .invalidResponse:
+      return "Invalid Response"
+    case .invalidDecode:
+      return "Invalid Decode"
+    }
+  }
+}
+
 class OSMWeatherAPI {
   /// https://openweathermap.org/api/one-call-api
   // TODO: Need a new local weather API
@@ -15,6 +32,25 @@ class OSMWeatherAPI {
   //private let baseURL = "https://api.openweathermap.org/data/2.5/forecast?"
   //private let apiKey = Bundle.main.infoDictionary?["OSMWeatherAPI_Key"] as? String ?? ""
   //private let units = "imperial" /// standard, metric, imperial
+  
+  func fetchWeather(latitude: Double, longitude: Double) async throws -> OpenMeteoSchema {
+    let url = ""
+    guard let url = URL(string: url) else {
+      throw OpenMeteoError.invalidURL
+    }
+    
+    let (data, response) = try await URLSession.shared.data(from: url)
+    
+    guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+      throw OpenMeteoError.invalidResponse
+    }
+    
+    guard let wx = try? JSONDecoder().decode(OpenMeteoSchema.self, from: data) else {
+      throw OpenMeteoError.invalidDecode
+    }
+    
+    return wx
+  }
   
   func fetchWeather(latitude: Double, longitude: Double, completion: @escaping (OpenMeteoSchema) -> () ) {
     
