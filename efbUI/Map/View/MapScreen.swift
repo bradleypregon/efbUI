@@ -21,7 +21,6 @@ struct MapScreen: View {
   @State private var viewport: Viewport = .camera(center: CLLocationCoordinate2D(latitude: 39.5, longitude: -98.0), zoom: 4, bearing: 0, pitch: 0)
   private let ornamentOptions = OrnamentOptions(scaleBar: ScaleBarViewOptions(visibility: .hidden))
   private let style = "mapbox://styles/bradleypregon/clpvnz3y900yn01qmby0f9xn6"
-//  @State private var coordinateBounds: CoordinateBounds?
   
   @State private var mapViewModel = MapScreenViewModel()
   
@@ -44,23 +43,11 @@ struct MapScreen: View {
   @State private var mapPopoverSelectedAirport: AirportSchema? = nil
   @State private var mapPopoverSelectedPoint: UnitPoint = .zero
   
-  @State private var sidRoute: [[ProcedureTable]] = []
-  @State private var starRoute: [[ProcedureTable]] = []
-  
-//  @State var updatingShips: Bool = false
   @State var featureCollection: FeatureCollection = .init(features: [])
   
   @State var radarPopoverVisible: Bool = false
   
   var body: some View {
-//    let testVisibileAreaPolygonCoords = [
-//      CLLocationCoordinate2DMake(coordinateBounds?.northwest.latitude ?? .zero, coordinateBounds?.northwest.longitude ?? .zero),
-//      CLLocationCoordinate2DMake(coordinateBounds?.northeast.latitude ?? .zero, coordinateBounds?.northeast.longitude ?? .zero),
-//      CLLocationCoordinate2DMake(coordinateBounds?.southeast.latitude ?? .zero, coordinateBounds?.southeast.longitude ?? .zero),
-//      CLLocationCoordinate2DMake(coordinateBounds?.southwest.latitude ?? .zero, coordinateBounds?.southwest.longitude ?? .zero),
-//    ]
-//    let testVisiblePolygon = Polygon([testVisibileAreaPolygonCoords])
-    
     NavigationSplitView(columnVisibility: $columnVisibility) {
       // sidebar
       if let airport = selectedAirport {
@@ -75,13 +62,7 @@ struct MapScreen: View {
         GeometryReader { geometry in
           MapReader { proxy in
             Map(viewport: $viewport) {
-              // MARK: Testing Polygon for map bounds
-              //            PolygonAnnotation(polygon: testVisiblePolygon)
-              //              .fillColor(StyleColor(UIColor.blue))
-              //              .fillOpacity(0.1)
-              
               // MARK: Airport Annotations
-              
               // MARK: Large Airports
               if mapViewModel.displayLg {
                 PointAnnotationGroup(mapViewModel.largeAirports) { airport in
@@ -101,6 +82,7 @@ struct MapScreen: View {
                       return true
                     }
                 }
+                .slot("Top")
               }
               
               
@@ -140,43 +122,14 @@ struct MapScreen: View {
                     .textOffset(x: 0.0, y: -1.9)
                     .textColor(.white)
                     .textSize(9)
+                  .onLongPressGesture { context in
+                    mapPopoverSelectedAirport = airport
+                    mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
+                    return true
+                  }
                 }
                 .clusterOptions(ClusterOptions(circleRadius: .constant(12.0), clusterRadius: 75.0, clusterMaxZoom: 6.5))
               }
-              
-              // MARK: Annotations that receive updates (ownship and traffic)
-              
-              // MARK: Ownship Annotation
-//              if simConnect.ownship.coordinate.latitude != .zero {
-//                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: simConnect.ownship.coordinate.latitude, longitude: simConnect.ownship.coordinate.longitude)) {
-//                  VStack(spacing: 0) {
-//                    Image("ShipArrow")
-//                      .rotationEffect(.degrees(simConnect.ownship.heading))
-//                    Text(simbrief.ofp?.aircraft.reg ?? "ownship")
-//                      .font(.caption)
-//                      .foregroundStyle(.white)
-//                  }
-//                }
-//              }
-              
-              // MARK: Traffic Annotations
-//              ForEvery(simConnect.traffic, id: \.id) { traffic in
-//                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: traffic.coordinate.latitude, longitude: traffic.coordinate.longitude)) {
-//                  VStack(spacing: 0) {
-//                    if displayTrafficAltitude {
-//                      Text("\(traffic.altitude.string)'")
-//                        .font(.system(size: 9))
-//                        .foregroundStyle(.lifr)
-//                    }
-//                    Image("TrafficArrow")
-//                      .rotationEffect(.degrees(traffic.heading))
-//                    Text(traffic.registration ?? "tfc")
-//                      .font(.system(size: 9))
-//                      .foregroundStyle(.lifr)
-//                  }
-//                }
-//                .allowOverlap(true)
-//              }
               
               // MARK: Route Display
               if mapViewModel.displayRoute {
@@ -236,32 +189,56 @@ struct MapScreen: View {
                 }
               }
               
-              //MARK: SID Chart
               if mapViewModel.displaySID {
-                // Currently, waypoints for each runway on the sid are showing up
-                // Filter by 'EE'? Essential and End of Enroute??
-                //  - need to be careful though, as SID can have > 1 "ending" waypoint
-                //
-                PolylineAnnotationGroup(sidRoute.compactMap { $0 }, id: \.self) { route in
-                  PolylineAnnotation(lineCoordinates: route.map { CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)}.filter { $0.latitude != .zero && $0.longitude != .zero })
-                    .lineWidth(2.0)
-                    .lineColor(StyleColor( UIColor(red: .random(in: 0.0...1.0), green: .random(in: 0.0...1.0), blue: .random(in: 0.0...1.0), alpha: 1.0) ))
-                    .onTapGesture {
-                      // TODO: popover with route details?
-                      print(route.first?.procedureIdentifier ?? "no SID procedure identifier")
+                ForEvery(mapViewModel.sidRoute, id: \.self) { route in
+                  let temp = Array(Dictionary(grouping: route, by:{ $0.transitionIdentifier}).values)
+                  PolylineAnnotationGroup(temp, id: \.self) { line in
+                    PolylineAnnotation(lineCoordinates: line.map{CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)})
+                      .lineColor(line.allSatisfy { $0.aircraftCategory != "" } ? .orange : .blue)
+                      .lineWidth(4.0)
+                  }
+                  
+                  ForEvery(temp.flatMap{$0}.filter{$0.waypointDescriptionCode.contains("E")}, id:\.self) { val in
+                    MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: val.waypointLatitude, longitude: val.waypointLongitude)) {
+                      Button {
+                        print("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
+                      } label: {
+                        Text("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
+                          .font(.caption)
+                      }
+                      .controlSize(.small)
+                      .buttonStyle(.borderedProminent)
+                      .buttonBorderShape(.capsule)
                     }
+                    .allowOverlap(true)
+                    
+                  }
                 }
               }
-              
-              // MARK: STAR Chart
+
               if mapViewModel.displaySTAR {
-                PolylineAnnotationGroup(starRoute.compactMap {$0}, id: \.self) { route in
-                  PolylineAnnotation(lineCoordinates: route.map { CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)}.filter { $0.latitude != .zero && $0.longitude != .zero})
-                    .lineWidth(5.0)
-                    .lineColor(StyleColor( UIColor(red: .random(in: 0.0...1.0), green: .random(in: 0.0...1.0), blue: .random(in: 0.0...1.0), alpha: 1.0) ))
-                    .onTapGesture {
-                      print(route.first?.procedureIdentifier ?? "no STAR procedure identifier")
+                ForEvery(mapViewModel.starRoute, id: \.self) { route in
+                  let temp = Array(Dictionary(grouping: route, by:{ $0.transitionIdentifier}).values)
+                  PolylineAnnotationGroup(temp, id: \.self) { line in
+                    PolylineAnnotation(lineCoordinates: line.map{CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)})
+                      .lineColor(line.allSatisfy { $0.aircraftCategory != "" } ? .orange : .blue)
+                      .lineWidth(4.0)
+                  }
+                  
+                  ForEvery(temp.flatMap{$0}.filter{$0.transitionIdentifier == $0.waypointIdentifier}, id:\.self) { val in
+                    MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: val.waypointLatitude, longitude: val.waypointLongitude)) {
+                      Button {
+                        print("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
+                      } label: {
+                        Text("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
+                          .font(.caption)
+                      }
+                      .controlSize(.small)
+                      .buttonStyle(.borderedProminent)
+                      .buttonBorderShape(.capsule)
                     }
+                    .allowOverlap(true)
+                  }
                 }
               }
               
@@ -270,30 +247,17 @@ struct MapScreen: View {
                   .data(.featureCollection(self.featureCollection))
                 SymbolLayer(id: "TrafficRegLayerID", source: "TrafficTextID")
                   .textField(Exp(.get) { "reg" })
-                  .textOffset(x: 0, y: 1.5)
-                  .textSize(8)
+                  .textOffset(x: 0, y: 1.8)
+                  .textSize(7)
                   .textColor(.white)
+                  .textFont(["Roboto Bold Condensed"])
                 SymbolLayer(id: "TrafficAltLayerID", source: "TrafficTextID")
                   .textField(Exp(.get) { "alt" })
-                  .textSize(8)
-                  .textOffset(x: 0, y: -1.5)
+                  .textSize(7)
+                  .textOffset(x: 0, y: -1.8)
                   .textColor(.white)
+                  .textFont(["Roboto Bold Condensed"])
               }
-              
-//              if updatingSimConnectShips {
-//                ForEvery(Array(simConnect.traffic.values)) { traffic in
-//                  SymbolLayer(id: String(describing: traffic.fs2ffid), source: String(describing: traffic.fs2ffid))
-//                    .textField(traffic.registration ?? "TFC")
-//                    .textSize(12)
-//                    .textOffset(x: 0, y: 1.0)
-//                }
-//                do {
-//                  try SymbolLayer(jsonObject: simConnect.traffic)
-//                } catch {
-//                  
-//                }
-//                
-//              }
               
               // WIP
 //              if mapViewModel.gatesVisible {
@@ -312,7 +276,6 @@ struct MapScreen: View {
                 try proxy.map?.addImage(UIImage(named: "ShipArrow") ?? UIImage(), id: "ShipArrow")
                 try proxy.map?.addImage(UIImage(named: "TrafficArrow") ?? UIImage(), id: "TrafficArrow")
                 addOwnshipLayer()
-//                updateShips()
               } catch {
                 print("Error adding image to map: \(error)")
               }
@@ -339,7 +302,6 @@ struct MapScreen: View {
 //            })
             .onAppear {
               proxyMap = proxy
-              // TODO: Add check if ownship layer already added
               if airportVM.requestMap {
                 Task {
                   guard let temp = airportVM.selectedAirport else { return }
@@ -362,17 +324,17 @@ struct MapScreen: View {
                 Text(airport.name)
                 
                 Button {
-                  print("View Airport")
+                  print("View Airport (INOP)")
                 } label: {
                   Text("View Airport")
                 }
                 
-                // TODO: Fix .toggle() causing routes to not show up
                 Menu("View Procedures") {
                   if (!sids.isEmpty) {
                     Button {
-                      let grouped = Dictionary(grouping: sids, by: { $0.procedureIdentifier })
-                      self.sidRoute = Array(grouped.values)
+                      let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+                      let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
+                      mapViewModel.sidRoute = Array(grouped.values)
                       mapViewModel.displaySID.toggle()
                     } label: {
                       Text("View SIDs")
@@ -381,9 +343,10 @@ struct MapScreen: View {
                   
                   if (!stars.isEmpty) {
                     Button {
-                      let grouped = Dictionary(grouping: stars, by: {$0.procedureIdentifier })
-                      self.starRoute = Array(grouped.values)
-                      mapViewModel.displaySID.toggle()
+                      let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+                      let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
+                      mapViewModel.starRoute = Array(grouped.values)
+                      mapViewModel.displaySTAR.toggle()
                     } label: {
                       Text("View STARs")
                     }
@@ -391,7 +354,7 @@ struct MapScreen: View {
                   
                 }
               }
-              .frame(idealWidth: 150, idealHeight: 150)
+              .frame(idealWidth: 150, idealHeight: 300)
               
             }
             .onReceive(simConnect.ownship) { ship in
@@ -406,22 +369,6 @@ struct MapScreen: View {
             }
           }
           .ignoresSafeArea()
-          .onAppear {
-//            if ServerStatus.shared.status == .running {
-//              addOwnshipLayer()
-//              if !updatingShips {
-//                startUpdatingShips()
-//              }
-//            }
-          }
-          .onChange(of: ServerStatus.shared.status) {
-//            if ServerStatus.shared.status == .running {
-//              addOwnshipLayer()
-//              if !updatingShips {
-//                startUpdatingShips()
-//              }
-//            }
-          }
           
           // MARK: Menu
           VStack(spacing: 5) {
@@ -589,56 +536,6 @@ struct MapScreen: View {
     
   }
   
-  func tempUpdateOwnship(ship: SimConnectShip, proxy: MapProxy) async {
-    do {
-      try proxy.map?.updateLayer(withId: "OwnshipLayer", type: LocationIndicatorLayer.self) { layer in
-        layer.location = .constant([ship.coordinate.latitude, ship.coordinate.longitude, ship.altitude])
-        layer.bearing = .constant(ship.heading)
-      }
-    } catch {
-      print("Error updating ownship layer to MapScreen: \(error)")
-    }
-  }
-  
-  func tempUpdateTraffic(traffic: [SimConnectShip], proxy: MapProxy) async {
-    // loop through simconnect.traffic
-    // update anything already created
-    //  if not created, create
-    //  check prune traffic
-    
-    // TODO: Should traffic be loaded into FeatureCollection? Or is onReceive + LocationIndicatorLayer efficient enough?
-    
-    for tfc in traffic {
-      if (proxy.map?.layerExists(withId: String(describing: tfc.fs2ffid)) != nil) {
-        updateTrafficLayer(id: String(describing: tfc.fs2ffid), ship: tfc, proxy: proxy)
-        // update featureCollection for traffic symbol layers
-        self.featureCollection.features.forEach { feature in
-          guard let temp = feature.properties?["reg"] else { return }
-          guard let tempReg = tfc.registration else { return }
-        }
-        
-      } else {
-        addTrafficLayer(id: String(describing: tfc.fs2ffid), proxy: proxy)
-        // add featureCollection
-        
-      }
-      
-    }
-    if simConnect.pruneTrafficArray.value != [] {
-      for tfc in simConnect.pruneTrafficArray.value {
-        pruneTrafficLayer(id: String(describing: tfc.fs2ffid), proxy: proxy)
-        // remove featureCollection
-      }
-    }
-    
-    self.featureCollection.features = traffic.map { traffic in
-      var feature = Feature(geometry: .point(Point(traffic.coordinate)))
-      feature.properties = ["reg": .init(stringLiteral: traffic.registration ?? ""), "alt": .init(floatLiteral: traffic.altitude), "onGround": .init(booleanLiteral: traffic.onGround ?? false)]
-      return feature
-    }
-    
-  }
-  
   func getSigmetFillColor(sigmet: String) -> StyleColor {
     switch sigmet {
     case "ICE":
@@ -659,15 +556,65 @@ struct MapScreen: View {
 
 // MARK: SimConnect Traffic
 extension MapScreen {
-  /*
-   how to listen to simconnect server changes
-   if simconnect server is running
-    add ownship layer
-    begin updating ownship layer
-    begin updating traffic layers
-      while true?
+  func tempUpdateOwnship(ship: SimConnectShip, proxy: MapProxy) async {
+    do {
+      try proxy.map?.updateLayer(withId: "OwnshipLayer", type: LocationIndicatorLayer.self) { layer in
+        layer.location = .constant([ship.coordinate.latitude, ship.coordinate.longitude, ship.altitude])
+        layer.bearing = .constant(ship.heading)
+      }
+    } catch {
+      print("Error updating ownship layer to MapScreen: \(error)")
+    }
+  }
+  
+  func tempUpdateTraffic(traffic: [SimConnectShip], proxy: MapProxy) async {
+    // loop through simconnect.traffic
+    // update anything already created
+    //  if not created, create
+    //  check prune traffic
     
-  */
+    for tfc in traffic {
+      if (proxy.map?.layerExists(withId: String(describing: tfc.fs2ffid)) != nil) {
+        updateTrafficLayer(id: String(describing: tfc.fs2ffid), ship: tfc, proxy: proxy)
+        
+        if self.featureCollection.features.contains(where: { $0.identifier == .string(String(describing: tfc.fs2ffid)) }) {
+          updateTrafficFeature(traffic: tfc, proxy: proxy)
+        } else {
+          addTrafficFeature(traffic: tfc)
+        }
+      } else {
+        addTrafficLayer(id: String(describing: tfc.fs2ffid), proxy: proxy)
+      }
+      
+    }
+    if simConnect.pruneTrafficArray.value != [] {
+      for tfc in simConnect.pruneTrafficArray.value {
+        pruneTrafficLayer(id: String(describing: tfc.fs2ffid), proxy: proxy)
+        removeTrafficFeature(id: String(describing: tfc.fs2ffid))
+      }
+    }
+  }
+  
+  func addTrafficFeature(traffic: SimConnectShip) {
+    var feature = Feature(geometry: .point(Point(traffic.coordinate)))
+    feature.identifier = .string(String(describing: traffic.fs2ffid))
+    feature.properties = ["reg": .init(stringLiteral: traffic.registration ?? ""), "alt": .init(floatLiteral: traffic.altitude), "onGround": .init(booleanLiteral: traffic.onGround ?? false)]
+    self.featureCollection.features.append(feature)
+  }
+  
+  func updateTrafficFeature(traffic: SimConnectShip, proxy: MapProxy) {
+    self.featureCollection.features.forEach { feature in
+      var updatedFeature = Feature(geometry: .point(Point(traffic.coordinate)))
+      updatedFeature.identifier = .string(String(describing: traffic.fs2ffid))
+      updatedFeature.properties = ["reg": .init(stringLiteral: traffic.registration ?? ""), "alt": .init(floatLiteral: traffic.altitude), "onGround": .init(booleanLiteral: traffic.onGround ?? false)]
+      
+      proxy.map?.updateGeoJSONSourceFeatures(forSourceId: "TrafficTextID", features: [updatedFeature])
+    }
+  }
+  
+  func removeTrafficFeature(id: String) {
+    self.featureCollection.features.removeAll { $0.identifier?.string == id }
+  }
   
   func addOwnshipLayer() {
     do {
@@ -679,62 +626,6 @@ extension MapScreen {
       print("Error adding ownship layer to MapScreen: \(error)")
     }
   }
-  
-   /*
-  func updateOwnshipLayer() async {
-    do {
-      try proxyMap?.map?.updateLayer(withId: "OwnshipLayer", type: LocationIndicatorLayer.self) { layer in
-        layer.location = .constant([simConnect.ownship.coordinate.latitude, simConnect.ownship.coordinate.longitude, simConnect.ownship.altitude])
-        layer.bearing = .constant(simConnect.ownship.heading)
-      }
-    } catch {
-      print("Error updating ownship layer to MapScreen: \(error)")
-    }
-  }
-  
-  func addTrafficSymbolLayer() {
-    do {
-      let layer = try SymbolLayer(jsonObject: simConnect.traffic)
-      try proxyMap?.map?.addLayer(layer)
-    } catch {
-      print("Error with traffic symbol layer: \(error)")
-    }
-  }
-  
-  func startUpdatingShips() {
-    updatingShips = true
-    
-    let timer = Timer(timeInterval: 0.25, repeats: true) { _ in
-      self.updateShips()
-    }
-    // current or main
-    RunLoop.current.add(timer, forMode: .common)
-  }
-  
-  func updateShips() {
-    if !updatingShips { return }
-    Task {
-      await self.updateOwnshipLayer()
-      await self.updateTrafficLayerDelegate()
-    }
-  }
-  
-  func updateTrafficLayerDelegate() async {
-    guard simConnect.trafficArray != [] else { return }
-    guard proxyMap != nil else { return }
-    
-    for traffic in simConnect.trafficArray {
-      if (proxyMap?.map?.layerExists(withId: String(describing: traffic.fs2ffid)) != nil) {
-        updateTrafficLayer(id: String(describing: traffic.fs2ffid), ship: traffic)
-      } else {
-        addTrafficLayer(id: String(describing: traffic.fs2ffid))
-      }
-    }
-    for traffic in simConnect.pruneTrafficArray {
-      pruneTrafficLayer(id: String(describing: traffic.fs2ffid))
-    }
-  }
-  */
   
   func updateTrafficLayer(id: String, ship: SimConnectShip, proxy: MapProxy) {
     do {
