@@ -26,6 +26,7 @@ struct efbUIApp: App {
               UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 10, bottomTrailingRadius: 10, topTrailingRadius: 0)
             )
             .frame(height: 50)
+            .background(.bar)
         }
         .environment(simConnectShip)
         .environment(airportDetailViewModel)
