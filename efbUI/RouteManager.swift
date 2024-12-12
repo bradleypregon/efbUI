@@ -55,6 +55,9 @@ import CoreLocation
 
 
 enum WaypointType {
+  case origin
+  case destination
+  case airport
   case vor
   case sid
   case star
