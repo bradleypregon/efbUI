@@ -38,6 +38,9 @@ class MapScreenViewModel {
   
   var sigmets: SigmetSchema = []
   
+  var sidRoute: [[ProcedureTable]] = []
+  var starRoute: [[ProcedureTable]] = []
+  
   init() {
     largeAirports = airportJSONModel.airports.filter { $0.size == .large }
     mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
