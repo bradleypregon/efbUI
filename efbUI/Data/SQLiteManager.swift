@@ -8,6 +8,7 @@
 import Foundation
 import SQLite
 typealias Expression = SQLite.Expression
+import MapboxMaps
 
 struct QueryAirportTextResult: Equatable, Identifiable {
   let airportIdentifier: String
@@ -441,4 +442,125 @@ class SQLiteManager {
       return []
     }
   }
+  
+  func getEnrouteComms(in bounds: CoordinateBounds) async -> [EnrouteCommTable] {
+    guard let database = db else { return [] }
+    var enrouteComms: [EnrouteCommTable] = []
+    do {
+      let table = Table("tbl_enroute_communication")
+      let areaCode = Expression<String?>("area_code")
+      let firRDOIdent = Expression<String?>("fir_rdo_ident")
+      let firUIRIndicator = Expression<String?>("fir_uir_indicator")
+      let communicationType = Expression<String?>("communication_type")
+      let communicationFrequency = Expression<Double?>("communication_frequency")
+      let frequencyUnits = Expression<String?>("frequency_units")
+      let serviceIndicator = Expression<String?>("service_indicator")
+      let remoteName = Expression<String?>("remote_name")
+      let callsign = Expression<String?>("callsign")
+      let latitude = Expression<Double>("latitude")
+      let longitude = Expression<Double>("longitude")
+      
+      var query: Table
+      let minLat = bounds.southwest.latitude
+      let maxLat = bounds.northeast.latitude
+      let minLon = bounds.southwest.longitude
+      let maxLon = bounds.northeast.longitude
+      
+      if minLon <= maxLon {
+        query = table.filter(latitude >= minLat && latitude <= maxLat &&
+                             (longitude >= minLon && longitude <= maxLon) && areaCode == "USA" && firUIRIndicator == "U" && frequencyUnits == "V")
+      } else {
+        query = table.filter(latitude >= minLat && latitude <= maxLat &&
+                             (longitude >= minLon || longitude <= maxLon) && areaCode == "USA" && firUIRIndicator == "U" && frequencyUnits == "V")
+      }
+      
+      do {
+        for res in try database.prepare(query) {
+          let comm: EnrouteCommTable = .init(areaCode: res[areaCode] ?? "", firRDOIdent: res[firRDOIdent] ?? "", firUIRIndicator: res[firUIRIndicator] ?? "", communicationType: res[communicationType] ?? "", communicationFrequency: res[communicationFrequency] ?? .zero, frequencyUnits: res[frequencyUnits] ?? "", serviceIndicator: res[serviceIndicator] ?? "", remoteName: res[remoteName] ?? "", callsign: res[callsign] ?? "", latitude: res[latitude], longitude: res[longitude])
+          enrouteComms.append(comm)
+        }
+        return enrouteComms
+      }
+    } catch let error {
+      print("Error querying enroute comms: \(error)")
+      return []
+    }
+  }
+  
+  
+  func searchTables(query: String) async -> [MyWaypoint] {
+    guard let database = db else { return [] }
+    let queryString = """
+    SELECT 
+      airport_identifier AS 'identifier', 
+      airport_name AS 'name', 
+      airport_ref_latitude AS 'latitude', 
+      airport_ref_longitude AS 'longitude',
+      'airport' AS 'type'
+    FROM tbl_airports WHERE airport_identifier LIKE ?
+    UNION ALL
+    SELECT 
+      ndb_identifier AS 'identifier', 
+      ndb_name AS 'name', 
+      ndb_latitude AS 'latitude', 
+      ndb_longitude AS 'longitude', 
+      'navaid' AS 'type'
+    FROM tbl_enroute_ndbnavaids WHERE ndb_identifier LIKE ?
+    UNION ALL
+    SELECT 
+      ndb_identifier AS 'identifier', 
+      ndb_name AS 'name', 
+      ndb_latitude AS 'latitude', 
+      ndb_longitude AS 'longitude', 
+      'navaid' AS 'type'
+    FROM tbl_terminal_ndbnavaids WHERE ndb_identifier LIKE ?
+    UNION ALL
+    SELECT 
+      vor_identifier AS 'identifier', 
+      vor_name AS 'name', 
+      vor_latitude AS 'latitude', 
+      vor_longitude AS 'longitude',
+      'navaid' AS 'type'
+    FROM tbl_vhfnavaids WHERE vor_identifier LIKE ?
+    UNION ALL
+    SELECT 
+      waypoint_identifier AS 'identifier', 
+      waypoint_name AS 'name', 
+      waypoint_latitude AS 'latitude', 
+      waypoint_longitude AS 'longitude',
+      'waypoint' AS 'type'
+    FROM tbl_terminal_waypoints WHERE waypoint_identifier LIKE ?
+    UNION ALL
+    SELECT 
+      waypoint_identifier AS 'identifier', 
+      waypoint_name AS 'name', 
+      waypoint_latitude AS 'latitude', 
+      waypoint_longitude AS 'longitude',
+      'waypoint' AS 'type'
+    FROM tbl_enroute_waypoints WHERE waypoint_identifier LIKE ?;
+    """
+    
+    var results: [MyWaypoint] = []
+    do {
+      let prep = try database.prepare(queryString)
+      let temp = try prep.run(query, query, query, query, query, query)
+      print(temp)
+//      for row in try statement.run(query, query, query, query, query, query) {
+//        if let identifier = row[0] as? String,
+//           let name = row[1] as? String,
+//           let lat = row[2] as? Double,
+//           let long = row[3] as? Double,
+//           let typeStr = row[4] as? String,
+//           let type = WaypointType(rawValue: typeStr)
+//          {
+//          results.append(MyWaypoint(identifier: identifier, name: name, lat: lat, long: long, type: type))
+//        }
+//      }
+    return results
+    } catch let error {
+      print("Error querying waypoints: \(error)")
+      return []
+    }
+  }
+  
 }

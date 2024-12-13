@@ -54,22 +54,22 @@ import CoreLocation
  */
 
 
-enum WaypointType {
-  case origin
-  case destination
+enum WaypointType: String {
   case airport
-  case vor
+  case navaid
+  case airway
   case sid
   case star
-  case gps
+  case waypoint
 }
 
 struct MyWaypoint: Identifiable, Hashable {
   let id: String = UUID().uuidString
+  let identifier: String
+  let name: String
   let lat: Double
   let long: Double
   let type: WaypointType
-  let name: String
 }
 
 @Observable

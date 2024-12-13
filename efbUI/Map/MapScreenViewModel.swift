@@ -41,6 +41,9 @@ class MapScreenViewModel {
   var sidRoute: [[ProcedureTable]] = []
   var starRoute: [[ProcedureTable]] = []
   
+  var enrouteCommsVisible: Bool = false
+  var enrouteComms: [EnrouteCommTable] = []
+  
   init() {
     largeAirports = airportJSONModel.airports.filter { $0.size == .large }
     mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }

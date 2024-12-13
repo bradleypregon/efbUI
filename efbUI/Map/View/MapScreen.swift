@@ -259,6 +259,15 @@ struct MapScreen: View {
                   .textFont(["Roboto Bold Condensed"])
               }
               
+              if mapViewModel.enrouteCommsVisible {
+                PointAnnotationGroup(mapViewModel.enrouteComms, id: \.self) { point in
+                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(point.latitude, point.longitude))
+                    .textField("\(point.communicationFrequency)")
+                    .textColor(.white)
+                    .textSize(12)
+                }
+              }
+              
               // WIP
 //              if mapViewModel.gatesVisible {
 //                PointAnnotationGroup(mapViewModel.visibleGates, id: \.gateIdentifier) { gate in
@@ -280,26 +289,25 @@ struct MapScreen: View {
                 print("Error adding image to map: \(error)")
               }
             }
-            // TODO: Follow Mapbox recommendation for .onCameraChanged
-            // NO @State variable changes. Too much computation and redraws
-            /*
-            .onCameraChanged { changed in
-              if changed.cameraState.zoom >= 7.5 {
-                mapViewModel.gatesVisible = true
-                // TODO: fetch visible airports in rect
-                mapViewModel.fetchVisibleGates()
+            .onCameraChanged { context in
+              if context.cameraState.zoom >= 6 {
+                if mapViewModel.enrouteCommsVisible {
+                  // TODO: This will be taxing. We don't really need to query *every* time the camera changes
+                  // filtering a lot out for now
+                  guard let bounds = proxy.map?.cameraBounds.bounds else { return }
+                  Task {
+                    mapViewModel.enrouteComms = await SQLiteManager.shared.getEnrouteComms(in: bounds)
+                  }
+                }
+              }
+              
+              if context.cameraState.zoom >= 7.5 {
+//                mapViewModel.gatesVisible = true
+//                mapViewModel.fetchVisibleGates()
               } else {
-                mapViewModel.gatesVisible = false
+//                mapViewModel.gatesVisible = false
               }
             }
-             */
-//            .onCameraChanged(action: { changed in
-//              currentZoom = changed.cameraState.zoom
-//              coordinateBounds = calculateVisibleMapRegion(center: changed.cameraState.center, zoom: changed.cameraState.zoom, geometry: geometry)
-//              if let coordinateBounds {
-//                handleCameraChange(zoom: changed.cameraState.zoom, bounds: coordinateBounds)
-//              }
-//            })
             .onAppear {
               proxyMap = proxy
               if airportVM.requestMap {
@@ -407,19 +415,7 @@ struct MapScreen: View {
                   Text("Satellite")
                 }
               }
-              
             }
-            
-//            Toggle("Radar", systemImage: mapViewModel.displayRadar ? "cloud.sun.fill" : "cloud.sun", isOn: $mapViewModel.displayRadar)
-//              .font(.title2)
-//              .tint(.mvfr)
-//              .toggleStyle(.button)
-//              .labelStyle(.iconOnly)
-//              .contentTransition(.symbolEffect)
-//              .onChange(of: mapViewModel.displayRadar) {
-//                fetchRadar()
-//                mapViewModel.displayRadar ? addRasterWxRadarSource() : removeRasterRadarSource()
-//              }
             
             Toggle("Route", systemImage: mapViewModel.displayRoute ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $mapViewModel.displayRoute)
               .font(.title2)
@@ -472,6 +468,13 @@ struct MapScreen: View {
                   print("Error changing visibility of Map Satellite layer: \(error)")
                 }
               }
+            
+            Toggle("Communications", systemImage: mapViewModel.enrouteCommsVisible ? "antenna.radiowaves.left.and.right" : "antenna.radiowaves.left.and.right.slash", isOn: $mapViewModel.enrouteCommsVisible)
+              .font(.title2)
+              .tint(.mvfr)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
             
             Toggle("Drawing", systemImage: drawingEnabled ? "pencil" : "pencil.slash", isOn: $drawingEnabled)
               .font(.title2)

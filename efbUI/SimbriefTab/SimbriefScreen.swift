@@ -63,9 +63,13 @@ struct SimbriefScreen: View {
     guard !navlog.isEmpty else { return }
     // query database
     for nav in navlog {
-      guard let lat = Double(nav.lat), let long = Double(nav.long) else { return }
-      let waypoint: MyWaypoint = .init(lat: lat, long: long, type: .gps, name: nav.name)
-      routeManager.waypoints.append(waypoint)
+      // TODO: fix this, we dont need to query database
+      // keep in mind: how to determine waypoint type
+      Task {
+        let res = await SQLiteManager.shared.searchTables(query: nav.ident)
+        guard let temp = res.first else { return }
+        routeManager.waypoints.append(temp)
+      }
     }
   }
 }

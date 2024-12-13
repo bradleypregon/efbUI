@@ -62,8 +62,13 @@ struct CustomInputView: View {
     // For instance, there are multiple VORs (or NBDs?) that have the same 3 letter identifier. Need to pick the right one
       .onReceive(currentInput.publisher) { val in
         if (val == " ") {
-          let temp = MyWaypoint(lat: 41.4090, long: -92.9154, type: .gps, name: currentInput.trimmingCharacters(in: .whitespaces))
-          routeManager.waypoints.append(temp)
+          Task {
+            let res = await SQLiteManager.shared.searchTables(query: currentInput.trimmingCharacters(in: .whitespaces))
+            if res == [] { return }
+            guard let temp = res.first else { return }
+            print(temp)
+            routeManager.waypoints.append(temp)
+          }
           currentInput = ""
         }
       }

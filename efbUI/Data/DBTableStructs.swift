@@ -110,6 +110,16 @@ struct ProcedureTable: Hashable {
   let centerId: String
 }
 
-struct ArrivalTable {
-  
+struct EnrouteCommTable: Hashable {
+  let areaCode: String
+  let firRDOIdent: String
+  let firUIRIndicator: String
+  let communicationType: String
+  let communicationFrequency: Double
+  let frequencyUnits: String
+  let serviceIndicator: String
+  let remoteName: String
+  let callsign: String
+  let latitude: Double
+  let longitude: Double
 }
