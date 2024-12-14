@@ -150,12 +150,9 @@ struct MapScreen: View {
               }
               
               if mapViewModel.displayNewRoute {
-                PolylineAnnotationGroup {
-                  PolylineAnnotation(lineCoordinates: routeManager.waypoints.map { CLLocationCoordinate2DMake($0.lat, $0.long) })
-                    .lineWidth(2)
-                    .lineColor(.blue)
-                }
-                
+                PolylineAnnotation(lineCoordinates: routeManager.waypoints.map { CLLocationCoordinate2DMake($0.lat, $0.long) })
+                  .lineWidth(3.0)
+                  .lineColor(.white)
               }
               
               // MARK: Sigmet Data
