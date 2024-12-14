@@ -22,9 +22,9 @@ struct WaypointsContainer: View {
     Button {
       print(wpt)
     } label: {
-      Text(wpt.name)
+      Text(wpt.identifier)
         .padding(8)
-        .background(.blue)
+        .background(getWaypointColor(wpt.type))
         .foregroundStyle(.white)
         .clipShape(Capsule())
     }
@@ -40,6 +40,19 @@ struct WaypointsContainer: View {
     }
   }
   
+  func getWaypointColor(_ wpt: WaypointType) -> Color {
+    switch wpt {
+    case .airport:
+      return .blue
+    case .navaid:
+      return .orange
+    case .waypoint:
+      return .green
+    default:
+      return .blue
+    }
+  }
+  
   func remove(_ waypoint: MyWaypoint) {
     routeManager.waypoints.removeAll { $0 == waypoint }
   }
@@ -52,6 +65,8 @@ struct WaypointsContainer: View {
 struct CustomInputView: View {
   @Environment(RouteManager.self) private var routeManager
   @State private var currentInput: String = ""
+  @State private var modalSheetVisible: Bool = false
+  @State var inputResults: [MyWaypoint] = []
   
   var body: some View {
     TextField("Wpt...", text: $currentInput)
@@ -62,14 +77,40 @@ struct CustomInputView: View {
     // For instance, there are multiple VORs (or NBDs?) that have the same 3 letter identifier. Need to pick the right one
       .onReceive(currentInput.publisher) { val in
         if (val == " ") {
-          Task {
-            let res = await SQLiteManager.shared.searchTables(query: currentInput.trimmingCharacters(in: .whitespaces))
-            if res == [] { return }
+          let res = SQLiteManager.shared.searchTables(query: currentInput.trimmingCharacters(in: .whitespaces))
+          if res == [] {
+            // display there was no waypoint found
+            return
+          }
+          if res.count == 1 {
             guard let temp = res.first else { return }
-            print(temp)
             routeManager.waypoints.append(temp)
+          } else {
+            inputResults = res
+            modalSheetVisible.toggle()
           }
           currentInput = ""
+        }
+      }
+      .sheet(isPresented: $modalSheetVisible) {
+        List {
+          ForEach($inputResults, id: \.id) { $result in
+            Button {
+              routeManager.waypoints.append(result)
+              modalSheetVisible.toggle()
+            } label: {
+              HStack {
+                VStack {
+                  Text(result.identifier)
+                  Text(result.name)
+                }
+                VStack {
+                  Text("\(result.lat)")
+                  Text("\(result.long)")
+                }
+              }
+            }
+          }
         }
       }
       .textFieldStyle(.roundedBorder)
