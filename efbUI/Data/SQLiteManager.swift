@@ -487,75 +487,79 @@ class SQLiteManager {
     }
   }
   
-  
-  func searchTables(query: String) async -> [MyWaypoint] {
+  // TODO: uhh fix this
+  // I totally hate everything about this.
+  // Please, have a drink (or two?) before trying to read this
+  func searchTables(query: String) -> [MyWaypoint] {
     guard let database = db else { return [] }
-    let queryString = """
-    SELECT 
-      airport_identifier AS 'identifier', 
-      airport_name AS 'name', 
-      airport_ref_latitude AS 'latitude', 
-      airport_ref_longitude AS 'longitude',
-      'airport' AS 'type'
-    FROM tbl_airports WHERE airport_identifier LIKE ?
-    UNION ALL
-    SELECT 
-      ndb_identifier AS 'identifier', 
-      ndb_name AS 'name', 
-      ndb_latitude AS 'latitude', 
-      ndb_longitude AS 'longitude', 
-      'navaid' AS 'type'
-    FROM tbl_enroute_ndbnavaids WHERE ndb_identifier LIKE ?
-    UNION ALL
-    SELECT 
-      ndb_identifier AS 'identifier', 
-      ndb_name AS 'name', 
-      ndb_latitude AS 'latitude', 
-      ndb_longitude AS 'longitude', 
-      'navaid' AS 'type'
-    FROM tbl_terminal_ndbnavaids WHERE ndb_identifier LIKE ?
-    UNION ALL
-    SELECT 
-      vor_identifier AS 'identifier', 
-      vor_name AS 'name', 
-      vor_latitude AS 'latitude', 
-      vor_longitude AS 'longitude',
-      'navaid' AS 'type'
-    FROM tbl_vhfnavaids WHERE vor_identifier LIKE ?
-    UNION ALL
-    SELECT 
-      waypoint_identifier AS 'identifier', 
-      waypoint_name AS 'name', 
-      waypoint_latitude AS 'latitude', 
-      waypoint_longitude AS 'longitude',
-      'waypoint' AS 'type'
-    FROM tbl_terminal_waypoints WHERE waypoint_identifier LIKE ?
-    UNION ALL
-    SELECT 
-      waypoint_identifier AS 'identifier', 
-      waypoint_name AS 'name', 
-      waypoint_latitude AS 'latitude', 
-      waypoint_longitude AS 'longitude',
-      'waypoint' AS 'type'
-    FROM tbl_enroute_waypoints WHERE waypoint_identifier LIKE ?;
-    """
+    let airportTable = Table("tbl_airports")
+    let airportIdentifier = Expression<String>("airport_identifier")
+    let airportName = Expression<String>("airport_name")
+    let airportLatitude = Expression<Double>("airport_ref_latitude")
+    let airportLongitude = Expression<Double>("airport_ref_longitude")
     
+    let enrouteNDBNavaidsTable = Table("tbl_enroute_ndbnavaids")
+    let enrouteNDBIdentifier = Expression<String>("ndb_identifier")
+    let enrouteNDBName = Expression<String>("ndb_name")
+    let enrouteNDBLatitude = Expression<Double>("ndb_latitude")
+    let enrouteNDBLongitude = Expression<Double>("ndb_longitude")
+    
+    let terminalNDBNavaidsTable = Table("tbl_terminal_ndbnavaids")
+    let terminalNDBIdentifier = Expression<String>("ndb_identifier")
+    let terminalNDBName = Expression<String>("ndb_name")
+    let terminalNDBLatitude = Expression<Double>("ndb_latitude")
+    let terminalNDBLongitude = Expression<Double>("ndb_longitude")
+    
+    let vhfNavaidsTable = Table("tbl_vhfnavaids")
+    let vhfIdentifier = Expression<String>("vor_identifier")
+    let vhfName = Expression<String>("vor_name")
+    let vhfLatitude = Expression<Double>("vor_latitude")
+    let vhfLongitude = Expression<Double>("vor_longitude")
+    
+    let enrouteWaypointsTable = Table("tbl_enroute_waypoints")
+    let enrouteWaypointIdentifier = Expression<String>("waypoint_identifier")
+    let enrouteWaypointName = Expression<String>("waypoint_name")
+    let enrouteWaypointLatitude = Expression<Double>("waypoint_latitude")
+    let enrouteWaypointLongitude = Expression<Double>("waypoint_longitude")
+    
+    let terminalWaypointsTable = Table("tbl_terminal_waypoints")
+    let terminalWaypointIdentifier = Expression<String>("waypoint_identifier")
+    let terminalWaypointName = Expression<String>("waypoint_name")
+    let terminalWaypointLatitude = Expression<Double>("waypoint_latitude")
+    let terminalWaypointLongitude = Expression<Double>("waypoint_longitude")
+
     var results: [MyWaypoint] = []
     do {
-      let prep = try database.prepare(queryString)
-      let temp = try prep.run(query, query, query, query, query, query)
-      print(temp)
-//      for row in try statement.run(query, query, query, query, query, query) {
-//        if let identifier = row[0] as? String,
-//           let name = row[1] as? String,
-//           let lat = row[2] as? Double,
-//           let long = row[3] as? Double,
-//           let typeStr = row[4] as? String,
-//           let type = WaypointType(rawValue: typeStr)
-//          {
-//          results.append(MyWaypoint(identifier: identifier, name: name, lat: lat, long: long, type: type))
-//        }
-//      }
+      let airportQuery = airportTable.filter(airportIdentifier == query).select(airportIdentifier,airportName,airportLatitude,airportLongitude)
+      for row in try database.prepare(airportQuery) {
+        results.append(MyWaypoint(identifier: row[airportIdentifier], name: row[airportName], lat: row[airportLatitude], long: row[airportLongitude], type: .airport))
+      }
+      
+      let enrouteNDBNavaidQuery = enrouteNDBNavaidsTable.filter(enrouteNDBIdentifier == query).select(enrouteNDBIdentifier,enrouteNDBName,enrouteNDBLatitude,enrouteNDBLongitude)
+      for row in try database.prepare(enrouteNDBNavaidQuery) {
+        results.append(MyWaypoint(identifier: row[enrouteNDBIdentifier], name: row[enrouteNDBName], lat: row[enrouteNDBLatitude], long: row[enrouteNDBLongitude], type: .navaid))
+      }
+      
+      let terminalNDBNavaidQuery = terminalNDBNavaidsTable.filter(terminalNDBIdentifier == query).select(terminalNDBIdentifier,terminalNDBName, terminalNDBLatitude,terminalNDBLongitude)
+      for row in try database.prepare(terminalNDBNavaidQuery) {
+        results.append(MyWaypoint(identifier: row[terminalNDBIdentifier], name: row[terminalNDBName], lat: row[terminalNDBLatitude], long: row[terminalNDBLongitude], type: .navaid))
+      }
+      
+      let vhfNavaidQuery = vhfNavaidsTable.filter(vhfIdentifier == query).select(vhfIdentifier,vhfName, vhfLatitude,vhfLongitude)
+      for row in try database.prepare(vhfNavaidQuery) {
+        results.append(MyWaypoint(identifier: row[vhfIdentifier], name: row[vhfName], lat: row[vhfLatitude], long: row[vhfLongitude], type: .navaid))
+      }
+      
+      let enrouteWaypointsQuery = enrouteWaypointsTable.filter(enrouteWaypointIdentifier == query).select(enrouteWaypointIdentifier,enrouteWaypointName, enrouteWaypointLatitude,enrouteWaypointLongitude)
+      for row in try database.prepare(enrouteWaypointsQuery) {
+        results.append(MyWaypoint(identifier: row[enrouteWaypointIdentifier], name: row[enrouteWaypointName], lat: row[enrouteWaypointLatitude], long: row[enrouteWaypointLongitude], type: .waypoint))
+      }
+      
+      let terminalWaypointsQuery = terminalWaypointsTable.filter(terminalWaypointIdentifier == query).select(terminalWaypointIdentifier,terminalWaypointName, terminalWaypointLatitude,terminalWaypointLongitude)
+      for row in try database.prepare(terminalWaypointsQuery) {
+        results.append(MyWaypoint(identifier: row[terminalWaypointIdentifier], name: row[terminalWaypointName], lat: row[terminalWaypointLatitude], long: row[terminalWaypointLongitude], type: .waypoint))
+      }
+
     return results
     } catch let error {
       print("Error querying waypoints: \(error)")
