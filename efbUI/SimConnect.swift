@@ -44,6 +44,7 @@ class ServerStatus {
 final class ServerListener {
   var ship: SimConnectShipObserver
   private let port: NWEndpoint.Port = 49002
+//  private let port: NWEndpoint.Port = 4000
   private var listener: NWListener?
   private var connection: NWConnection?
   private var listening: Bool = true
@@ -85,6 +86,7 @@ final class ServerListener {
         ServerStatus.shared.status = .running
         print("Connection ready to receive message")
         self.consumeData()
+//        self.consumeDataGDL90()
       case .cancelled, .failed:
         ServerStatus.shared.status = .stopped
         self.listening = false
@@ -116,6 +118,28 @@ final class ServerListener {
       }
       
       self.consumeData()
+    }
+  }
+  
+  private func consumeDataGDL90() {
+    self.connection?.receive(minimumIncompleteLength: 1, maximumLength: 64000) { (data, _, isComplete, error) in
+      
+      guard let data = data else { return }
+      switch data.first {
+      case 0x10: // Ownship Report
+        print("Type ownship")
+         
+        //              return [
+        //                  "type": "Ownship Report",
+        //                  "latitude": latitude,
+        //                  "longitude": longitude,
+        //                  "altitude": altitude,
+        //                  "northSouthVelocity": northSouthVelocity,
+        //                  "eastWestVelocity": eastWestVelocity
+        //              ]
+      default:
+        print("unknown") // Unsupported message type
+      }
     }
   }
   
