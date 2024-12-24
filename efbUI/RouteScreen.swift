@@ -8,19 +8,14 @@
 import SwiftUI
 import CoreLocation
 
-struct WaypointsContainer: View {
-  @Environment(RouteManager.self) private var routeManager
-  @State private var popover: Bool = false
+struct WaypointContainerButton: View {
+  @State private var showPopover: Bool = false
+  let wpt: MyWaypoint
+  var route: RouteManager
   
   var body: some View {
-    WrappingHStack(models: routeManager.waypoints) { waypoint in
-      WptView(wpt: waypoint)
-    }
-  }
-  
-  func WptView(wpt: MyWaypoint) -> some View {
     Button {
-      print(wpt)
+      showPopover.toggle()
     } label: {
       Text(wpt.identifier)
         .padding(8)
@@ -28,15 +23,28 @@ struct WaypointsContainer: View {
         .foregroundStyle(.white)
         .clipShape(Capsule())
     }
-    .popover(isPresented: $popover) {
-      Button {
-        remove(wpt)
-      } label: {
-        Text("Remove")
+    .popover(isPresented: $showPopover) {
+      VStack {
+        Button("Insert Before") {
+          print("Insert before")
+        }
+        .background(.vfr)
+        .buttonStyle(.bordered)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        Button("Insert After") {
+          print("Insert After")
+        }
+        .background(.mvfr)
+        .buttonStyle(.bordered)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        Button("Remove") {
+          remove(wpt)
+        }
+        .background(.ifr)
+        .buttonStyle(.bordered)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
       }
-    }
-    .onLongPressGesture {
-      popover.toggle()
+      .padding()
     }
   }
   
@@ -54,11 +62,32 @@ struct WaypointsContainer: View {
   }
   
   func remove(_ waypoint: MyWaypoint) {
-    routeManager.waypoints.removeAll { $0 == waypoint }
+    route.waypoints.removeAll { $0 == waypoint }
+  }
+}
+
+struct WaypointsContainer: View {
+  @Environment(RouteManager.self) private var routeManager
+  @State private var popover: Bool = false
+  
+  var body: some View {
+    List {
+      ForEach(routeManager.waypoints) { waypoint in
+        WaypointContainerButton(wpt: waypoint, route: routeManager)
+      }
+      .onMove { from, to in
+        routeManager.waypoints.move(fromOffsets: from, toOffset: to)
+      }
+      .onDelete(perform: removeWaypoint)
+    }
+    
+//    WrappingHStack(models: routeManager.waypoints) { waypoint in
+//      WaypointContainerButton(wpt: waypoint, route: routeManager)
+//    }
   }
   
-  func move(from source: IndexSet, to destination: Int) {
-    routeManager.waypoints.move(fromOffsets: source, toOffset: destination)
+  func removeWaypoint(at offsets: IndexSet) {
+    routeManager.waypoints.remove(atOffsets: offsets)
   }
 }
 
@@ -67,19 +96,16 @@ struct CustomInputView: View {
   @State private var currentInput: String = ""
   @State private var modalSheetVisible: Bool = false
   @State var inputResults: [MyWaypoint] = []
+  @State private var noWaypointAlertVisible: Bool = false
   
   var body: some View {
     TextField("Wpt...", text: $currentInput)
-    // TODO: Query each db table (Airport, NBD, VOR) upon submission and return either an array or single object
-    // airports, enroute_airways, enroute_waypoints, pathpoints, sids, stars, terminal_waypoints, vhfnavaids
     // TODO: How to handle airways?
-    // If an array is returned, its probbaly a matching name, user needs to select appropriate
-    // For instance, there are multiple VORs (or NBDs?) that have the same 3 letter identifier. Need to pick the right one
       .onReceive(currentInput.publisher) { val in
         if (val == " ") {
-          let res = SQLiteManager.shared.searchTables(query: currentInput.trimmingCharacters(in: .whitespaces))
+          let res = SQLiteManager.shared.searchTables(query: currentInput.trimmingCharacters(in: .whitespaces).uppercased())
           if res == [] {
-            // display there was no waypoint found
+            noWaypointAlertVisible = true
             return
           }
           if res.count == 1 {
@@ -92,11 +118,21 @@ struct CustomInputView: View {
           currentInput = ""
         }
       }
+      .alert("No Waypoint Found", isPresented: $noWaypointAlertVisible) {
+        Button {
+          noWaypointAlertVisible = false
+        } label: {
+          Text("Ok (sad!)")
+        }
+      } message: {
+        Text("This some real sad sh!t. No waypoint was found for: \(currentInput)")
+      }
       .sheet(isPresented: $modalSheetVisible) {
         List {
           ForEach($inputResults, id: \.id) { $result in
             Button {
               routeManager.waypoints.append(result)
+              currentInput = ""
               modalSheetVisible.toggle()
             } label: {
               HStack {
@@ -112,6 +148,7 @@ struct CustomInputView: View {
             }
           }
         }
+        .presentationSizing(.form)
       }
       .textFieldStyle(.roundedBorder)
       .frame(maxWidth: 300)
@@ -124,8 +161,6 @@ struct RouteScreen: View {
   @Environment(SimBriefViewModel.self) private var simbrief
   
   var body: some View {
-    // TODO: build array from ofp including origin, waypoints, destination
-    // TODO: Color for Airports, color for Departures, color for Arrivals, color for TOC/TOD
     VStack {
       if let ofp = simbrief.ofp {
         WrappingHStack(models: ofp.navlog.filter { $0.type != "apt" }) { wpt in
@@ -145,7 +180,6 @@ struct RouteScreen: View {
       } else {
         Text("No simbrief ofp")
       }
-      
       
       WaypointsContainer()
       CustomInputView()
