@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AirportTable: Identifiable {
+struct AirportTable: Identifiable, Hashable {
   let areaCode: String
   let icaoCode: String
   let airportIdentifier: String

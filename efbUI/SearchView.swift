@@ -17,6 +17,8 @@ import Combine
   var searchTextSubject = CurrentValueSubject<String, Never>("")
   var cancellables: Set<AnyCancellable> = []
   
+  var requestMap: Bool = false
+  
   init() {
     searchTextSubject
       .filter { $0.isEmpty }
@@ -51,27 +53,52 @@ import Combine
 }
 
 struct SearchView: View {
-  @Binding var tab: efbTab
   @State private var viewModel = SearchViewModel()
+  @Binding var tab: efbTab
   
   var body: some View {
     NavigationStack {
       Text("TODO: Favorite/common airports here?")
-      List(viewModel.airports) { airport in
-        HStack {
-          Text(airport.airportIdentifier)
-          Text(airport.airportName)
-          Button {
-            print("")
-          } label: {
-            Text("Map")
-          }
-        }
+      WrappingHStack(models: viewModel.airports) { airport in
+        AirportSearchResultCard(tab: $tab, airport: airport)
       }
+//      List(viewModel.airports) { airport in
+//        AirportSearchResultCard(tab: $tab, airport: airport)
+//      }
       .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
       .navigationTitle("Search")
       .navigationBarTitleDisplayMode(.large)
     }
+  }
+}
+
+struct AirportSearchResultCard: View {
+  @Environment(AirportScreenViewModel.self) private var airportScreenViewModel
+  @Binding var tab: efbTab
+  let airport: AirportTable
+  
+  var body: some View {
+    HStack(spacing: 10) {
+      VStack {
+        Text(airport.airportIdentifier)
+        Text(airport.airportName)
+      }
+      Button {
+        airportScreenViewModel.selectedAirportICAO = airport.airportIdentifier
+        tab = .airports
+      } label: {
+        Text("Details")
+      }
+      Button {
+        airportScreenViewModel.selectedAirportICAO = airport.airportIdentifier
+        airportScreenViewModel.requestMap = true
+        tab = .map
+      } label: {
+        Text("Map")
+      }
+    }
+    .padding()
+    .clipShape(RoundedRectangle(cornerRadius: 10))
   }
 }
 
