@@ -51,7 +51,7 @@ struct MapScreen: View {
     NavigationSplitView(columnVisibility: $columnVisibility) {
       // sidebar
       if let airport = selectedAirport {
-        AirportAnnotationSidebarView(selectedTab: $selectedTab, selectedAirport: airport)
+        AirportAnnotationSidebarView(columnVisibility: $columnVisibility, selectedTab: $selectedTab, selectedAirport: airport)
       } else {
         ContentUnavailableView("Airport Details Unavailable", systemImage: "airplane.circle", description: Text("Select an airport on the map to view details."))
       }

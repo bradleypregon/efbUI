@@ -16,6 +16,7 @@ import Neumorphic
 //    - Simply just update properties from SidebarView
 
 struct AirportAnnotationSidebarView: View {
+  @Binding var columnVisibility: NavigationSplitViewVisibility
   @Binding var selectedTab: efbTab
   var selectedAirport: AirportTable
   
@@ -190,11 +191,18 @@ struct AirportAnnotationSidebarView: View {
           Text("View Airport")
             .font(.system(size: 12))
         }
-        .softButtonStyle(Capsule(), padding: 5)
+        .buttonStyle(.borderedProminent)
+        .clipShape(Capsule())
         .frame(maxWidth: .infinity, alignment: .center)
         
-        Spacer()
-          .frame(maxWidth: .infinity, alignment: .trailing)
+        Button {
+          columnVisibility = .detailOnly
+        } label: {
+          Text("Close")
+        }
+        .buttonStyle(.plain)
+        .clipShape(Capsule())
+        .frame(maxWidth: .infinity, alignment: .trailing)
       }
       
     }
