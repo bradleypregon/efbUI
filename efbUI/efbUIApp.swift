@@ -18,21 +18,19 @@ struct efbUIApp: App {
   
   var body: some Scene {
     WindowGroup {
-      RootToastView {
-        VStack {
-          TabBar()
-          TopBarView()
-            .clipShape(
-              UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 10, bottomTrailingRadius: 10, topTrailingRadius: 0)
-            )
-            .frame(height: 50)
-            .background(.bar)
-        }
-        .environment(simConnectShip)
-        .environment(airportDetailViewModel)
-        .environment(simbrief)
-        .environment(routeManager)
+      VStack {
+        TabBar()
+        TopBarView()
+          .clipShape(
+            UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 10, bottomTrailingRadius: 10, topTrailingRadius: 0)
+          )
+          .frame(height: 50)
+          .background(.bar)
       }
+      .environment(simConnectShip)
+      .environment(airportDetailViewModel)
+      .environment(simbrief)
+      .environment(routeManager)
     }
     .modelContainer(for: UserSettings.self)
   }
