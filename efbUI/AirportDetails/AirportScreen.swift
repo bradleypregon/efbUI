@@ -154,7 +154,8 @@ struct AirportScreen: View {
           }
         }
       }
-      .navigationTitle("\(viewModel.selectedAirport?.airportName ?? "Airport Details")")
+      .navigationTitle(viewModel.selectedAirport != nil ? "\(viewModel.selectedAirport?.airportIdentifier ?? "") | \(viewModel.selectedAirport?.airportName ?? "")" : "Airport Details")
+//      .navigationTitle("\(viewModel.selectedAirport?.airportIdentifier ?? "") | \(viewModel.selectedAirport?.airportName ?? "Airport Details")")
       .navigationBarTitleDisplayMode(.large)
         
         
