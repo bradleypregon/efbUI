@@ -63,7 +63,7 @@ struct AirportScreen: View {
                   Text(viewModel.formatAirportCoordinates(lat: viewModel.selectedAirport?.airportRefLat ?? .zero, long: viewModel.selectedAirport?.airportRefLong ?? .zero))
                 }
                 GridRow {
-                  AirportSunriseSunsetView(weather: viewModel.osmWeatherResults)
+                  AirportSunriseSunsetView(weather: viewModel.localWeatherResults)
                 }
               }
               .frame(maxWidth: .infinity, alignment: .leading)
@@ -155,42 +155,7 @@ struct AirportScreen: View {
         }
       }
       .navigationTitle(viewModel.selectedAirport != nil ? "\(viewModel.selectedAirport?.airportIdentifier ?? "") | \(viewModel.selectedAirport?.airportName ?? "")" : "Airport Details")
-//      .navigationTitle("\(viewModel.selectedAirport?.airportIdentifier ?? "") | \(viewModel.selectedAirport?.airportName ?? "Airport Details")")
       .navigationBarTitleDisplayMode(.large)
-        
-        
-//        .toolbar {
-//          TextField("Search Airports...", text: $viewModel.searchText)
-//            .autocorrectionDisabled()
-//            .textFieldStyle(.roundedBorder)
-//            .frame(width: 300)
-//            .onTapGesture {
-//              textFieldFocused = true
-//            }
-//            .popover(isPresented: $textFieldFocused, content: {
-//              if viewModel.searchText.count > 1 {
-//                List {
-//                  ForEach(viewModel.airportSearchResults) { result in
-//                    Button {
-//                      viewModel.selectedAirport = SQLiteManager.shared.selectAirport(result.airportIdentifier)
-//                      viewModel.selectedAirportICAO = result.airportIdentifier
-//                      textFieldFocused = false
-//                    } label: {
-//                      Text("\(result.airportIdentifier) - \(result.airportName)")
-//                    }
-//                    .listRowSeparator(.visible)
-//                  }
-//                }
-//                .listStyle(.plain)
-//                .frame(idealWidth: 300, idealHeight: 300, maxHeight: 500)
-//              } else {
-//                EmptyView()
-//                  .frame(idealWidth: 300, idealHeight: 300)
-//              }
-//            })
-//        }
-      
-      
     }
     .task {
       // fetch metar, weather, local weather, etc
@@ -224,8 +189,8 @@ struct AirportScreenInfoTabBuilder: View {
         ContentUnavailableView("Runways INOP", systemImage: "", description: Text("Select an airport to view runways."))
       }
     case .localwx:
-      if airportVM.osmWeatherResults != nil {
-        AirportScreenLocalWxTab(localwx: airportVM.osmWeatherResults)
+      if airportVM.localWeatherResults != nil {
+        AirportScreenLocalWxTab(localwx: airportVM.localWeatherResults)
       } else {
         ContentUnavailableView("Local Wx INOP", systemImage: "", description: Text("Select an airport to view local weather."))
       }
@@ -325,14 +290,18 @@ struct AirportScreenRwyTab: View {
   let runways: [RunwayTable]?
   let wx: [AirportMETARSchema]?
   
+  let columns = [GridItem(.adaptive(minimum: 200))]
+  
   @State var optimalRunways: [RunwayTable] = []
   @State var longestRunways: [RunwayTable] = []
   
   var body: some View {
     if let runways {
-      ScrollView(.vertical) {
-        WrappingHStack(models: runways) { runway in
-          AirportRunwayView(runway: runway, weather: wx?.first, optimal: isOptimal(runway), longest: isLongest(runway))
+      ScrollView {
+        LazyVGrid(columns: columns, spacing: 10) {
+          ForEach(runways, id: \.self) { runway in
+            AirportRunwayView(runway: runway, weather: wx?.first, optimal: isOptimal(runway), longest: isLongest(runway))
+          }
         }
       }
       .onAppear {
@@ -387,9 +356,9 @@ struct AirportScreenLocalWxTab: View {
   
   var body: some View {
     if let localwx {
-      Text("\("wx string here")")
-      Text("main: \("main here")")
-      Text("desc: \("desc here")")
+      Text("\(localwx.current.temperature2M)\(localwx.currentUnits.temperature2M)")
+      Text("humidity: \(localwx.current.relativeHumidity2M)%")
+      Text("wind: \(localwx.current.windDirection10M) / \(localwx.current.windSpeed10M) G\(localwx.current.windGusts10M) mph")
       
     }
   }
