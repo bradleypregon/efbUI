@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreLocation
 import Combine
+import SwiftData
 
 enum efbTab: Equatable, Hashable {
   case airports
@@ -27,12 +28,16 @@ enum RouteCategory: Equatable, Hashable {
 struct TabBar: View {
   @State var selectedTab: efbTab = .airports
   @Environment(SimConnectShipObserver.self) private var ship
-  @Environment(SimBriefViewModel.self) private var simbrief
+  @Environment(RouteManager.self) private var route
+  @Query var userSettings: [UserSettings]
   
-  @State private var depNoticeTriggered: Bool = false
-  @State private var inboundTriggered: Bool = false
-  @State private var tenMileInbd: Bool = false
-  @State private var fiveMileInbd: Bool = false
+  @State private var depTriggered: Bool = false
+  @State private var inbTriggered: Bool = false
+  @State private var atisTriggered: Bool = false
+  @State private var shortInbTriggered: Bool = false
+  @State private var finalTriggered: Bool = false
+  
+  @State private var toasts: [Toast] = []
   
   private let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
   
@@ -67,7 +72,6 @@ struct TabBar: View {
       
       Tab("Map", systemImage: "map", value: .map) {
         MapScreen(selectedTab: $selectedTab)
-//          .ignoresSafeArea(edges: .top)
       }
       Tab("ScratchPad", systemImage: "square.and.pencil", value: .scratchPad) {
         ScratchPadView()
@@ -79,38 +83,104 @@ struct TabBar: View {
         SettingsView()
       }
     }
-    .onReceive(timer) { _ in
-      guard let ofp = simbrief.ofp else { return }
-      guard ship.ownship.value.coordinate.latitude != .zero else { return }
+    .toast($toasts)
+    .onReceive(ship.ownship) { ship in
+      guard
+        route.waypoints.count > 0,
+        let origin = route.waypoints.first,
+        let dest = route.waypoints.last
+      else { return }
       
-      let shipLocation = CLLocation(latitude: ship.ownship.value.coordinate.latitude, longitude: ship.ownship.value.coordinate.longitude)
-      let originCoord = CLLocation(latitude: Double(ofp.origin.posLat) ?? .zero, longitude: Double(ofp.origin.posLong) ?? .zero)
-      let destCoord = CLLocation(latitude: Double(ofp.destination.posLat) ?? .zero, longitude: Double(ofp.destination.posLong) ?? .zero)
+      guard ship.coordinate.latitude != .zero else { return }
+      guard let settings = userSettings.first else { return }
       
-      // if we are 20 miles past origin airport, notification for final call
-      if (shipLocation.distance(from: originCoord) * 0.000621371 >= 20) && depNoticeTriggered == false {
-//        Toast.shared.present(title: "20mi from \(ofp.origin.icaoCode): Final Call", symbol: "airplane.departure")
-        depNoticeTriggered = true
+      let shipCoord = CLLocation(latitude: ship.coordinate.latitude, longitude: ship.coordinate.longitude)
+      let originCoord = CLLocation(latitude: origin.lat, longitude: origin.long)
+      let destCoord = CLLocation(latitude: dest.lat, longitude: dest.long)
+      
+      // Origin Departure Final Call
+      if (shipCoord.distance(from: originCoord) * 0.000621371 >= Double(settings.outboundDistance) && !depTriggered) {
+        print("Departure call")
+        pushToast(image: "airplane.departure", title: "\(settings.outboundDistance)nm from \(origin.identifier): Final Call")
+        depTriggered = true
       }
       
-      // if we are 30 miles inbound to de stinatino, notification for inbound
-      if shipLocation.distance(from: destCoord) * 0.000621371 <= 30 && inboundTriggered == false  {
-//        Toast.shared.present(title: "30mi from \(ofp.destination.icaoCode): Inbound Call", symbol: "airplane.arrival")
-        inboundTriggered = true
+      // Inbound
+      if (shipCoord.distance(from: destCoord) * 0.000621371 <= Double(settings.inboundDistance) && !inbTriggered) {
+        pushToast(image: "airplane.arrival", title: "\(settings.inboundDistance)nm from \(dest.identifier): Inbound")
+        inbTriggered = true
       }
       
-      // 10 miles, make another call, 10 miles out
-      if shipLocation.distance(from: destCoord) * 0.000621371 <= 10 && tenMileInbd == false {
-//        Toast.shared.present(title: "10mi from \(ofp.destination.icaoCode): 10 Mile Call", symbol: "airplane.arrival")
-        tenMileInbd = true
+      // ATIS
+      if (shipCoord.distance(from: destCoord) * 0.000621371 <= Double(settings.atisDistance) && !atisTriggered) {
+        // fetch atis/awos frequency from destination if airport
+        guard dest.type == .airport else { return }
+        pushToast(image: "airplane.arrival", title: "ATIS/AWOS for \(dest.identifier)")
+        atisTriggered = true
       }
       
-      // 5 miles, make another call
-      if shipLocation.distance(from: destCoord) * 0.000621371 <= 5 && fiveMileInbd == false {
-//        Toast.shared.present(title: "5mi from \(ofp.destination.icaoCode): 5 Mile Call", symbol: "airplane.arrival")
-        fiveMileInbd = true
+      // Short Inbound
+      if (shipCoord.distance(from: destCoord) * 0.000621371 <= Double(settings.shortInboundDistance) && !shortInbTriggered) {
+        pushToast(image: "airplane.arrival", title: "\(settings.shortInboundDistance)nm from \(dest.identifier): Short Inbound")
+        shortInbTriggered = true
+      }
+      
+      // Final
+      if (shipCoord.distance(from: destCoord) * 0.000621371 <= Double(settings.finalDistance) && !finalTriggered) {
+        pushToast(image: "airplane.arrival", title: "\(settings.shortInboundDistance)nm from \(dest.identifier): Final Approach")
+        finalTriggered = true
+      }
+      
+    }
+    .onChange(of: route.waypoints) { prev, new in
+      // Origin Changed
+      if (prev.first != new.first) {
+        depTriggered = false
+      }
+      
+      // Dest Changed
+      if (prev.last != new.last) {
+        inbTriggered = false
+        atisTriggered = false
+        shortInbTriggered = false
+        finalTriggered = false
       }
     }
+  }
+  
+  func pushToast(image: String, title: String) {
+    withAnimation(.bouncy) {
+      let toast = Toast { id in
+        ToastView(id, image: image, title: title)
+      }
+      toasts.append(toast)
+    }
+  }
+  
+  @ViewBuilder
+  func ToastView(_ id: String, image: String, title: String) -> some View {
+    HStack(spacing: 12) {
+      Image(systemName: image)
+      Text(title)
+        .font(.callout)
+        .fontWeight(.semibold)
+      
+      Button {
+        $toasts.delete(id)
+      } label: {
+        Image(systemName: "xmark.circle.fill")
+          .font(.title2)
+      }
+    }
+    .foregroundStyle(.primary)
+    .padding(12)
+    .background {
+      Capsule()
+        .fill(.background)
+        .shadow(color: .black.opacity(0.06), radius: 3, x: -1, y: -3)
+        .shadow(color: .black.opacity(0.06), radius: 2, x: 1, y: 3)
+    }
+    .padding(.horizontal, 15)
   }
 }
 
