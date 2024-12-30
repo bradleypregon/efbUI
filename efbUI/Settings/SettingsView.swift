@@ -17,9 +17,13 @@ struct SettingsView: View {
   
   @State var ownshipRegistration: String = ""
   @State var simbriefUserIDString: String = ""
-  @State var outboundNotificationDistance: Int = 20
-  @State var inboundNotificationDistance: Int = 30
-  @State var finalNotificationDistance: Int = 5
+  
+  @State var outboundDistance: Int = 20
+  @State var atisDistance: Int = 40
+  @State var inbDistance: Int = 20
+  @State var shortInbDistance: Int = 10
+  @State var finalDistance: Int = 5
+  
   @State var keepAwake: Bool = false
   
   @State private var calcInput: Int?
@@ -62,27 +66,43 @@ struct SettingsView: View {
             }
             Section(header: Text("Airport Notification Distances")) {
               HStack {
-                Text("Outbound")
-                TextField("20 miles final call...", value: $outboundNotificationDistance, format: .number)
+                Text("Outbound Final Call Distance")
+                TextField("20 miles final call...", value: $outboundDistance, format: .number)
                   .keyboardType(.decimalPad)
                   .onSubmit {
-                    userSettings.first?.outboundDistance = outboundNotificationDistance
+                    userSettings.first?.outboundDistance = outboundDistance
                   }
               }
               HStack {
-                Text("Inbound")
-                TextField("30 miles inb...", value: $inboundNotificationDistance, format: .number)
+                Text("Inbound Warning Distance")
+                TextField("30 miles inbound...", value: $inbDistance, format: .number)
                   .keyboardType(.decimalPad)
                   .onSubmit {
-                    userSettings.first?.inboundDistance = inboundNotificationDistance
+                    userSettings.first?.inboundDistance = inbDistance
                   }
               }
               HStack {
-                Text("Final")
-                TextField("5 mile final...", value: $finalNotificationDistance, format: .number)
+                Text("ATIS Distance")
+                TextField("ATIS for dest...", value: $atisDistance, format: .number)
                   .keyboardType(.decimalPad)
                   .onSubmit {
-                    userSettings.first?.finalDistance = finalNotificationDistance
+                    userSettings.first?.atisDistance = atisDistance
+                  }
+              }
+              HStack {
+                Text("Short Inbound Warning Distance")
+                TextField("10 mile inbound...", value: $shortInbDistance, format: .number)
+                  .keyboardType(.decimalPad)
+                  .onSubmit {
+                    userSettings.first?.shortInboundDistance = shortInbDistance
+                  }
+              }
+              HStack {
+                Text("Final Warning Distance")
+                TextField("5 mile short final...", value: $finalDistance, format: .number)
+                  .keyboardType(.decimalPad)
+                  .onSubmit {
+                    userSettings.first?.finalDistance = finalDistance
                   }
               }
             }
@@ -136,9 +156,9 @@ struct SettingsView: View {
     .onAppear {
       ownshipRegistration = userSettings.first?.ownshipRegistration ?? ""
       simbriefUserIDString = userSettings.first?.simbriefUserID ?? ""
-      outboundNotificationDistance = userSettings.first?.outboundDistance ?? 20
-      inboundNotificationDistance = userSettings.first?.inboundDistance ?? 20
-      finalNotificationDistance = userSettings.first?.finalDistance ?? 5
+      outboundDistance = userSettings.first?.outboundDistance ?? 20
+      inbDistance = userSettings.first?.inboundDistance ?? 20
+      finalDistance = userSettings.first?.finalDistance ?? 5
     }
   }
   
