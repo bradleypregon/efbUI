@@ -43,20 +43,4 @@ class PilotedgeAPI {
     
     return atis
   }
-  
-  func fetchATIS(icao: String, completion: @escaping ([String]) -> ()) {
-    let url = "https://www.pilotedge.net/atis/\(icao).txt"
-    guard let url = URL(string: url) else { return }
-    
-    URLSession.shared.dataTask(with: url) { (data, response, error) in
-      guard error == nil else { return }
-      guard let data = data else { return }
-      
-      if let result = String(data: data, encoding: .utf8)?.components(separatedBy: .newlines) {
-        DispatchQueue.main.async {
-          completion(result)
-        }
-      }
-    }.resume()
-  }
 }
