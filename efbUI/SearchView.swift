@@ -56,15 +56,18 @@ struct SearchView: View {
   @State private var viewModel = SearchViewModel()
   @Binding var tab: efbTab
   
+  let columns = [GridItem(.adaptive(minimum: 250))]
+  
   var body: some View {
     NavigationStack {
       Text("TODO: Favorite/common airports here?")
-      WrappingHStack(models: viewModel.airports) { airport in
-        AirportSearchResultCard(tab: $tab, airport: airport)
+      ScrollView {
+        LazyVGrid(columns: columns) {
+          ForEach(viewModel.airports) { airport in
+            AirportSearchResultCard(tab: $tab, airport: airport)
+          }
+        }
       }
-//      List(viewModel.airports) { airport in
-//        AirportSearchResultCard(tab: $tab, airport: airport)
-//      }
       .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
       .navigationTitle("Search")
       .navigationBarTitleDisplayMode(.large)
@@ -98,7 +101,10 @@ struct AirportSearchResultCard: View {
       }
     }
     .padding()
-    .clipShape(RoundedRectangle(cornerRadius: 10))
+    .background {
+      RoundedRectangle(cornerRadius: 8)
+        .stroke(.gray, lineWidth: 1)
+    }
   }
 }
 
