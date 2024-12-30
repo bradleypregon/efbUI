@@ -50,14 +50,11 @@ class MapScreenViewModel {
     smallAirports = airportJSONModel.airports.filter { $0.size == .small }
   }
   
-  func fetchRadar() {
-    let rainviewer = RainviewerAPI()
-    Task {
-      do {
-        currentRadar = try await rainviewer.fetchRadar()
-      } catch {
-        print("Error fetching Rainviewer API: \(error)")
-      }
+  func fetchRadar() async {
+    do {
+      currentRadar = try await RainviewerAPI().fetchRadar()
+    } catch let error {
+      print("Error fetching Rainviewer API: \(error)")
     }
   }
   
