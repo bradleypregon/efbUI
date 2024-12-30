@@ -67,7 +67,7 @@
 		A2B1F17B2B26154000E39C09 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A2B1F17A2B26154000E39C09 /* SQLite */; };
 		A2B98D6C2B9BB5A700A91977 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B98D6B2B9BB5A700A91977 /* Toast.swift */; };
 		A2B98D6E2B9BBFF600A91977 /* ToastTestContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B98D6D2B9BBFF600A91977 /* ToastTestContentView.swift */; };
-		A2C6ED152B2E3DA400856381 /* OSMWeatherAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED142B2E3DA400856381 /* OSMWeatherAPI.swift */; };
+		A2C6ED152B2E3DA400856381 /* OpenMeteoAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED142B2E3DA400856381 /* OpenMeteoAPI.swift */; };
 		A2C6ED172B2E3DCE00856381 /* OSMWeatherSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED162B2E3DCE00856381 /* OSMWeatherSchema.swift */; };
 		A2C6ED1A2B3005A700856381 /* FetchAirportWx.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED192B3005A700856381 /* FetchAirportWx.swift */; };
 		A2C6ED1D2B3005C900856381 /* FetchAirportCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED1C2B3005C900856381 /* FetchAirportCharts.swift */; };
@@ -134,7 +134,7 @@
 		A2A243672B00368B00245A0F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A2B98D6B2B9BB5A700A91977 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		A2B98D6D2B9BBFF600A91977 /* ToastTestContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastTestContentView.swift; sourceTree = "<group>"; };
-		A2C6ED142B2E3DA400856381 /* OSMWeatherAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSMWeatherAPI.swift; sourceTree = "<group>"; };
+		A2C6ED142B2E3DA400856381 /* OpenMeteoAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeteoAPI.swift; sourceTree = "<group>"; };
 		A2C6ED162B2E3DCE00856381 /* OSMWeatherSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSMWeatherSchema.swift; sourceTree = "<group>"; };
 		A2C6ED192B3005A700856381 /* FetchAirportWx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchAirportWx.swift; sourceTree = "<group>"; };
 		A2C6ED1C2B3005C900856381 /* FetchAirportCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchAirportCharts.swift; sourceTree = "<group>"; };
@@ -398,7 +398,7 @@
 				A2710D002BCEB1830034889B /* IVAO */,
 				A23B5BB72BCDD9E400DA5A08 /* Pilotedge */,
 				A23B5BB62BCDD96A00DA5A08 /* FAA */,
-				A2C6ED142B2E3DA400856381 /* OSMWeatherAPI.swift */,
+				A2C6ED142B2E3DA400856381 /* OpenMeteoAPI.swift */,
 				A2C6ED162B2E3DCE00856381 /* OSMWeatherSchema.swift */,
 				A22696052CB8686F006CE148 /* OpenMeteoSchema.swift */,
 			);
@@ -575,7 +575,7 @@
 				A283DBC32CDE88680022CFF8 /* RouteScreen.swift in Sources */,
 				A23B5BB92BCDDA0100DA5A08 /* PilotedgeAPI.swift in Sources */,
 				A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */,
-				A2C6ED152B2E3DA400856381 /* OSMWeatherAPI.swift in Sources */,
+				A2C6ED152B2E3DA400856381 /* OpenMeteoAPI.swift in Sources */,
 				A2710D052BCEB1BB0034889B /* IvaoAPI.swift in Sources */,
 				A23B5BB52BC309BB00DA5A08 /* AtisAPISchema.swift in Sources */,
 				A22322D52B20B74E001274CA /* Extensions.swift in Sources */,
