@@ -129,11 +129,12 @@ class AirportDetails {
     return "ivao metar"
   }
   
-  func fetchPilotedgeATIS(icao: String) {
-    let api = PilotedgeAPI()
-    api.fetchATIS(icao: icao) { atis in
-      self.pilotedgeAtis = atis.joined(separator: "\n")
+  func fetchPilotedgeATIS(icao: String) async {
+    do {
+      self.pilotedgeAtis = try await PilotedgeAPI().fetchATIS(icao: icao).joined(separator: "\n")
       self.currentWxString = self.pilotedgeAtis
+    } catch let error {
+      print("Error with pilotedge atis: \(error)")
     }
   }
   
@@ -239,7 +240,7 @@ class AirportDetails {
       if prevICAO == icao && !refresh && self.pilotedgeAtis != "" {
         self.currentWxString = self.pilotedgeAtis
       } else {
-        self.fetchPilotedgeATIS(icao: icao)
+        await self.fetchPilotedgeATIS(icao: icao)
       }
     }
     self.prevICAO = icao
@@ -262,7 +263,7 @@ enum AirportsScreenInfoTabs: String, Identifiable, CaseIterable {
 class AirportScreenViewModel: AirportDetails {
   var requestMap: Bool = false
   var selectedAirport: AirportTable?
-  var osmWeatherResults: OpenMeteoSchema?
+  var localWeatherResults: OpenMeteoSchema?
   var cityServed = ""
   var selectedInfoTab: AirportsScreenInfoTabs = .freq
   var selectedAirportCharts: DecodedArray<AirportChartAPISchema>?
@@ -281,28 +282,22 @@ class AirportScreenViewModel: AirportDetails {
     }
   }
   
-  // MARK: AirportScreen search bar
-//  var airportSearchResults = [QueryAirportTextResult]()
-//  var searchText: String = "" {
-//    didSet {
-//      airportSearchResults = SQLiteManager.shared.queryAirports(searchText)
-//    }
-//  }
-  
   /**
    Fetch Weather, fetch airport communications, fetch city/state
    */
   private func queryAirportData(airport: AirportTable) async {
-    fetchLocalWeather(lat: airport.airportRefLat, long: airport.airportRefLong)
+    await fetchLocalWeather(lat: airport.airportRefLat, long: airport.airportRefLong)
     fetchCityState(lat: airport.airportRefLat, long: airport.airportRefLong)
     await fetchAirportCharts(icao: airport.airportIdentifier)
   }
   
-  func fetchLocalWeather(lat: Double, long: Double) {
-    let weatherAPI = OSMWeatherAPI()
-    weatherAPI.fetchWeather(latitude: lat, longitude: long) { [weak self] weather in
-      self?.osmWeatherResults = weather
+  func fetchLocalWeather(lat: Double, long: Double) async {
+    do {
+      self.localWeatherResults = try await OpenMeteoAPI().fetchWeather(latitude: lat, longitude: long)
+    } catch let error {
+      print(error)
     }
+    
   }
   
   func fetchCityState(lat: Double, long: Double) {
