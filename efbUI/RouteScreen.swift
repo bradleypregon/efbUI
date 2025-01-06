@@ -80,10 +80,6 @@ struct WaypointsContainer: View {
       }
       .onDelete(perform: removeWaypoint)
     }
-    
-//    WrappingHStack(models: routeManager.waypoints) { waypoint in
-//      WaypointContainerButton(wpt: waypoint, route: routeManager)
-//    }
   }
   
   func removeWaypoint(at offsets: IndexSet) {
@@ -106,6 +102,7 @@ struct CustomInputView: View {
           let res = SQLiteManager.shared.searchTables(query: currentInput.trimmingCharacters(in: .whitespaces).uppercased())
           if res == [] {
             noWaypointAlertVisible = true
+            currentInput = ""
             return
           }
           if res.count == 1 {
@@ -114,6 +111,7 @@ struct CustomInputView: View {
           } else {
             inputResults = res
             modalSheetVisible.toggle()
+            currentInput = ""
           }
           currentInput = ""
         }
