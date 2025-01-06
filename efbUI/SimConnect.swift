@@ -154,6 +154,18 @@ final class ServerListener {
     
     let ship = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed)
     self.ship.ownship.send(ship)
+    
+    for traffic in self.ship.trafficArray.value {
+      guard let tfcTS = traffic.lastUpdated else { print("bad traffic timestamp"); return }
+      print(Date().timeIntervalSince(tfcTS))
+      // if traffic is on ground, do a longer time interval
+      // if not on the ground, do a shorter interval
+      if Date().timeIntervalSince(tfcTS) > 30 {
+        print("greater than 30")
+        self.ship.pruneTrafficArray.send([traffic])
+        self.ship.trafficArray.value.removeAll(where: { $0.fs2ffid == traffic.fs2ffid })
+      }
+    }
   }
   
   private func updateTraffic(_ components: [String]) {
@@ -188,15 +200,7 @@ final class ServerListener {
 //    self.ship.traffic[String(describing: plane.fs2ffid)] = plane
     
     self.ship.trafficArray.send([plane])
-    for traffic in self.ship.trafficArray.value {
-      guard let tfcTS = traffic.lastUpdated else { return }
-      // if traffic is on ground, do a longer time interval
-      // if not on the ground, do a shorter interval
-      if Date().timeIntervalSince(tfcTS) > 30 {
-        self.ship.pruneTrafficArray.send([traffic])
-        self.ship.trafficArray.value.removeAll(where: { $0.fs2ffid == traffic.fs2ffid })
-      }
-    }
+    
     
 //    for traffic in self.ship.trafficArray {
 //      guard let trafficTimestamp = traffic.lastUpdated else { return }
