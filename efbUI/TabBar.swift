@@ -100,7 +100,6 @@ struct TabBar: View {
       
       // Origin Departure Final Call
       if (shipCoord.distance(from: originCoord) * 0.000621371 >= Double(settings.outboundDistance) && !depTriggered) {
-        print("Departure call")
         pushToast(image: "airplane.departure", title: "\(settings.outboundDistance)nm from \(origin.identifier): Final Call")
         depTriggered = true
       }
@@ -113,9 +112,18 @@ struct TabBar: View {
       
       // ATIS
       if (shipCoord.distance(from: destCoord) * 0.000621371 <= Double(settings.atisDistance) && !atisTriggered) {
-        // fetch atis/awos frequency from destination if airport
+        // fetch atis/awos/ASOS? frequency from destination if airport
         guard dest.type == .airport else { return }
-        pushToast(image: "airplane.arrival", title: "ATIS/AWOS for \(dest.identifier)")
+        let comms = SQLiteManager.shared.getAirportComms(dest.identifier)
+        guard !comms.isEmpty else { return }
+        
+        
+        // Try AWO if not ATI. How to handle multiple frequencies?
+        // frequency_units == V
+        //  if service_indicator starts with L: Arrival atis (D is dep)
+        // if neither AWO nor ATI, recommend trying METAR or nearby airport
+        
+        pushToast(image: "airplane.arrival", title: "ATIS for \(dest.identifier): \("000.000")")
         atisTriggered = true
       }
       
