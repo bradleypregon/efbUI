@@ -9,7 +9,7 @@ import CoreLocation
 import SwiftUI
 
 enum WxCategory: String {
-  case VFR, MVFR, IFR, LIFR
+  case VFR, MVFR, IFR, LIFR, NONE
 }
 
 
@@ -54,12 +54,12 @@ class AirportDetails {
   }
   
   func fetchRunways(icao: String) async {
-    let runways = SQLiteManager.shared.getAirportRunways(icao)
+    let runways = await SQLiteManager.shared.getAirportRunways(icao)
     self.runways = runways
   }
   
   func fetchComms(icao: String) async {
-    let comms = SQLiteManager.shared.getAirportComms(icao)
+    let comms = await SQLiteManager.shared.getAirportComms(icao)
     self.comms = comms
   }
   
@@ -71,6 +71,31 @@ class AirportDetails {
       return frequency
     } else {
       return "n/a"
+    }
+  }
+  
+  func getATIS(comms: [AirportCommunicationTable]?) -> [AirportCommunicationTable] {
+    let types = ["ATI", "AWO", "ASO", "AWI", "AWS"]
+    guard comms != nil else { return [] }
+    guard let filter = comms?.filter({ $0.frequencyUnits == "V" && types.contains($0.communicationType)}) else { return [] }
+    print(filter)
+    let sorted = sortWx(wx: filter)
+    return sorted
+  }
+  
+  func sortWx(wx: [AirportCommunicationTable]) -> [AirportCommunicationTable] {
+    let ranking: [String: Int] = [
+      "ATI": 1,
+      "AWO": 2,
+      "ASO": 3,
+      "AWI": 4,
+      "AWS": 5
+    ]
+    
+    return wx.sorted { (a, b) -> Bool in
+      let rankA = ranking[a.communicationType] ?? Int.max
+      let rankB = ranking[b.communicationType] ?? Int.max
+      return rankA < rankB
     }
   }
   
@@ -148,6 +173,8 @@ class AirportDetails {
       return .ifr
     case .LIFR:
       return .lifr
+    case .NONE:
+      return .primary
     }
   }
   
@@ -163,11 +190,10 @@ class AirportDetails {
      IFR:  Ceiling 500-1000ft    AND/OR Vis 1-3sm
      LIFR: Ceiling <500ft        AND/OR Vis <1sm
      */
-    guard let wx = wx.first else { return .VFR }
+    guard let wx = wx.first else { return .NONE }
     
     var lowestBase: Int = 4000
     var visib: Double = 10
-    //    var currWx: WxCategory = .VFR
     
     switch wx.visib {
     case .int(let int):
