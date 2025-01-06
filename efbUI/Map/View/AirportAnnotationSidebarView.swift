@@ -194,15 +194,6 @@ struct AirportAnnotationSidebarView: View {
         .buttonStyle(.borderedProminent)
         .clipShape(Capsule())
         .frame(maxWidth: .infinity, alignment: .center)
-        
-        Button {
-          columnVisibility = .detailOnly
-        } label: {
-          Text("Close")
-        }
-        .buttonStyle(.plain)
-        .clipShape(Capsule())
-        .frame(maxWidth: .infinity, alignment: .trailing)
       }
       
     }
@@ -217,9 +208,4 @@ struct AirportAnnotationSidebarView: View {
       vm.wxType = .metar
     }
   }
-  
-  func getWeather(_ source: WxSources, _ type: WxTabs) -> String {
-    return "hello"
-  }
 }
-
