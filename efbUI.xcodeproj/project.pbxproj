@@ -21,9 +21,7 @@
 		3AE11B3027319452005974E5 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3AE11B2F27319452005974E5 /* Preview Assets.xcassets */; };
 		3AE11B5327319480005974E5 /* SimConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE11B5227319480005974E5 /* SimConnect.swift */; };
 		A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2046B0A2B28E58300E04BEA /* MKViewRepresentable.swift */; };
-		A206201A2B49B4E90034D902 /* Neumorphic in Frameworks */ = {isa = PBXBuildFile; productRef = A20620192B49B4E90034D902 /* Neumorphic */; };
 		A206201C2B49B4F80034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A206201B2B49B4F80034D902 /* MapboxMaps */; };
-		A206201E2B49B5E70034D902 /* Neumorphic in Frameworks */ = {isa = PBXBuildFile; productRef = A206201D2B49B5E70034D902 /* Neumorphic */; };
 		A20620202B49B6100034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A206201F2B49B6100034D902 /* MapboxMaps */; };
 		A20620222B49B61D0034D902 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A20620212B49B61D0034D902 /* SQLite */; };
 		A20620242B49B6AB0034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A20620232B49B6AB0034D902 /* MapboxMaps */; };
@@ -61,12 +59,12 @@
 		A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */; };
 		A29479BD2BDC3A2A00B89CE9 /* Airports.json in Resources */ = {isa = PBXBuildFile; fileRef = A29479BC2BDC3A2A00B89CE9 /* Airports.json */; };
 		A2A243682B00368B00245A0F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A243672B00368B00245A0F /* SettingsView.swift */; };
-		A2AAEBAF2B1CF82C00BEA78E /* Neumorphic in Frameworks */ = {isa = PBXBuildFile; productRef = A2AAEBAE2B1CF82C00BEA78E /* Neumorphic */; };
 		A2B1F1792B26152700E39C09 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A2B1F1782B26152700E39C09 /* MapboxMaps */; };
 		A2B1F17B2B26154000E39C09 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A2B1F17A2B26154000E39C09 /* SQLite */; };
 		A2B98D6C2B9BB5A700A91977 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B98D6B2B9BB5A700A91977 /* Toast.swift */; };
 		A2B98D6E2B9BBFF600A91977 /* ToastTestContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B98D6D2B9BBFF600A91977 /* ToastTestContentView.swift */; };
 		A2C06DC32D2C211700DF7EF6 /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = A2C06DC22D2C211700DF7EF6 /* navdata.db */; };
+		A2C06DC62D2C24EF00DF7EF6 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = A2C06DC52D2C24EF00DF7EF6 /* GRDB */; };
 		A2C6ED152B2E3DA400856381 /* OpenMeteoAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED142B2E3DA400856381 /* OpenMeteoAPI.swift */; };
 		A2C6ED172B2E3DCE00856381 /* OSMWeatherSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED162B2E3DCE00856381 /* OSMWeatherSchema.swift */; };
 		A2C6ED1A2B3005A700856381 /* FetchAirportWx.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED192B3005A700856381 /* FetchAirportWx.swift */; };
@@ -157,13 +155,11 @@
 				A25CB2862B250298008E9FEF /* SQLite in Frameworks */,
 				A206201C2B49B4F80034D902 /* MapboxMaps in Frameworks */,
 				A25CB2802B2494E0008E9FEF /* SQLite in Frameworks */,
+				A2C06DC62D2C24EF00DF7EF6 /* GRDB in Frameworks */,
 				A20620202B49B6100034D902 /* MapboxMaps in Frameworks */,
 				A232CCBC2B250659005C3E2E /* MapboxMaps in Frameworks */,
 				A206A69F2CF1927400BAB2D9 /* AsyncAlgorithms in Frameworks */,
 				A20620242B49B6AB0034D902 /* MapboxMaps in Frameworks */,
-				A206201E2B49B5E70034D902 /* Neumorphic in Frameworks */,
-				A206201A2B49B4E90034D902 /* Neumorphic in Frameworks */,
-				A2AAEBAF2B1CF82C00BEA78E /* Neumorphic in Frameworks */,
 				A20620222B49B61D0034D902 /* SQLite in Frameworks */,
 				A2B1F1792B26152700E39C09 /* MapboxMaps in Frameworks */,
 			);
@@ -490,19 +486,17 @@
 			);
 			name = efbUI;
 			packageProductDependencies = (
-				A2AAEBAE2B1CF82C00BEA78E /* Neumorphic */,
 				A25CB27F2B2494E0008E9FEF /* SQLite */,
 				A25CB2852B250298008E9FEF /* SQLite */,
 				A232CCBB2B250659005C3E2E /* MapboxMaps */,
 				A2B1F1782B26152700E39C09 /* MapboxMaps */,
 				A2B1F17A2B26154000E39C09 /* SQLite */,
-				A20620192B49B4E90034D902 /* Neumorphic */,
 				A206201B2B49B4F80034D902 /* MapboxMaps */,
-				A206201D2B49B5E70034D902 /* Neumorphic */,
 				A206201F2B49B6100034D902 /* MapboxMaps */,
 				A20620212B49B61D0034D902 /* SQLite */,
 				A20620232B49B6AB0034D902 /* MapboxMaps */,
 				A206A69E2CF1927400BAB2D9 /* AsyncAlgorithms */,
+				A2C06DC52D2C24EF00DF7EF6 /* GRDB */,
 			);
 			productName = efbUI;
 			productReference = 3AE11B2527319450005974E5 /* EFB.app */;
@@ -533,10 +527,10 @@
 			);
 			mainGroup = 3AE11B1C27319450005974E5;
 			packageReferences = (
-				A2AAEBAD2B1CF82C00BEA78E /* XCRemoteSwiftPackageReference "neumorphic" */,
 				A25CB27E2B2494E0008E9FEF /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
 				A206A69D2CF1927400BAB2D9 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+				A2C06DC42D2C24EF00DF7EF6 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 3AE11B2627319450005974E5 /* Products */;
 			projectDirPath = "";
@@ -874,9 +868,9 @@
 				minimumVersion = 0.14.1;
 			};
 		};
-		A2AAEBAD2B1CF82C00BEA78E /* XCRemoteSwiftPackageReference "neumorphic" */ = {
+		A2C06DC42D2C24EF00DF7EF6 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/costachung/neumorphic.git";
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
 				branch = master;
 				kind = branch;
@@ -885,20 +879,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		A20620192B49B4E90034D902 /* Neumorphic */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A2AAEBAD2B1CF82C00BEA78E /* XCRemoteSwiftPackageReference "neumorphic" */;
-			productName = Neumorphic;
-		};
 		A206201B2B49B4F80034D902 /* MapboxMaps */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
 			productName = MapboxMaps;
-		};
-		A206201D2B49B5E70034D902 /* Neumorphic */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A2AAEBAD2B1CF82C00BEA78E /* XCRemoteSwiftPackageReference "neumorphic" */;
-			productName = Neumorphic;
 		};
 		A206201F2B49B6100034D902 /* MapboxMaps */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -935,11 +919,6 @@
 			package = A25CB27E2B2494E0008E9FEF /* XCRemoteSwiftPackageReference "SQLite.swift" */;
 			productName = SQLite;
 		};
-		A2AAEBAE2B1CF82C00BEA78E /* Neumorphic */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A2AAEBAD2B1CF82C00BEA78E /* XCRemoteSwiftPackageReference "neumorphic" */;
-			productName = Neumorphic;
-		};
 		A2B1F1782B26152700E39C09 /* MapboxMaps */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
@@ -949,6 +928,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A25CB27E2B2494E0008E9FEF /* XCRemoteSwiftPackageReference "SQLite.swift" */;
 			productName = SQLite;
+		};
+		A2C06DC52D2C24EF00DF7EF6 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A2C06DC42D2C24EF00DF7EF6 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
