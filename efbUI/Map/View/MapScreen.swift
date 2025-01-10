@@ -76,21 +76,17 @@ struct MapScreen: View {
                     .onTapGesture { context in
                       selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                       mapPopoverSelectedPoint = UnitPoint(
-                        x: (
-                          context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))
-                        ),
-                        y: (
-                          context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom))
-                        )
+                        x: (context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))),
+                        y: (context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom)))
                       )
                       displaySheet.toggle()
                       return true
                     }
-                    .onLongPressGesture { context in
-                      mapPopoverSelectedAirport = airport
-                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
-                      return true
-                    }
+//                    .onLongPressGesture { context in
+//                      mapPopoverSelectedAirport = airport
+//                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
+//                      return true
+//                    }
                 }
                 .slot("Top")
               }
@@ -118,11 +114,11 @@ struct MapScreen: View {
                       displaySheet.toggle()
                       return true
                     }
-                    .onLongPressGesture { context in
-                      mapPopoverSelectedAirport = airport
-                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
-                      return true
-                    }
+//                    .onLongPressGesture { context in
+//                      mapPopoverSelectedAirport = airport
+//                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
+//                      return true
+//                    }
                 }
                 .clusterOptions(ClusterOptions(clusterRadius: 75.0, clusterMaxZoom: 8.0))
               }
@@ -181,7 +177,7 @@ struct MapScreen: View {
                 PolylineAnnotation(lineCoordinates: routeManager.waypoints.map { CLLocationCoordinate2DMake($0.lat, $0.long) })
                   .lineWidth(3.0)
                   .lineColor(.white)
-                ForEvery(routeManager.waypoints) { wpt in
+                ForEvery(routeManager.waypoints.filter { $0.type != .airport }) { wpt in
                   MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: wpt.lat, longitude: wpt.long)) {
                     MapScreenWaypointView(wpt: wpt)
                   }
