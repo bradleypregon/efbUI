@@ -19,11 +19,11 @@ enum WxTabs: String, Identifiable, CaseIterable {
 }
 
 enum WxSources: String, Identifiable, CaseIterable {
-  case faa, ivao, pilotedge
+  case faa, vatsim, ivao, pilotedge
   var id: Self { self }
 }
 
-@Observable
+@MainActor @Observable
 class AirportDetails {
   var runways: [RunwayTable] = []
   var comms: [AirportCommunicationTable] = []
@@ -44,6 +44,8 @@ class AirportDetails {
   
   var currentWxString: String = ""
   
+  var nearestWxStrings: [AirportMETARSchema] = []
+  
   /**
     fetchAirportDetails(icao: String)
     fetches runways, comms
@@ -54,12 +56,12 @@ class AirportDetails {
   }
   
   func fetchRunways(icao: String) async {
-    let runways = await SQLiteManager.shared.getAirportRunways(icao)
+    let runways = SQLiteManager.shared.getAirportRunways(icao)
     self.runways = runways
   }
   
   func fetchComms(icao: String) async {
-    let comms = await SQLiteManager.shared.getAirportComms(icao)
+    let comms = SQLiteManager.shared.getAirportComms(icao)
     self.comms = comms
   }
   
@@ -78,7 +80,6 @@ class AirportDetails {
     let types = ["ATI", "AWO", "ASO", "AWI", "AWS"]
     guard comms != nil else { return [] }
     guard let filter = comms?.filter({ $0.frequencyUnits == "V" && types.contains($0.communicationType)}) else { return [] }
-    print(filter)
     let sorted = sortWx(wx: filter)
     return sorted
   }
@@ -99,6 +100,27 @@ class AirportDetails {
     }
   }
   
+  func fetchBBoxMetar(ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D) async {
+    do {
+      self.nearestWxStrings = try await AirportWxAPI().fetchBBox(ne: ne, sw: sw)
+    } catch let error {
+      print(error.localizedDescription)
+    }
+  }
+  
+  func closestField(to center: CLLocationCoordinate2D, fields: [AirportMETARSchema]) -> AirportMETARSchema? {
+    guard !fields.isEmpty else { return nil }
+    return fields.min { f1, f2 in
+      guard let f1Lat = f1.lat, let f1Lon = f1.lon, let f2lat = f2.lat, let f2lon = f2.lon else { return false }
+      
+      let latDiff1 = abs(center.latitude - f1Lat)
+      let lonDiff1 = abs(center.longitude - f1Lon)
+      let latDiff2 = abs(center.latitude - f2lat)
+      let lonDiff2 = abs(center.latitude - f2lon)
+      return (latDiff1 + lonDiff1) < (latDiff2 + lonDiff2)
+    }
+  }
+  
   /// fetch faa/noaa metar and calculate wx category
   func fetchFaaMetar(icao: String) async {
     do {
@@ -106,13 +128,8 @@ class AirportDetails {
       self.faaMetar = metars
       self.wxCategory = self.calculateWxCategory(wx: metars)
       self.currentWxString = metars.first?.rawOb ?? "metar n/a"
-    } catch AirportWxError.invalidURL {
-      // TODO: Handle AirportWxError types
-      print(AirportWxError.invalidURL.localizedDescription)
-    } catch AirportWxError.invalidResponse {
-      print(AirportWxError.invalidResponse.localizedDescription)
-    } catch (AirportWxError.invalidDecode) {
-      print(AirportWxError.invalidDecode.localizedDescription)
+    } catch let error as AirportWxError {
+      print(error.localizedDescription)
     } catch {
       print("An unexpected issue ocurred fetching AirportWxAPI METARs for Airport.")
     }
@@ -122,13 +139,8 @@ class AirportDetails {
     do {
       let tafs = try await AirportWxAPI().fetchTAF(icao: icao)
       self.faaTaf = tafs
-    } catch AirportWxError.invalidURL {
-      // TODO: Handle AirportWxError types
-      print(AirportWxError.invalidURL.localizedDescription)
-    } catch AirportWxError.invalidResponse {
-      print(AirportWxError.invalidResponse.localizedDescription)
-    } catch (AirportWxError.invalidDecode) {
-      print(AirportWxError.invalidDecode.localizedDescription)
+    } catch let error as AirportWxError {
+      print(error.localizedDescription)
     } catch {
       print("An unexpected issue ocurred fetching AirportWxAPI TAFs for Airport.")
     }
@@ -148,6 +160,10 @@ class AirportDetails {
     } catch {
       print("Unexpected error fetching from FaaAtisAPI")
     }
+  }
+  
+  func fetchVatsimATIS(icao: String) async {
+    
   }
   
   func fetchIvaoWx() -> String {
@@ -202,6 +218,8 @@ class AirportDetails {
       visib = double
     case .string(_):
       visib = 10
+    case .none:
+      visib = 10
     }
     
     // Check clouds
@@ -252,6 +270,12 @@ class AirportDetails {
       } else {
         await fetchFaaAtis(icao: icao)
       }
+    case (.vatsim, .atis):
+      if prevICAO == icao && !refresh && !self.vatsimAtis.isEmpty {
+        self.currentWxString = self.vatsimAtis
+      } else {
+        await fetchVatsimATIS(icao: icao)
+      }
     case (.ivao, .metar):
       self.currentWxString = "ivao metar"
     case (.ivao, .taf):
@@ -268,6 +292,10 @@ class AirportDetails {
       } else {
         await self.fetchPilotedgeATIS(icao: icao)
       }
+    case (.vatsim, .metar):
+      self.currentWxString = ""
+    case (.vatsim, .taf):
+      self.currentWxString = ""
     }
     self.prevICAO = icao
   }
