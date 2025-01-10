@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreLocation
-import Neumorphic
 
 // TODO: Separate this from AirportDetailViewModel
 //  Reason: Will allow user to select multiple airports on map without affecting selected airport in AirportScreen

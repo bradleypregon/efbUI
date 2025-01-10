@@ -96,7 +96,6 @@ struct ScratchPadView: View {
           ScratchPadCRAFT()
           DrawingView(canvas: $craftCanvas)
         default:
-          Color.Neumorphic.main
           DrawingView(canvas: $scratchCanvas)
         }
         

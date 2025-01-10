@@ -38,11 +38,10 @@ struct ScratchPadATIS: View {
   func Card(header: String) -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 20)
-        .fill(Color.Neumorphic.main).softOuterShadow(offset: 2, radius: 2)
       HStack {
         VStack(alignment: .leading) {
           Text(header)
-            .foregroundStyle(Color.Neumorphic.secondary)
+            .foregroundStyle(.secondary)
             .font(.title)
             .fontWeight(.semibold)
             .padding([.leading, .top], 8)
@@ -57,11 +56,10 @@ struct ScratchPadATIS: View {
   func WindCard() -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 20)
-        .fill(Color.Neumorphic.main).softOuterShadow(offset: 2, radius: 2)
       HStack {
         VStack(alignment: .leading) {
           Text("Wind")
-            .foregroundStyle(Color.Neumorphic.secondary)
+            .foregroundStyle(.secondary)
             .font(.title)
             .fontWeight(.semibold)
             .padding([.leading, .top], 8)
@@ -73,12 +71,12 @@ struct ScratchPadATIS: View {
         Spacer()
           .frame(width: 150)
         Text("@")
-          .foregroundStyle(Color.Neumorphic.secondary)
+          .foregroundStyle(.secondary)
           .font(.title)
           .fontWeight(.semibold)
         Spacer()
         Text("G")
-          .foregroundStyle(Color.Neumorphic.secondary)
+          .foregroundStyle(.secondary)
           .font(.title)
           .fontWeight(.semibold)
         Spacer()
@@ -90,11 +88,10 @@ struct ScratchPadATIS: View {
   func SkyCard() -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 20)
-        .fill(Color.Neumorphic.main).softOuterShadow(offset: 2, radius: 2)
       HStack {
         VStack(alignment: .leading) {
           Text("Sky")
-            .foregroundStyle(Color.Neumorphic.secondary)
+            .foregroundStyle(.secondary)
             .font(.title)
             .fontWeight(.semibold)
             .padding([.leading, .top], 8)
@@ -128,13 +125,13 @@ struct ScratchPadATIS: View {
         Text("FEW")
         Text("@")
       }
-      .foregroundStyle(Color.Neumorphic.secondary)
+      .foregroundStyle(.secondary)
       .font(.title2)
       .fontWeight(.semibold)
       Spacer()
       Text("Clear")
         .padding([.trailing], 40)
-        .foregroundStyle(Color.Neumorphic.secondary)
+        .foregroundStyle(.secondary)
         .font(.title2)
         .fontWeight(.semibold)
     }

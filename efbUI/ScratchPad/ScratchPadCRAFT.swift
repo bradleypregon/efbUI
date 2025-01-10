@@ -38,11 +38,10 @@ struct ScratchPadCRAFT: View {
   func Card(letter: String, desc: String) -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 20)
-        .fill(Color.Neumorphic.main).softOuterShadow(offset: 2, radius: 2)
       HStack {
         VStack(alignment: .leading) {
           Text(letter)
-            .foregroundStyle(Color.Neumorphic.secondary)
+            .foregroundStyle(.secondary)
             .font(.system(size: 45))
             .fontWeight(.semibold)
           Text(desc)

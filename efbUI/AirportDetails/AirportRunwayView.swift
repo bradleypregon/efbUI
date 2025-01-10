@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Neumorphic
 
 struct AirportRunwayView: View {
   let runway: RunwayTable
@@ -19,7 +18,7 @@ struct AirportRunwayView: View {
   var body: some View {
     VStack {
       Text(runway.runwayIdentifier)
-        .foregroundStyle(longest ? .orange : Color.Neumorphic.secondary)
+        .foregroundStyle(longest ? .orange : .secondary)
         .fontWeight(.semibold)
       
       Button {
@@ -29,11 +28,9 @@ struct AirportRunwayView: View {
           if optimal {
             RoundedRectangle(cornerRadius: 20)
               .stroke(.vfr, lineWidth: 10)
-              .fill(Color.Neumorphic.main)
               .frame(width: 200, height: 200)
           } else {
             RoundedRectangle(cornerRadius: 20)
-              .fill(Color.Neumorphic.main)
               .frame(width: 200, height: 200)
           }
           
@@ -41,21 +38,19 @@ struct AirportRunwayView: View {
             ZStack {
               RoundedRectangle(cornerRadius: 4)
                 .stroke(.white, lineWidth: 5)
-                .fill(Color.Neumorphic.secondary)
                 .frame(width: 45, height: 190)
               
               Text(runway.runwayIdentifier.split(separator: "RW")[0])
                 .foregroundStyle(.white)
                 .fontWeight(.semibold)
                 .offset(y: 80)
-                .foregroundStyle(Color.Neumorphic.main)
             }
             .rotationEffect(.degrees(runway.runwayMagneticBearing))
             
-            if let windDir = weather?.wdir {
+            if let windDir = weather?.wdir, let dir = windDir.asInt {
               Image(systemName: "arrow.up")
                 .foregroundStyle(.blue)
-                .rotationEffect(.degrees(Double(invertDegree(for: windDir))))
+                .rotationEffect(.degrees(Double(invertDegree(for: dir))))
                 .font(.system(size: 55))
             }
           }
@@ -63,7 +58,7 @@ struct AirportRunwayView: View {
       }
       
       Text("\(runway.runwayLength)'")
-        .foregroundStyle(longest ? .orange : Color.Neumorphic.secondary)
+        .foregroundStyle(longest ? .orange : .secondary)
         .fontWeight(.semibold)
     }
     .popover(isPresented: $popoverPresented, content: {
