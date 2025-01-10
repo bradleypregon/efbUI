@@ -25,7 +25,7 @@ struct SimConnectShip: Identifiable, Equatable {
 }
 
 @Observable
-final class SimConnectShipObserver {
+final class SimConnectShipObserver: Sendable {
   var ownship = CurrentValueSubject<SimConnectShip, Never>(.init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero))
   var trafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
   var pruneTrafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
@@ -55,24 +55,24 @@ final class ServerListener {
   }
   
   func start() {
-    self.listener?.stateUpdateHandler = { [self] state in
+    self.listener?.stateUpdateHandler = { [weak self] state in
       switch state {
       case .ready:
         print("Listener is ready")
         break
       case .failed, .cancelled:
-        listening = false
+        self?.listening = false
         print("Listener did fail")
-        stopListener()
+        self?.stopListener()
       default:
         print("default triggered in listener state update")
-        listening = true
+        self?.listening = true
         break
       }
     }
     
-    self.listener?.newConnectionHandler = { [self] connection in
-      createConnection(connection: connection)
+    self.listener?.newConnectionHandler = { [weak self] connection in
+      self?.createConnection(connection: connection)
     }
     self.listener?.start(queue: DispatchQueue.global(qos: .userInitiated))
   }
@@ -80,18 +80,18 @@ final class ServerListener {
   private func createConnection(connection: NWConnection) {
     self.connection = connection
     
-    self.connection?.stateUpdateHandler = { [self] state in
+    self.connection?.stateUpdateHandler = { [weak self] state in
       switch state {
       case .ready:
         ServerStatus.shared.status = .running
         print("Connection ready to receive message")
-        self.consumeData()
+        self?.consumeData()
 //        self.consumeDataGDL90()
       case .cancelled, .failed:
         ServerStatus.shared.status = .stopped
-        self.listening = false
+        self?.listening = false
         print("Connection stopped")
-        self.listener?.cancel()
+        self?.listener?.cancel()
       default:
         print("default triggered in connection createConnection")
         print("Connection waiting to receive message")
