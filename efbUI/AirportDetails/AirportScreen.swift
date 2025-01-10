@@ -314,8 +314,7 @@ struct AirportScreenRwyTab: View {
   func getOptimalRunways() {
     self.optimalRunways = []
     guard let runways = runways else { return }
-    guard let dir = wx?.first?.wdir else { return }
-    if dir == 0 { return }
+    guard let dir = wx?.first?.wdir?.asInt, dir != 0 else { return }
     
     let runwayDiff = runways.map { ($0, abs($0.runwayMagneticBearing - Double(dir))) }
     
