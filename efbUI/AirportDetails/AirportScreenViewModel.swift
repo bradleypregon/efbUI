@@ -127,7 +127,7 @@ class AirportDetails {
       let metars = try await AirportWxAPI().fetchMetar(icao: icao)
       self.faaMetar = metars
       self.wxCategory = self.calculateWxCategory(wx: metars)
-      self.currentWxString = metars.first?.rawOb ?? "metar n/a"
+      self.currentWxString = metars.first?.rawOb ?? "metar n/a for \(icao)"
     } catch let error as AirportWxError {
       print(error.localizedDescription)
     } catch {
@@ -164,10 +164,6 @@ class AirportDetails {
   
   func fetchVatsimATIS(icao: String) async {
     
-  }
-  
-  func fetchIvaoWx() -> String {
-    return "ivao metar"
   }
   
   func fetchPilotedgeATIS(icao: String) async {
@@ -248,8 +244,6 @@ class AirportDetails {
     
   }
   
-  // TODO: no need to re-call api, if you JUST looked at the tab. How to implement that...
-  // Refresh parameter?
   func fetchWx(for source: WxSources, type: WxTabs, icao: String, refresh: Bool) async {
     switch (source, type) {
     case (.faa, .metar):
@@ -276,25 +270,17 @@ class AirportDetails {
       } else {
         await fetchVatsimATIS(icao: icao)
       }
-    case (.ivao, .metar):
-      self.currentWxString = "ivao metar"
-    case (.ivao, .taf):
-      self.currentWxString = "ivao taf"
-    case (.ivao, .atis):
-      self.currentWxString = "ivao atis"
-    case (.pilotedge, .metar):
-      self.currentWxString = "n/a"
-    case (.pilotedge, .taf):
-      self.currentWxString = "n/a"
     case (.pilotedge, .atis):
       if prevICAO == icao && !refresh && self.pilotedgeAtis != "" {
         self.currentWxString = self.pilotedgeAtis
       } else {
         await self.fetchPilotedgeATIS(icao: icao)
       }
-    case (.vatsim, .metar):
-      self.currentWxString = ""
-    case (.vatsim, .taf):
+    // TODO:
+    // Ivao METAR, TAF, ATIS
+    // PilotEdge METAR, TAF
+    // Vatsim METAR, TAF
+    default:
       self.currentWxString = ""
     }
     self.prevICAO = icao
@@ -320,7 +306,7 @@ class AirportScreenViewModel: AirportDetails {
   var localWeatherResults: OpenMeteoSchema?
   var cityServed = ""
   var selectedInfoTab: AirportsScreenInfoTabs = .freq
-  var selectedAirportCharts: DecodedArray<AirportChartAPISchema>?
+  var selectedAirportCharts: AirportChartAPISchema?
   
   var selectedAirportICAO: String = "" {
     didSet {
@@ -372,8 +358,10 @@ class AirportScreenViewModel: AirportDetails {
   func fetchAirportCharts(icao: String) async {
     do {
       self.selectedAirportCharts = try await AirportChartAPI().fetchCharts(icao: icao)
+    } catch let error as AirportChartAPIError {
+      print(error.localizedDescription)
     } catch {
-      print("err")
+      print("Unexpected error fetching airport charts: \(error)")
     }
   }
   
