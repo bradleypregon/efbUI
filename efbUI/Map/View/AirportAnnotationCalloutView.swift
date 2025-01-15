@@ -28,8 +28,6 @@ struct AirportAnnotationCalloutView: View {
         Text(airport.airportName)
       }
       .fontWeight(.semibold)
-
-//      Divider()
       
       List {
         Section {
@@ -42,14 +40,14 @@ struct AirportAnnotationCalloutView: View {
             }
             GridRow {
               // get ATIS otherwise get AWOS or ASOS
-              Text("\(vm.getATIS(comms: vm.comms).first?.communicationType ?? "Wx Type N/A")")
+              Text("\(vm.getATIS(comms: vm.comms).first?.communicationType ?? "ATI n/a")")
                 .font(.subheadline)
               // Convert to string
               Text("\(vm.getATIS(comms: vm.comms).first?.communicationFrequency ?? .zero)")
                 .fontWeight(.semibold)
             }
             GridRow {
-              Text("Elev")
+              Text("ELEV")
                 .font(.subheadline)
               Text("\(airport.elevation)'")
                 .fontWeight(.semibold)
@@ -77,16 +75,16 @@ struct AirportAnnotationCalloutView: View {
             
             Divider()
             
-            Picker("Weather Source", selection: $vm.wxSource) {
-              ForEach(WxSources.allCases) { source in
-                Text(source.rawValue.uppercased())
+            VStack {
+              Picker("Weather Source", selection: $vm.wxSource) {
+                ForEach(WxSources.allCases) { source in
+                  Text(source.rawValue.uppercased())
+                }
               }
-            }
-            .pickerStyle(.segmented)
-            
-            Picker("Weather Type", selection: $vm.wxType) {
-              ForEach(WxTabs.allCases) { tab in
-                Text(tab.rawValue)
+              Picker("Weather Type", selection: $vm.wxType) {
+                ForEach(WxTabs.allCases) { tab in
+                  Text(tab.rawValue)
+                }
               }
             }
             .pickerStyle(.segmented)
@@ -104,7 +102,7 @@ struct AirportAnnotationCalloutView: View {
                 }
               }
               
-              if (vm.currentWxString == "metar n/a") {
+              if (vm.currentWxString == "") {
                 if let field = vm.closestField(to: CLLocationCoordinate2DMake(airport.airportRefLat, airport.airportRefLong), fields: vm.nearestWxStrings) {
                   Text(field.rawOb ?? "")
                 }
@@ -139,7 +137,7 @@ struct AirportAnnotationCalloutView: View {
           Text("Runways")
         }
       }
-      .listStyle(.insetGrouped)
+      .listStyle(.grouped)
       
       
       HStack {
