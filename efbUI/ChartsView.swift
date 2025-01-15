@@ -19,7 +19,7 @@ struct ChartsView: View {
   @Environment(SimBriefViewModel.self) private var sbViewModel
   
   @State private var columnVisibility: NavigationSplitViewVisibility = .all
-  @State private var starred: [AirportDetail] = []
+  @State private var starred: [Chart] = []
   @State private var selectedChartURL: String = ""
   
   @State private var rotation: Angle = .zero
@@ -174,9 +174,9 @@ struct ChartsView: View {
   }
   
   @MainActor 
-  func charts(charts: DecodedArray<AirportChartAPISchema>?) -> some View {
-    List {
-      if let charts = charts?.first {
+  func charts(charts: AirportChartAPISchema?) -> some View {
+      List {
+        if let charts = charts {
         DisclosureGroup("General") {
           ForEach(charts.general, id: \.id) { chart in
             HStack {
@@ -196,9 +196,7 @@ struct ChartsView: View {
               .buttonStyle(PlainButtonStyle())
               Spacer()
               Button {
-                DispatchQueue.main.async {
-                  selectedChartURL = chart.pdfPath
-                }
+                selectedChartURL = chart.pdfPath
               } label: {
                 Text(chart.chartName)
               }
@@ -226,9 +224,7 @@ struct ChartsView: View {
               .buttonStyle(PlainButtonStyle())
               Spacer()
               Button {
-                DispatchQueue.main.async {
-                  selectedChartURL = chart.pdfPath
-                }
+                selectedChartURL = chart.pdfPath
               } label: {
                 Text(chart.chartName)
               }
@@ -240,7 +236,6 @@ struct ChartsView: View {
           ForEach(charts.star, id: \.id) { chart in
             HStack {
               Button {
-                // TODO: Clicking chart keeps adding it to starred
                 if starred.contains(chart) {
                   starred.removeAll { $0.id == chart.id }
                 } else {
@@ -256,9 +251,7 @@ struct ChartsView: View {
               .buttonStyle(PlainButtonStyle())
               Spacer()
               Button {
-                DispatchQueue.main.async {
-                  selectedChartURL = chart.pdfPath
-                }
+                selectedChartURL = chart.pdfPath
               } label: {
                 Text(chart.chartName)
               }
@@ -270,25 +263,18 @@ struct ChartsView: View {
           ForEach(charts.capp, id: \.id) { chart in
             HStack {
               Button {
-                // TODO: Clicking chart keeps adding it to starred
                 if starred.contains(chart) {
                   starred.removeAll { $0.id == chart.id }
                 } else {
                   starred.append(chart)
                 }
               } label: {
-                if starred.contains(chart) {
-                  Image(systemName: "star.fill")
-                } else {
-                  Image(systemName: "star")
-                }
+                Image(systemName: starred.contains(chart) ? "star.fill" : "star")
               }
               .buttonStyle(PlainButtonStyle())
               Spacer()
               Button {
-                DispatchQueue.main.async {
-                  selectedChartURL = chart.pdfPath
-                }
+                selectedChartURL = chart.pdfPath
               } label: {
                 Text(chart.chartName)
               }
@@ -296,9 +282,9 @@ struct ChartsView: View {
             }
           }
         }
-      }
+     }
     }
-    .listStyle(.insetGrouped)
+      .listStyle(.insetGrouped)
   }
   
   @MainActor

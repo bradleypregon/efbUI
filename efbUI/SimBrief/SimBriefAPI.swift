@@ -28,9 +28,9 @@ final class SimBriefViewModel: Sendable {
   let api = SimBriefAPI()
   var sbAPIErrorMessage: String?
   
-  var depCharts: DecodedArray<AirportChartAPISchema>?
-  var arrCharts: DecodedArray<AirportChartAPISchema>?
-  var altnCharts: DecodedArray<AirportChartAPISchema>?
+  var depCharts: AirportChartAPISchema?
+  var arrCharts: AirportChartAPISchema?
+  var altnCharts: AirportChartAPISchema?
   
   func fetchOFP(for id: String) async {
     do {
@@ -42,7 +42,7 @@ final class SimBriefViewModel: Sendable {
     }
   }
   
-  func fetchCharts(icao: String) async -> DecodedArray<AirportChartAPISchema>? {
+  func fetchCharts(icao: String) async -> AirportChartAPISchema? {
     do {
       return try await AirportChartAPI().fetchCharts(icao: icao)
     } catch {
