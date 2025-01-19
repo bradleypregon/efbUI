@@ -31,7 +31,7 @@ enum AirportWxError: Error, LocalizedError {
 class AirportWxAPI {
   
   func fetchMetar(icao: String) async throws -> [AirportMETARSchema] {
-    let url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=\(icao)&format=json"
+    let url = "https://aviationweather.gov/api/data/metar?ids=\(icao)&format=json"
     guard let url = URL(string: url) else {
       throw AirportWxError.invalidURL
     }
@@ -46,13 +46,12 @@ class AirportWxAPI {
       let metars = try JSONDecoder().decode([AirportMETARSchema].self, from: data)
       return metars
     } catch {
-//      let rawResponse = String(data: data, encoding: .utf8)
       throw AirportWxError.invalidDecode(error)
     }
   }
   
-  func fetchMetar(icao: String, at time: Date) async throws -> [AirportMETARSchema] {
-    let url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=\(icao)&format=json"
+  func fetchMetar(icao: String, at time: String) async throws -> [AirportMETARSchema] {
+    let url = "https://aviationweather.gov/api/data/metar?ids=\(icao)&format=json&date=\(time)"
     guard let url = URL(string: url) else {
       throw AirportWxError.invalidURL
     }
