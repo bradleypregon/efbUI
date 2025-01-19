@@ -25,7 +25,6 @@ struct MapScreen: View {
   @State private var mapViewModel = MapScreenViewModel()
   
   @State private var selectedAirport: AirportTable?
-  @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
   @State private var proxyMap: MapProxy? = nil
   @State private var currentZoom: CGFloat = 3.0
 
@@ -49,113 +48,103 @@ struct MapScreen: View {
   @State var displaySheet: Bool = false
   
   var body: some View {
-    NavigationSplitView(columnVisibility: $columnVisibility) {
-      // sidebar
-      if let airport = selectedAirport {
-        AirportAnnotationSidebarView(columnVisibility: $columnVisibility, selectedTab: $selectedTab, selectedAirport: airport)
-      } else {
-        ContentUnavailableView("Airport Details Unavailable", systemImage: "airplane.circle", description: Text("Select an airport on the map to view details."))
-      }
-      
-    } detail: {
-      // map
-      ZStack {
-        GeometryReader { geometry in
-          MapReader { proxy in
-            Map(viewport: $viewport) {
-              // MARK: Airport Annotations
-              // MARK: Large Airports
-              if mapViewModel.displayLg {
-                PointAnnotationGroup(mapViewModel.largeAirports) { airport in
-                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(airport.lat, airport.long), isDraggable: false)
-                    .image(named: "lg-airport-vfr")
-                    .textField(airport.icao)
-                    .textOffset(x: 0.0, y: -1.8)
-                    .textColor(.white)
-                    .textSize(12)
-                    .onTapGesture { context in
-                      selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
-                      mapPopoverSelectedPoint = UnitPoint(
-                        x: (context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))),
-                        y: (context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom)))
-                      )
-                      displaySheet.toggle()
-                      return true
-                    }
+    ZStack {
+      GeometryReader { geometry in
+        MapReader { proxy in
+          Map(viewport: $viewport) {
+            // MARK: Airport Annotations
+            // MARK: Large Airports
+            if mapViewModel.displayLg {
+              PointAnnotationGroup(mapViewModel.largeAirports) { airport in
+                PointAnnotation(coordinate: CLLocationCoordinate2DMake(airport.lat, airport.long), isDraggable: false)
+                  .image(named: "lg-airport-vfr")
+                  .textField(airport.icao)
+                  .textOffset(x: 0.0, y: -1.8)
+                  .textColor(.white)
+                  .textSize(12)
+                  .onTapGesture { context in
+                    selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
+                    mapPopoverSelectedPoint = UnitPoint(
+                      x: (context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))),
+                      y: (context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom)))
+                    )
+                    displaySheet.toggle()
+                    return true
+                  }
 //                    .onLongPressGesture { context in
 //                      mapPopoverSelectedAirport = airport
 //                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
 //                      return true
 //                    }
-                }
-                .slot("Top")
               }
-              
-              
-              // MARK: Medium Airports
-              if mapViewModel.displayMd {
-                PointAnnotationGroup(mapViewModel.mediumAirports, id: \.id) { airport in
-                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
-                    .image(named: "md-airport-vfr")
-                    .textField(airport.icao)
-                    .textOffset(x: 0.0, y: -1.9)
-                    .textColor(.white)
-                    .textSize(11)
-                    .onTapGesture { context in
-                      selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
-                      mapPopoverSelectedPoint = UnitPoint(
-                        x: (
-                          context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))
-                        ),
-                        y: (
-                          context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom))
-                        )
+              .slot("Top")
+            }
+            
+            
+            // MARK: Medium Airports
+            if mapViewModel.displayMd {
+              PointAnnotationGroup(mapViewModel.mediumAirports, id: \.id) { airport in
+                PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
+                  .image(named: "md-airport-vfr")
+                  .textField(airport.icao)
+                  .textOffset(x: 0.0, y: -1.9)
+                  .textColor(.white)
+                  .textSize(11)
+                  .onTapGesture { context in
+                    selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
+                    mapPopoverSelectedPoint = UnitPoint(
+                      x: (
+                        context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))
+                      ),
+                      y: (
+                        context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom))
                       )
-                      displaySheet.toggle()
-                      return true
-                    }
+                    )
+                    displaySheet.toggle()
+                    return true
+                  }
 //                    .onLongPressGesture { context in
 //                      mapPopoverSelectedAirport = airport
 //                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
 //                      return true
 //                    }
-                }
-                .clusterOptions(ClusterOptions(clusterRadius: 75.0, clusterMaxZoom: 8.0))
               }
-              
-              
-              // MARK: Small Airports
-              if mapViewModel.displaySm {
-                PointAnnotationGroup(mapViewModel.smallAirports) { airport in
-                  PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
-                    .image(named: "sm-airport-vfr")
-                    .textField(airport.icao)
-                    .textOffset(x: 0.0, y: -1.9)
-                    .textColor(.white)
-                    .textSize(9)
-                    .onTapGesture { context in
-                      selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
-                      mapPopoverSelectedPoint = UnitPoint(
-                        x: (
-                          context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))
-                        ),
-                        y: (
-                          context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom))
-                        )
+              .clusterOptions(ClusterOptions(clusterRadius: 75.0, clusterMaxZoom: 8.0))
+            }
+            
+            
+            // MARK: Small Airports
+            if mapViewModel.displaySm {
+              PointAnnotationGroup(mapViewModel.smallAirports) { airport in
+                PointAnnotation(coordinate: CLLocationCoordinate2D(latitude: airport.lat, longitude: airport.long), isDraggable: false)
+                  .image(named: "sm-airport-vfr")
+                  .textField(airport.icao)
+                  .textOffset(x: 0.0, y: -1.9)
+                  .textColor(.white)
+                  .textSize(9)
+                  .onTapGesture { context in
+                    selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
+                    mapPopoverSelectedPoint = UnitPoint(
+                      x: (
+                        context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))
+                      ),
+                      y: (
+                        context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom))
                       )
-                      displaySheet.toggle()
-                      return true
-                    }
-                    .onLongPressGesture { context in
-                      mapPopoverSelectedAirport = airport
-                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
-                      return true
-                    }
-                }
-                .clusterOptions(ClusterOptions(circleRadius: .constant(12.0), clusterRadius: 75.0, clusterMaxZoom: 6.5))
+                    )
+                    displaySheet.toggle()
+                    return true
+                  }
+                  .onLongPressGesture { context in
+                    mapPopoverSelectedAirport = airport
+                    mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
+                    return true
+                  }
               }
-              
-              // MARK: Route Display
+              .clusterOptions(ClusterOptions(circleRadius: .constant(12.0), clusterRadius: 75.0, clusterMaxZoom: 6.5))
+            }
+            
+            // MARK: Route Display
 //              if mapViewModel.displayRoute {
 //                if let navlog = simbrief.ofp?.navlog {
 //                  PolylineAnnotationGroup {
@@ -172,129 +161,129 @@ struct MapScreen: View {
 //                  }
 //                }
 //              }
-              
-              if mapViewModel.displayNewRoute {
-                PolylineAnnotation(lineCoordinates: routeManager.waypoints.map { CLLocationCoordinate2DMake($0.lat, $0.long) })
-                  .lineWidth(3.0)
-                  .lineColor(.white)
-                ForEvery(routeManager.waypoints.filter { $0.type != .airport }) { wpt in
-                  MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: wpt.lat, longitude: wpt.long)) {
-                    MapScreenWaypointView(wpt: wpt)
-                  }
+            
+            if mapViewModel.displayNewRoute {
+              PolylineAnnotation(lineCoordinates: routeManager.waypoints.map { CLLocationCoordinate2DMake($0.lat, $0.long) })
+                .lineWidth(3.0)
+                .lineColor(.white)
+              ForEvery(routeManager.waypoints.filter { $0.type != .airport }) { wpt in
+                MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: wpt.lat, longitude: wpt.long)) {
+                  MapScreenWaypointView(wpt: wpt)
                 }
               }
-              
-              // MARK: Sigmet Data
-              // CONVECTIVE: orange, IFR: blue, MTN OBSCN: gray, TURB: red
-              if mapViewModel.displaySigmet {
-                PolygonAnnotationGroup(mapViewModel.sigmets.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
-                  var polyCoords: [CLLocationCoordinate2D] = []
-                  
-                  for coord in sigmet.coords {
-                    if let hiAlt = sigmet.altitudeHi2, let loAlt = sigmet.altitudeLow1 {
-                      if hiAlt < Int(sigmetSliderRange.upperBound) && loAlt > Int(sigmetSliderRange.lowerBound) {
-                        polyCoords.append(CLLocationCoordinate2DMake(coord.lat, coord.lon))
-                      }
+            }
+            
+            // MARK: Sigmet Data
+            // CONVECTIVE: orange, IFR: blue, MTN OBSCN: gray, TURB: red
+            if mapViewModel.displaySigmet {
+              PolygonAnnotationGroup(mapViewModel.sigmets.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
+                var polyCoords: [CLLocationCoordinate2D] = []
+                
+                for coord in sigmet.coords {
+                  if let hiAlt = sigmet.altitudeHi2, let loAlt = sigmet.altitudeLow1 {
+                    if hiAlt < Int(sigmetSliderRange.upperBound) && loAlt > Int(sigmetSliderRange.lowerBound) {
+                      polyCoords.append(CLLocationCoordinate2DMake(coord.lat, coord.lon))
                     }
-                    
                   }
                   
-                  let polygon = Polygon([polyCoords])
-                  return PolygonAnnotation(polygon: polygon, isDraggable: false)
-                    .fillOpacity(0.09)
-                    .fillColor(getSigmetFillColor(sigmet: sigmet.hazard))
-                    .onTapGesture {
-                      // testing purposes
-                      print("hz: \(sigmet.hazard)")
-                      print("low alt: \(sigmet.altitudeLow1 ?? .zero)")
-                      print("low alt2: \(sigmet.altitudeLow2 ?? .zero)")
-                      print("hi alt: \(sigmet.altitudeHi1 ?? .zero)")
-                      print("hi alt2: \(sigmet.altitudeHi2 ?? .zero)")
+                }
+                
+                let polygon = Polygon([polyCoords])
+                return PolygonAnnotation(polygon: polygon, isDraggable: false)
+                  .fillOpacity(0.09)
+                  .fillColor(getSigmetFillColor(sigmet: sigmet.hazard))
+                  .onTapGesture {
+                    // testing purposes
+                    print("hz: \(sigmet.hazard)")
+                    print("low alt: \(sigmet.altitudeLow1 ?? .zero)")
+                    print("low alt2: \(sigmet.altitudeLow2 ?? .zero)")
+                    print("hi alt: \(sigmet.altitudeHi1 ?? .zero)")
+                    print("hi alt2: \(sigmet.altitudeHi2 ?? .zero)")
+                  }
+                  
+              }
+            }
+            
+            if mapViewModel.displaySID {
+              ForEvery(mapViewModel.sidRoute, id: \.self) { route in
+                let temp = Array(Dictionary(grouping: route, by:{ $0.transitionIdentifier}).values)
+                PolylineAnnotationGroup(temp, id: \.self) { line in
+                  PolylineAnnotation(lineCoordinates: line.map{CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)})
+                    .lineColor(line.allSatisfy { $0.aircraftCategory != "" } ? .orange : .blue)
+                    .lineWidth(4.0)
+                }
+                
+                ForEvery(temp.flatMap{$0}.filter{$0.waypointDescriptionCode.contains("E")}, id:\.self) { val in
+                  MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: val.waypointLatitude, longitude: val.waypointLongitude)) {
+                    Button {
+                      print("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
+                    } label: {
+                      Text("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
+                        .font(.caption)
                     }
-                    
+                    .controlSize(.small)
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.capsule)
+                  }
+                  .allowOverlap(true)
+                  
                 }
               }
-              
-              if mapViewModel.displaySID {
-                ForEvery(mapViewModel.sidRoute, id: \.self) { route in
-                  let temp = Array(Dictionary(grouping: route, by:{ $0.transitionIdentifier}).values)
-                  PolylineAnnotationGroup(temp, id: \.self) { line in
-                    PolylineAnnotation(lineCoordinates: line.map{CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)})
-                      .lineColor(line.allSatisfy { $0.aircraftCategory != "" } ? .orange : .blue)
-                      .lineWidth(4.0)
-                  }
-                  
-                  ForEvery(temp.flatMap{$0}.filter{$0.waypointDescriptionCode.contains("E")}, id:\.self) { val in
-                    MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: val.waypointLatitude, longitude: val.waypointLongitude)) {
-                      Button {
-                        print("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
-                      } label: {
-                        Text("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
-                          .font(.caption)
-                      }
-                      .controlSize(.small)
-                      .buttonStyle(.borderedProminent)
-                      .buttonBorderShape(.capsule)
-                    }
-                    .allowOverlap(true)
-                    
-                  }
-                }
-              }
+            }
 
-              if mapViewModel.displaySTAR {
-                ForEvery(mapViewModel.starRoute, id: \.self) { route in
-                  let temp = Array(Dictionary(grouping: route, by:{ $0.transitionIdentifier}).values)
-                  PolylineAnnotationGroup(temp, id: \.self) { line in
-                    PolylineAnnotation(lineCoordinates: line.map{CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)})
-                      .lineColor(line.allSatisfy { $0.aircraftCategory != "" } ? .orange : .blue)
-                      .lineWidth(4.0)
-                  }
-                  
-                  ForEvery(temp.flatMap{$0}.filter{$0.transitionIdentifier == $0.waypointIdentifier}, id:\.self) { val in
-                    MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: val.waypointLatitude, longitude: val.waypointLongitude)) {
-                      Button {
-                        print("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
-                      } label: {
-                        Text("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
-                          .font(.caption)
-                      }
-                      .controlSize(.small)
-                      .buttonStyle(.borderedProminent)
-                      .buttonBorderShape(.capsule)
+            if mapViewModel.displaySTAR {
+              ForEvery(mapViewModel.starRoute, id: \.self) { route in
+                let temp = Array(Dictionary(grouping: route, by:{ $0.transitionIdentifier}).values)
+                PolylineAnnotationGroup(temp, id: \.self) { line in
+                  PolylineAnnotation(lineCoordinates: line.map{CLLocationCoordinate2D(latitude: $0.waypointLatitude, longitude: $0.waypointLongitude)})
+                    .lineColor(line.allSatisfy { $0.aircraftCategory != "" } ? .orange : .blue)
+                    .lineWidth(4.0)
+                }
+                
+                ForEvery(temp.flatMap{$0}.filter{$0.transitionIdentifier == $0.waypointIdentifier}, id:\.self) { val in
+                  MapViewAnnotation(coordinate: CLLocationCoordinate2D(latitude: val.waypointLatitude, longitude: val.waypointLongitude)) {
+                    Button {
+                      print("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
+                    } label: {
+                      Text("\(val.procedureIdentifier)/\(val.waypointIdentifier)")
+                        .font(.caption)
                     }
-                    .allowOverlap(true)
+                    .controlSize(.small)
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.capsule)
                   }
+                  .allowOverlap(true)
                 }
               }
-              
-              if !featureCollection.features.isEmpty {
-                GeoJSONSource(id: "TrafficTextID")
-                  .data(.featureCollection(self.featureCollection))
-                SymbolLayer(id: "TrafficRegLayerID", source: "TrafficTextID")
-                  .textField(Exp(.get) { "reg" })
-                  .textOffset(x: 0, y: 1.8)
-                  .textSize(7)
+            }
+            
+            if !featureCollection.features.isEmpty {
+              GeoJSONSource(id: "TrafficTextID")
+                .data(.featureCollection(self.featureCollection))
+              SymbolLayer(id: "TrafficRegLayerID", source: "TrafficTextID")
+                .textField(Exp(.get) { "reg" })
+                .textOffset(x: 0, y: 1.8)
+                .textSize(7)
+                .textColor(.white)
+                .textFont(["Roboto Bold Condensed"])
+              SymbolLayer(id: "TrafficAltLayerID", source: "TrafficTextID")
+                .textField(Exp(.get) { "alt" })
+                .textSize(7)
+                .textOffset(x: 0, y: -1.8)
+                .textColor(.white)
+                .textFont(["Roboto Bold Condensed"])
+            }
+            
+            if mapViewModel.enrouteCommsVisible {
+              PointAnnotationGroup(mapViewModel.enrouteComms, id: \.self) { point in
+                PointAnnotation(coordinate: CLLocationCoordinate2DMake(point.latitude, point.longitude))
+                  .textField("\(point.communicationFrequency)")
                   .textColor(.white)
-                  .textFont(["Roboto Bold Condensed"])
-                SymbolLayer(id: "TrafficAltLayerID", source: "TrafficTextID")
-                  .textField(Exp(.get) { "alt" })
-                  .textSize(7)
-                  .textOffset(x: 0, y: -1.8)
-                  .textColor(.white)
-                  .textFont(["Roboto Bold Condensed"])
+                  .textSize(12)
               }
-              
-              if mapViewModel.enrouteCommsVisible {
-                PointAnnotationGroup(mapViewModel.enrouteComms, id: \.self) { point in
-                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(point.latitude, point.longitude))
-                    .textField("\(point.communicationFrequency)")
-                    .textColor(.white)
-                    .textSize(12)
-                }
-              }
-              
-              // WIP
+            }
+            
+            // WIP
 //              if mapViewModel.gatesVisible {
 //                PointAnnotationGroup(mapViewModel.visibleGates, id: \.gateIdentifier) { gate in
 //                  PointAnnotation(coordinate: CLLocationCoordinate2DMake(gate.gateLatitude, gate.gateLongitude))
@@ -303,274 +292,273 @@ struct MapScreen: View {
 //                    .textSize(12)
 //                }
 //              }
+          }
+          .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
+          .ornamentOptions(ornamentOptions)
+          .onStyleLoaded { _ in
+            do {
+              try proxy.map?.addImage(UIImage(named: "ShipArrow") ?? UIImage(), id: "ShipArrow")
+              try proxy.map?.addImage(UIImage(named: "TrafficArrow") ?? UIImage(), id: "TrafficArrow")
+              addOwnshipLayer()
+            } catch {
+              print("Error adding image to map: \(error)")
             }
-            .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
-            .ornamentOptions(ornamentOptions)
-            .onStyleLoaded { _ in
-              do {
-                try proxy.map?.addImage(UIImage(named: "ShipArrow") ?? UIImage(), id: "ShipArrow")
-                try proxy.map?.addImage(UIImage(named: "TrafficArrow") ?? UIImage(), id: "TrafficArrow")
-                addOwnshipLayer()
-              } catch {
-                print("Error adding image to map: \(error)")
-              }
-            }
-            .onCameraChanged { context in
-              if context.cameraState.zoom >= 6 {
-                if mapViewModel.enrouteCommsVisible {
-                  // TODO: This will be taxing. We don't really need to query *every* time the camera changes
-                  // filtering a lot out for now
-                  guard let bounds = proxy.map?.cameraBounds.bounds else { return }
-                  Task {
-                    mapViewModel.enrouteComms = await SQLiteManager.shared.getEnrouteComms(in: bounds)
-                  }
+          }
+          .onCameraChanged { context in
+            if context.cameraState.zoom >= 6 {
+              if mapViewModel.enrouteCommsVisible {
+                // TODO: This will be taxing. We don't really need to query *every* time the camera changes
+                // filtering a lot out for now
+                guard let bounds = proxy.map?.cameraBounds.bounds else { return }
+                Task {
+                  mapViewModel.enrouteComms = await SQLiteManager.shared.getEnrouteComms(in: bounds)
                 }
               }
-              
-              if context.cameraState.zoom >= 7.5 {
+            }
+            
+            if context.cameraState.zoom >= 7.5 {
 //                mapViewModel.gatesVisible = true
 //                mapViewModel.fetchVisibleGates()
-              } else {
+            } else {
 //                mapViewModel.gatesVisible = false
-              }
             }
-            .onAppear {
-              proxyMap = proxy
-              if airportVM.requestMap {
-                Task {
-                  guard let temp = airportVM.selectedAirport else { return }
-                  proxy.camera?.ease(to: CameraOptions(center: CLLocationCoordinate2DMake(temp.airportRefLat, temp.airportRefLong), zoom: 13), duration: 1.25)
-                  airportVM.requestMap = false
-                }
-              }
-            }
-            .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
-              Button("Ok") {
-                // TODO: Handle retrying radar
-                mapViewModel.displayRadar = false
-              }
-            }
-            .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
-              let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
-              let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
-              
-              VStack {
-                Text(airport.name)
-                
-                Button {
-                  print("View Airport (INOP)")
-                } label: {
-                  Text("View Airport")
-                }
-                
-                Menu("View Procedures") {
-                  if (!sids.isEmpty) {
-                    Button {
-                      let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-                      let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
-                      mapViewModel.sidRoute = Array(grouped.values)
-                      mapViewModel.displaySID.toggle()
-                    } label: {
-                      Text("View SIDs")
-                    }
-                  }
-                  
-                  if (!stars.isEmpty) {
-                    Button {
-                      let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-                      let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
-                      mapViewModel.starRoute = Array(grouped.values)
-                      mapViewModel.displaySTAR.toggle()
-                    } label: {
-                      Text("View STARs")
-                    }
-                  }
-                  
-                }
-              }
-              .frame(idealWidth: 150, idealHeight: 300)
-              
-            }
-            .onReceive(simConnect.ownship) { ship in
+          }
+          .onAppear {
+            proxyMap = proxy
+            if airportVM.requestMap {
               Task {
-                await tempUpdateOwnship(ship: ship, proxy: proxy)
+                guard let temp = airportVM.selectedAirport else { return }
+                proxy.camera?.ease(to: CameraOptions(center: CLLocationCoordinate2DMake(temp.airportRefLat, temp.airportRefLong), zoom: 13), duration: 1.25)
+                airportVM.requestMap = false
               }
             }
-            .onReceive(simConnect.trafficArray) { traffic in
-              Task {
-                await tempUpdateTraffic(traffic: traffic, proxy: proxy)
+          }
+          .alert("Radar Error", isPresented: $rasterRadarAlertVisible) {
+            Button("Ok") {
+              // TODO: Handle retrying radar
+              mapViewModel.displayRadar = false
+            }
+          }
+          .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
+            let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
+            let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
+            
+            VStack {
+              Text(airport.name)
+              
+              Button {
+                print("View Airport (INOP)")
+              } label: {
+                Text("View Airport")
+              }
+              
+              Menu("View Procedures") {
+                if (!sids.isEmpty) {
+                  Button {
+                    let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+                    let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
+                    mapViewModel.sidRoute = Array(grouped.values)
+                    mapViewModel.displaySID.toggle()
+                  } label: {
+                    Text("View SIDs")
+                  }
+                }
+                
+                if (!stars.isEmpty) {
+                  Button {
+                    let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+                    let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
+                    mapViewModel.starRoute = Array(grouped.values)
+                    mapViewModel.displaySTAR.toggle()
+                  } label: {
+                    Text("View STARs")
+                  }
+                }
+                
               }
             }
-            .popover(item: $selectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
-              AirportAnnotationCalloutView(selectedTab: $selectedTab, airport: airport)
-                .frame(width: 300, height: 375)
+            .frame(idealWidth: 150, idealHeight: 300)
+            
+          }
+          .onReceive(simConnect.ownship) { ship in
+            Task {
+              await tempUpdateOwnship(ship: ship, proxy: proxy)
             }
+          }
+          .onReceive(simConnect.trafficArray) { traffic in
+            Task {
+              await tempUpdateTraffic(traffic: traffic, proxy: proxy)
+            }
+          }
+          .popover(item: $selectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
+            AirportAnnotationCalloutView(selectedTab: $selectedTab, airport: airport)
+              .frame(width: 300, height: 375)
+          }
 //            .sheet(item: $selectedAirport) { airport in
 //              AirportAnnotationCalloutView(selectedTab: $selectedTab, airport: airport)
 //            .frame(width: 300, height: 375)
 //            }
+        }
+        .ignoresSafeArea()
+        
+        // MARK: Menu
+        VStack(spacing: 5) {
+          Button {
+            // display popover
+            radarPopoverVisible.toggle()
+          } label: {
+            Image(systemName: "cloud.sun")
           }
-          .ignoresSafeArea()
-          
-          // MARK: Menu
-          VStack(spacing: 5) {
-            Button {
-              // display popover
-              radarPopoverVisible.toggle()
-            } label: {
-              Image(systemName: "cloud.sun")
-            }
-            .task(id: radarPopoverVisible) {
-              // TODO: Cleanup the currentRadar optional date comparison
-              // TODO: Use ViewModel fetchRadar function instead of using View
-              if radarPopoverVisible && mapViewModel.currentRadar?.generated ?? Int(Date().timeIntervalSinceNow) < (Int(Date().timeIntervalSinceNow) + Int(5*60)) {
-                let rainviewerAPI = RainviewerAPI()
-                do {
-                  mapViewModel.currentRadar = try await rainviewerAPI.fetchRadar()
-                } catch {
-                  print("Error fetching current radar: \(error)")
-                }
+          .task(id: radarPopoverVisible) {
+            // TODO: Cleanup the currentRadar optional date comparison
+            // TODO: Use ViewModel fetchRadar function instead of using View
+            if radarPopoverVisible && mapViewModel.currentRadar?.generated ?? Int(Date().timeIntervalSinceNow) < (Int(Date().timeIntervalSinceNow) + Int(5*60)) {
+              let rainviewerAPI = RainviewerAPI()
+              do {
+                mapViewModel.currentRadar = try await rainviewerAPI.fetchRadar()
+              } catch {
+                print("Error fetching current radar: \(error)")
               }
             }
-            .popover(isPresented: $radarPopoverVisible) {
-              VStack {
-                // Weather Radar
-                Button {
-                  mapViewModel.displayRadar.toggle()
-                  mapViewModel.displayRadar ? addWeatherRadarSource() : removeWeatherRadarSource()
-                } label: {
-                  Text("Wx Radar")
-                }
-                // Satellite Radar
-                Button {
-                  mapViewModel.displaySatelliteRadar.toggle()
-                  mapViewModel.displaySatelliteRadar ? addSatelliteRadarSource() : removeSatelliteRadarSource()
-                } label: {
-                  Text("Satellite")
-                }
-              }
-            }
-            
-            Toggle("Route", systemImage: mapViewModel.displayRoute ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $mapViewModel.displayRoute)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-              .labelStyle(.iconOnly)
-              .contentTransition(.symbolEffect)
-            
-            Toggle("NewRoute", systemImage: mapViewModel.displayNewRoute ? "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath.fill" : "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath", isOn: $mapViewModel.displayNewRoute)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-              .labelStyle(.iconOnly)
-              .contentTransition(.symbolEffect)
-            
-            // TODO: Fix long press gesture not working properly
-            // Fixed: Added button in bottom-left to control altitudes
-            Toggle("Sigmet", systemImage: mapViewModel.displaySigmet ? "hazardsign.fill" : "hazardsign", isOn: $mapViewModel.displaySigmet)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-              .labelStyle(.iconOnly)
-              .contentTransition(.symbolEffect)
-              .task(id: mapViewModel.displaySigmet) {
-                if mapViewModel.displaySigmet {
-                  let sigmetAPI = SigmetAPI()
-                  do {
-                    mapViewModel.sigmets = try await sigmetAPI.fetchSigmet()
-                  } catch {
-                    print("Error fetching Sigmet API: \(error)")
-                  }
-                } else {
-                  mapViewModel.sigmets = []
-                }
-              }
-              
-            
-            Toggle("Satellite", systemImage: mapViewModel.satelliteVisible ? "globe.americas.fill" : "globe.americas", isOn: $mapViewModel.satelliteVisible)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-              .labelStyle(.iconOnly)
-              .contentTransition(.symbolEffect)
-              .onChange(of: mapViewModel.satelliteVisible) {
-                do {
-                  try proxyMap?.map?.updateLayer(withId: "satellite", type: RasterLayer.self) { layer in
-                    layer.visibility = .constant(mapViewModel.satelliteVisible ? .visible : .none)
-                  }
-                } catch {
-                  print("Error changing visibility of Map Satellite layer: \(error)")
-                }
-              }
-            
-            Toggle("Communications", systemImage: mapViewModel.enrouteCommsVisible ? "antenna.radiowaves.left.and.right" : "antenna.radiowaves.left.and.right.slash", isOn: $mapViewModel.enrouteCommsVisible)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-              .labelStyle(.iconOnly)
-              .contentTransition(.symbolEffect)
-            
-            Toggle("Drawing", systemImage: drawingEnabled ? "pencil" : "pencil.slash", isOn: $drawingEnabled)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-              .labelStyle(.iconOnly)
-              .contentTransition(.symbolEffect)
-            
-            Spacer()
-              .frame(height: 15)
-            
-            Toggle("Lg", isOn: $mapViewModel.displayLg)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-            Toggle("Md", isOn: $mapViewModel.displayMd)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-            Toggle("Sm", isOn: $mapViewModel.displaySm)
-              .font(.title2)
-              .tint(.mvfr)
-              .toggleStyle(.button)
-            
           }
-          .padding([.leading], 5)
-          
-          /// Bottom-Right VStack of Buttons to control map features
-          VStack(spacing: 5) {
-            if(mapViewModel.displaySigmet) {
+          .popover(isPresented: $radarPopoverVisible) {
+            VStack {
+              // Weather Radar
               Button {
-                sigmetMenuPopoverVisible.toggle()
+                mapViewModel.displayRadar.toggle()
+                mapViewModel.displayRadar ? addWeatherRadarSource() : removeWeatherRadarSource()
               } label: {
-                Image(systemName: "hazardsign.fill")
-                  .font(.title2)
-                  .foregroundStyle(.mvfr)
+                Text("Wx Radar")
               }
-              .popover(isPresented: $sigmetMenuPopoverVisible) {
-                VStack {
-                  Text("Sigmet Altitudes")
-                  RangedSliderView(value: $sigmetSliderRange, bounds: 0...50000,  step: 1000)
+              // Satellite Radar
+              Button {
+                mapViewModel.displaySatelliteRadar.toggle()
+                mapViewModel.displaySatelliteRadar ? addSatelliteRadarSource() : removeSatelliteRadarSource()
+              } label: {
+                Text("Satellite")
+              }
+            }
+          }
+          
+          Toggle("Route", systemImage: mapViewModel.displayRoute ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $mapViewModel.displayRoute)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .contentTransition(.symbolEffect)
+          
+          Toggle("NewRoute", systemImage: mapViewModel.displayNewRoute ? "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath.fill" : "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath", isOn: $mapViewModel.displayNewRoute)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .contentTransition(.symbolEffect)
+          
+          // TODO: Fix long press gesture not working properly
+          // Fixed: Added button in bottom-left to control altitudes
+          Toggle("Sigmet", systemImage: mapViewModel.displaySigmet ? "hazardsign.fill" : "hazardsign", isOn: $mapViewModel.displaySigmet)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .contentTransition(.symbolEffect)
+            .task(id: mapViewModel.displaySigmet) {
+              if mapViewModel.displaySigmet {
+                let sigmetAPI = SigmetAPI()
+                do {
+                  mapViewModel.sigmets = try await sigmetAPI.fetchSigmet()
+                } catch {
+                  print("Error fetching Sigmet API: \(error)")
                 }
-                .frame(idealWidth: 250)
-                .padding()
-                .padding([.leading, .trailing, .bottom], 10)
+              } else {
+                mapViewModel.sigmets = []
               }
             }
             
+          
+          Toggle("Satellite", systemImage: mapViewModel.satelliteVisible ? "globe.americas.fill" : "globe.americas", isOn: $mapViewModel.satelliteVisible)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .contentTransition(.symbolEffect)
+            .onChange(of: mapViewModel.satelliteVisible) {
+              do {
+                try proxyMap?.map?.updateLayer(withId: "satellite", type: RasterLayer.self) { layer in
+                  layer.visibility = .constant(mapViewModel.satelliteVisible ? .visible : .none)
+                }
+              } catch {
+                print("Error changing visibility of Map Satellite layer: \(error)")
+              }
             }
-          .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-          .padding([.bottom], 100)
-          .padding([.trailing], 16)
-            
+          
+          Toggle("Communications", systemImage: mapViewModel.enrouteCommsVisible ? "antenna.radiowaves.left.and.right" : "antenna.radiowaves.left.and.right.slash", isOn: $mapViewModel.enrouteCommsVisible)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .contentTransition(.symbolEffect)
+          
+          Toggle("Drawing", systemImage: drawingEnabled ? "pencil" : "pencil.slash", isOn: $drawingEnabled)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .contentTransition(.symbolEffect)
+          
+          Spacer()
+            .frame(height: 15)
+          
+          Toggle("Lg", isOn: $mapViewModel.displayLg)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+          Toggle("Md", isOn: $mapViewModel.displayMd)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+          Toggle("Sm", isOn: $mapViewModel.displaySm)
+            .font(.title2)
+            .tint(.mvfr)
+            .toggleStyle(.button)
+          
         }
-        if (drawingEnabled) {
-          // TODO: make this better
-          DrawingView(canvas: $canvas)
-            .frame(width: 500, height: 1000)
-        }
+        .padding([.leading], 5)
+        
+        /// Bottom-Right VStack of Buttons to control map features
+        VStack(spacing: 5) {
+          if(mapViewModel.displaySigmet) {
+            Button {
+              sigmetMenuPopoverVisible.toggle()
+            } label: {
+              Image(systemName: "hazardsign.fill")
+                .font(.title2)
+                .foregroundStyle(.mvfr)
+            }
+            .popover(isPresented: $sigmetMenuPopoverVisible) {
+              VStack {
+                Text("Sigmet Altitudes")
+                RangedSliderView(value: $sigmetSliderRange, bounds: 0...50000,  step: 1000)
+              }
+              .frame(idealWidth: 250)
+              .padding()
+              .padding([.leading, .trailing, .bottom], 10)
+            }
+          }
+          
+          }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        .padding([.bottom], 100)
+        .padding([.trailing], 16)
+          
+      }
+      if (drawingEnabled) {
+        // TODO: make this better
+        DrawingView(canvas: $canvas)
+          .frame(width: 500, height: 1000)
+          .background(.ultraThinMaterial)
       }
     }
-    
   }
   
   func getSigmetFillColor(sigmet: String) -> StyleColor {
