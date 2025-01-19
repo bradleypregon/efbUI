@@ -48,6 +48,7 @@
 		A25CB2802B2494E0008E9FEF /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A25CB27F2B2494E0008E9FEF /* SQLite */; };
 		A25CB2862B250298008E9FEF /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A25CB2852B250298008E9FEF /* SQLite */; };
 		A25CC0612B97A25D00716E1A /* RouteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A25CC0602B97A25D00716E1A /* RouteManager.swift */; };
+		A266BF392D3C99E90002AB80 /* VatsimInfoAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A266BF382D3C99E90002AB80 /* VatsimInfoAPI.swift */; };
 		A26E17AC2B9C11D9002B4090 /* AirportRunwayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17AB2B9C11D9002B4090 /* AirportRunwayView.swift */; };
 		A26E17AF2B9EA39E002B4090 /* SigmetSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17AE2B9EA39E002B4090 /* SigmetSchema.swift */; };
 		A26E17B12B9EA3A5002B4090 /* SigmetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E17B02B9EA3A5002B4090 /* SigmetAPI.swift */; };
@@ -116,6 +117,7 @@
 		A257E1B32B2A75C6003B1859 /* SQLiteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteManager.swift; sourceTree = "<group>"; };
 		A257E1B52B2AB514003B1859 /* DBTableStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBTableStructs.swift; sourceTree = "<group>"; };
 		A25CC0602B97A25D00716E1A /* RouteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteManager.swift; sourceTree = "<group>"; };
+		A266BF382D3C99E90002AB80 /* VatsimInfoAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VatsimInfoAPI.swift; sourceTree = "<group>"; };
 		A26E17AB2B9C11D9002B4090 /* AirportRunwayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportRunwayView.swift; sourceTree = "<group>"; };
 		A26E17AE2B9EA39E002B4090 /* SigmetSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigmetSchema.swift; sourceTree = "<group>"; };
 		A26E17B02B9EA3A5002B4090 /* SigmetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigmetAPI.swift; sourceTree = "<group>"; };
@@ -267,6 +269,7 @@
 				A24692F22B8E3A6B00A10A7F /* DrawingView.swift */,
 				A25CC0602B97A25D00716E1A /* RouteManager.swift */,
 				A206A69B2CEFEB4A00BAB2D9 /* SearchView.swift */,
+				A266BF382D3C99E90002AB80 /* VatsimInfoAPI.swift */,
 			);
 			path = efbUI;
 			sourceTree = "<group>";
@@ -584,6 +587,7 @@
 				3A24A78D27321C15000D98E5 /* TabBar.swift in Sources */,
 				A2B98D6E2B9BBFF600A91977 /* ToastTestContentView.swift in Sources */,
 				3A81763F27339AA100445CDA /* TopBarView.swift in Sources */,
+				A266BF392D3C99E90002AB80 /* VatsimInfoAPI.swift in Sources */,
 				A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */,
 				A283DBC72CE51B620022CFF8 /* SimbriefTabRoute.swift in Sources */,
 				A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */,

@@ -4,6 +4,8 @@
 //
 //  Created by Bradley Pregon on 1/6/24.
 //
+
+// todo: uhh clean this entire thing up
 import Observation
 import CoreLocation
 import SwiftUI
@@ -46,6 +48,8 @@ class AirportDetails {
   
   var nearestWxStrings: [AirportMETARSchema] = []
   
+  var vatsimInfo: VatsimInfoSchema? = nil
+  
   /**
     fetchAirportDetails(icao: String)
     fetches runways, comms
@@ -53,6 +57,7 @@ class AirportDetails {
   func fetchAirportDetails(icao: String) async {
     await self.fetchRunways(icao: icao)
     await self.fetchComms(icao: icao)
+    await self.fetchVatsimInfo(icao: icao)
   }
   
   func fetchRunways(icao: String) async {
@@ -284,6 +289,16 @@ class AirportDetails {
       self.currentWxString = ""
     }
     self.prevICAO = icao
+  }
+  
+  func fetchVatsimInfo(icao: String) async {
+    do {
+      self.vatsimInfo = try await VatsimInfoAPI().fetchAirportInfo(for: icao)
+    } catch let error as VatsimInfoError{
+      print("Error fetching Vatsim Info: \(error.localizedDescription)")
+    } catch let error {
+      print("Unknown error fetching Vatsim Info: \(error)")
+    }
   }
   
 }

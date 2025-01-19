@@ -29,9 +29,9 @@ struct AirportAnnotationCalloutView: View {
       }
       .fontWeight(.semibold)
       
-      List {
-        Section {
-          Grid {
+      ScrollView(.vertical) {
+        GroupBox("Info") {
+          Grid(alignment: .leading) {
             GridRow {
               Text("TWR")
                 .font(.subheadline)
@@ -39,11 +39,9 @@ struct AirportAnnotationCalloutView: View {
                 .fontWeight(.semibold)
             }
             GridRow {
-              // get ATIS otherwise get AWOS or ASOS
               Text("\(vm.getATIS(comms: vm.comms).first?.communicationType ?? "ATI n/a")")
                 .font(.subheadline)
-              // Convert to string
-              Text("\(vm.getATIS(comms: vm.comms).first?.communicationFrequency ?? .zero)")
+              Text("\(String(format: "%.3f", vm.getATIS(comms: vm.comms).first?.communicationFrequency ?? .zero))")
                 .fontWeight(.semibold)
             }
             GridRow {
@@ -53,11 +51,8 @@ struct AirportAnnotationCalloutView: View {
                 .fontWeight(.semibold)
             }
           }
-        } header: {
-          Text("Info")
         }
-        
-        Section {
+        GroupBox("Weather") {
           VStack {
             HStack {
               Text(vm.wxCategory.rawValue)
@@ -93,7 +88,7 @@ struct AirportAnnotationCalloutView: View {
             if vm.wxSource == .faa && vm.wxType == .metar {
               Slider(value: $currTimeInt, in: (currentTime.timeIntervalSince1970-43200)...(currentTime.timeIntervalSince1970), step: 900) { _ in }
               HStack {
-                Text(toZulu(currTimeInt))
+                Text(getTime(currTimeInt))
                   .font(.caption)
                 Button {
                   print("Get updated metar")
@@ -103,6 +98,7 @@ struct AirportAnnotationCalloutView: View {
               }
               
               if (vm.currentWxString == "") {
+                // TODO: add Setting for closest METAR station radius
                 if let field = vm.closestField(to: CLLocationCoordinate2DMake(airport.airportRefLat, airport.airportRefLong), fields: vm.nearestWxStrings) {
                   Text(field.rawOb ?? "")
                 }
@@ -116,37 +112,46 @@ struct AirportAnnotationCalloutView: View {
             Task {
               await vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: airport.airportIdentifier, refresh: false)
             }
-            
           }
           .onChange(of: vm.wxType.rawValue) {
             Task {
               await vm.fetchWx(for: vm.wxSource, type: vm.wxType, icao: airport.airportIdentifier, refresh: false)
             }
           }
-        } header: {
-          Text("Weather")
         }
-        
-        Section {
-          VStack {
+        GroupBox("Runways") {
+          LazyVGrid(columns: [GridItem(.adaptive(minimum: 70))], spacing: 4) {
             ForEach(vm.runways, id: \.self) { runway in
               Text(runway.runwayIdentifier)
             }
           }
-        } header: {
-          Text("Runways")
+        }
+        
+        if let vatsim = vm.vatsimInfo {
+          GroupBox("Vatsim") {
+            Grid(alignment: .leading, verticalSpacing: 4) {
+              ForEach(vatsim.data.stations, id: \.self) { station in
+                GridRow {
+                  Text(station.ctaf ? "\(station.name) CTAF" : station.name)
+                    .font(.caption2)
+                    .fontWeight(station.ctaf ? .semibold : .regular)
+                }
+                GridRow {
+                  Text(station.callsign)
+                  Text(station.frequency)
+                    .fontWeight(.semibold)
+                }
+              }
+            }
+          }
         }
       }
-      .listStyle(.grouped)
-      
-      
       HStack {
         VStack {
           Text("\(String(format: "%.4f", airport.airportRefLat))")
           Text("\(String(format: "%.4f", airport.airportRefLong))")
         }
         .font(.caption2)
-//        .frame(maxWidth: .infinity, alignment: .leading)
         .foregroundStyle(.gray)
         
         Button {
@@ -157,9 +162,7 @@ struct AirportAnnotationCalloutView: View {
             .font(.system(size: 12))
         }
         .frame(maxWidth: .infinity, alignment: .center)
-        
       }
-      
     }
     .padding()
     .task {
@@ -181,13 +184,40 @@ struct AirportAnnotationCalloutView: View {
     }
   }
   
-  func toZulu(_ timeInterval: Double) -> String {
-    let date = Date(timeIntervalSince1970: timeInterval)
+  func getTime(_ timeInterval: Double) -> String {
+    let date = getDate(timeInterval: timeInterval)
+    let localTime = getLocalTime(date)
+    let zTime = getZuluTime(date)
+    
+    return "\(localTime) - \(zTime)Z"
+  }
+  
+  func getZuluTime(_ date: Date) -> String {
+    let df = DateFormatter()
+    df.dateFormat = "HHmm"
+    df.timeZone = TimeZone(identifier: "UTC")
+    return df.string(from: date)
+  }
+  
+  func getLocalTime(_ date: Date) -> String {
+//    formatted(date: date)
     let df = DateFormatter()
     df.dateFormat = "HH:mm"
-    df.timeStyle = .short
     df.timeZone = currTimeZone
+    df.timeStyle = .short
     return df.string(from: date)
+  }
+  
+  func formatted(date: Date) {
+    let df = DateFormatter()
+    df.dateFormat = "yyyyMMdd_HHmm"
+    df.timeZone = TimeZone(identifier: "UTC")
+    let str = df.string(from: date)
+    print("\(str)Z")
+  }
+  
+  func getDate(timeInterval: Double) -> Date {
+    return Date(timeIntervalSince1970: timeInterval)
   }
   
   func getTimeZone() async -> TimeZone {
