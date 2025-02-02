@@ -91,7 +91,9 @@ struct AirportAnnotationCalloutView: View {
                 Text(getTime(currTimeInt))
                   .font(.caption)
                 Button {
-                  print("Get updated metar")
+                  Task {
+                    await vm.fetchFaaMetar(icao: airport.airportIdentifier)
+                  }
                 } label: {
                   Image(systemName: "arrow.clockwise.circle.fill")
                 }
@@ -147,28 +149,24 @@ struct AirportAnnotationCalloutView: View {
         }
       }
       HStack {
-        VStack {
-          Text("\(String(format: "%.4f", airport.airportRefLat))")
-          Text("\(String(format: "%.4f", airport.airportRefLong))")
-        }
+        Text("\(String(format: "%.2f", airport.airportRefLat)), \(String(format: "%.2f", airport.airportRefLong))")
         .font(.caption2)
         .foregroundStyle(.gray)
         
-        Button {
+        Button("View Airport") {
           airportVM.selectedAirportICAO = airport.airportIdentifier
           selectedTab = .airports
-        } label: {
-          Text("View Airport")
-            .font(.system(size: 12))
         }
-        .frame(maxWidth: .infinity, alignment: .center)
+        .buttonStyle(.bordered)
+        .frame(maxWidth: .infinity)
       }
+      .frame(alignment: .center)
     }
     .padding()
     .task {
-      if airport.airportIdentifier != vm.prevICAO {
-        await vm.fetchFaaMetar(icao: airport.airportIdentifier)
-      }
+//      if airport.airportIdentifier != vm.prevICAO {
+//        await vm.fetchFaaMetar(icao: airport.airportIdentifier)
+//      }
       await vm.fetchAirportDetails(icao: airport.airportIdentifier)
       
       self.currTimeZone = await getTimeZone()
@@ -188,7 +186,6 @@ struct AirportAnnotationCalloutView: View {
     let date = getDate(timeInterval: timeInterval)
     let localTime = getLocalTime(date)
     let zTime = getZuluTime(date)
-    
     return "\(localTime) - \(zTime)Z"
   }
   
@@ -200,7 +197,6 @@ struct AirportAnnotationCalloutView: View {
   }
   
   func getLocalTime(_ date: Date) -> String {
-//    formatted(date: date)
     let df = DateFormatter()
     df.dateFormat = "HH:mm"
     df.timeZone = currTimeZone
