@@ -5,7 +5,6 @@
 //  Created by Bradley Pregon on 1/6/24.
 //
 
-// todo: uhh clean this entire thing up
 import Observation
 import CoreLocation
 import SwiftUI
