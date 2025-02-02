@@ -14,6 +14,7 @@ import SwiftUI
 final class AirportJSONModel {
   let path = Bundle.main.path(forResource: "Airports", ofType: "json")
   var airports: [AirportSchema] = []
+  let geoPath = Bundle.main.path(forResource: "Airports", ofType: "geojson")
   
   init() {
     if let path {
