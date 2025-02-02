@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Observation
+import MapboxMaps
 
 @Observable
 class MapScreenViewModel {
@@ -23,6 +24,7 @@ class MapScreenViewModel {
   var displayRoute: Bool = false
   var displayNewRoute: Bool = false
   var displaySigmet: Bool = false
+  var displayLgTest: Bool = false
   var displayLg: Bool = true
   var displayMd: Bool = false
   var displaySm: Bool = false
@@ -48,6 +50,7 @@ class MapScreenViewModel {
     largeAirports = airportJSONModel.airports.filter { $0.size == .large }
     mediumAirports = airportJSONModel.airports.filter { $0.size == .medium }
     smallAirports = airportJSONModel.airports.filter { $0.size == .small }
+//    
   }
   
   func fetchRadar() async {
@@ -60,5 +63,18 @@ class MapScreenViewModel {
   
   func fetchVisibleGates() {
     visibleGates = SQLiteManager.shared.getAirportGates("KLAX")
+  }
+  
+  func fetchAirportGeoJSON() async -> FeatureCollection {
+    let path = Bundle.main.path(forResource: "Airports", ofType: "geojson")
+    if let path {
+      do {
+        let data = try Data(contentsOf: URL(fileURLWithPath: path))
+        return try JSONDecoder().decode(FeatureCollection.self, from: data)
+      } catch {
+        print("Error decoding Airport JSON from Airports.geojson: \(error)")
+      }
+    }
+    return .init(features: [])
   }
 }
