@@ -12,9 +12,8 @@ import PencilKit
 
 struct MapScreen: View {
   @Binding var selectedTab: efbTab
-  @Environment(SimConnectShipObserver.self) private var simConnect
+  @Environment(SimConnectShipObserver.self) var simConnect
 //  @Environment(Settings.self) private var settings
-  @Environment(SimBriefViewModel.self) private var simbrief
   @Environment(AirportScreenViewModel.self) private var airportVM
   @Environment(RouteManager.self) private var routeManager
   
@@ -22,16 +21,16 @@ struct MapScreen: View {
   private let ornamentOptions = OrnamentOptions(scaleBar: ScaleBarViewOptions(visibility: .hidden))
   private let style = "mapbox://styles/bradleypregon/clpvnz3y900yn01qmby0f9xn6"
   
-  @State private var mapViewModel = MapScreenViewModel()
+  @State var mapViewModel = MapScreenViewModel()
   
-  @State private var selectedAirport: AirportTable?
-  @State private var proxyMap: MapProxy? = nil
-  @State private var currentZoom: CGFloat = 3.0
+  @State var selectedAirport: AirportTable?
+  @State var proxyMap: MapProxy? = nil
+  @State var currentZoom: CGFloat = 3.0
 
-  @State private var rasterRadarAlertVisible: Bool = false
+  @State var rasterRadarAlertVisible: Bool = false
   
-  @State private var drawingEnabled: Bool = false
-  @State private var canvas = PKCanvasView()
+  @State var drawingEnabled: Bool = false
+  @State var canvas = PKCanvasView()
   
   @State private var waypointPopoverVisible: Bool = false
   
@@ -54,6 +53,15 @@ struct MapScreen: View {
           Map(viewport: $viewport) {
             // MARK: Airport Annotations
             // MARK: Large Airports
+            
+            /*
+            RasterSource(id: "VFR-Sectional")
+              .tiles(["https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer/tile/{z}/{y}/{x}.png"])
+              
+            RasterLayer(id: "VFR-Sectional-Layer", source: "VFR-Sectional")
+            */
+            
+            
             if mapViewModel.displayLg {
               PointAnnotationGroup(mapViewModel.largeAirports) { airport in
                 PointAnnotation(coordinate: CLLocationCoordinate2DMake(airport.lat, airport.long), isDraggable: false)
@@ -63,6 +71,7 @@ struct MapScreen: View {
                   .textColor(.white)
                   .textSize(12)
                   .onTapGesture { context in
+                    // get departures and arrivals
                     selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                     mapPopoverSelectedPoint = UnitPoint(
                       x: (context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))),
@@ -71,11 +80,11 @@ struct MapScreen: View {
                     displaySheet.toggle()
                     return true
                   }
-//                    .onLongPressGesture { context in
-//                      mapPopoverSelectedAirport = airport
-//                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
-//                      return true
-//                    }
+          //                    .onLongPressGesture { context in
+          //                      mapPopoverSelectedAirport = airport
+          //                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
+          //                      return true
+          //                    }
               }
               .slot("Top")
             }
@@ -103,11 +112,11 @@ struct MapScreen: View {
                     displaySheet.toggle()
                     return true
                   }
-//                    .onLongPressGesture { context in
-//                      mapPopoverSelectedAirport = airport
-//                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
-//                      return true
-//                    }
+          //                    .onLongPressGesture { context in
+          //                      mapPopoverSelectedAirport = airport
+          //                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
+          //                      return true
+          //                    }
               }
               .clusterOptions(ClusterOptions(clusterRadius: 75.0, clusterMaxZoom: 8.0))
             }
@@ -262,14 +271,14 @@ struct MapScreen: View {
                 .data(.featureCollection(self.featureCollection))
               SymbolLayer(id: "TrafficRegLayerID", source: "TrafficTextID")
                 .textField(Exp(.get) { "reg" })
-                .textOffset(x: 0, y: 1.8)
+                .textOffset(x: 0, y: 2)
                 .textSize(7)
                 .textColor(.white)
                 .textFont(["Roboto Bold Condensed"])
               SymbolLayer(id: "TrafficAltLayerID", source: "TrafficTextID")
                 .textField(Exp(.get) { "alt" })
                 .textSize(7)
-                .textOffset(x: 0, y: -1.8)
+                .textOffset(x: 0, y: -2)
                 .textColor(.white)
                 .textFont(["Roboto Bold Condensed"])
             }
@@ -298,6 +307,7 @@ struct MapScreen: View {
           .onStyleLoaded { _ in
             do {
               try proxy.map?.addImage(UIImage(named: "ShipArrow") ?? UIImage(), id: "ShipArrow")
+              try proxy.map?.addImage(UIImage(named: "lg-airport-vfr") ?? UIImage(), id: "LgAirportVFR")
               try proxy.map?.addImage(UIImage(named: "TrafficArrow") ?? UIImage(), id: "TrafficArrow")
               addOwnshipLayer()
             } catch {
@@ -306,6 +316,7 @@ struct MapScreen: View {
           }
           .onCameraChanged { context in
             if context.cameraState.zoom >= 6 {
+              // remove
               if mapViewModel.enrouteCommsVisible {
                 // TODO: This will be taxing. We don't really need to query *every* time the camera changes
                 // filtering a lot out for now
@@ -394,12 +405,19 @@ struct MapScreen: View {
             AirportAnnotationCalloutView(selectedTab: $selectedTab, airport: airport)
               .frame(width: 300, height: 375)
           }
-//            .sheet(item: $selectedAirport) { airport in
-//              AirportAnnotationCalloutView(selectedTab: $selectedTab, airport: airport)
-//            .frame(width: 300, height: 375)
-//            }
         }
         .ignoresSafeArea()
+        .overlay {
+          if drawingEnabled {
+            VStack {
+              Spacer()
+              DrawingView(canvas: $canvas)
+                .frame(width: geometry.size.width, height: (geometry.size.height * 0.3), alignment: .bottom)
+                .background(.ultraThinMaterial)
+            }
+            
+          }
+        }
         
         // MARK: Menu
         VStack(spacing: 5) {
@@ -513,14 +531,43 @@ struct MapScreen: View {
             .font(.title2)
             .tint(.mvfr)
             .toggleStyle(.button)
+            .onChange(of: mapViewModel.displayLg) {
+              do {
+                guard let map = proxyMap?.map else { return }
+                var layer = try map.layer(withId: Id.lgAirports)
+                layer.visibility = mapViewModel.displayLg ? .constant(.visible) : .constant(.none)
+              } catch {
+                print("Error changing visiblity of large airports")
+              }
+            }
           Toggle("Md", isOn: $mapViewModel.displayMd)
             .font(.title2)
             .tint(.mvfr)
             .toggleStyle(.button)
+            .onChange(of: mapViewModel.displayMd) {
+              do {
+                guard let map = proxyMap?.map else { return }
+                var layer = try map.layer(withId: Id.mdAirports)
+                layer.visibility = mapViewModel.displayMd ? .constant(.visible) : .constant(.none)
+              } catch {
+                print("Error changing visiblity of medium airports")
+              }
+            }
           Toggle("Sm", isOn: $mapViewModel.displaySm)
             .font(.title2)
             .tint(.mvfr)
             .toggleStyle(.button)
+            .onChange(of: mapViewModel.displaySm) {
+              do {
+                guard var layer = try proxyMap?.map?.layer(withId: Id.smAirports) else {
+                  print("Error getting airport layer")
+                  return
+                }
+                layer.visibility = mapViewModel.displaySm ? .constant(.visible) : .constant(.none)
+              } catch {
+                print("Error changing visiblity of small airports")
+              }
+            }
           
         }
         .padding([.leading], 5)
@@ -552,12 +599,6 @@ struct MapScreen: View {
         .padding([.trailing], 16)
           
       }
-      if (drawingEnabled) {
-        // TODO: make this better
-        DrawingView(canvas: $canvas)
-          .frame(width: 500, height: 1000)
-          .background(.ultraThinMaterial)
-      }
     }
   }
   
@@ -573,268 +614,131 @@ struct MapScreen: View {
       return .init(.gray)
     }
   }
+  
+  func setupAirportClusterLayer() async throws {
+//    let image = UIImage(named: Id.airportIcon)?.resize(newWidth: 28)?.withRenderingMode(.alwaysTemplate) ?? UIImage()
+    let image = UIImage(named: Id.airportIcon) ?? UIImage()
+    
+    guard let map = proxyMap?.map else {
+      print("error with proxy map")
+      return
+    }
+    
+    do {
+//      try map.addImage(image, id: Id.airportIcon, sdf: true)
+      try map.addImage(image, id: Id.airportIcon)
+    } catch {
+      print("error adding AirportIcon to map: \(error)")
+    }
+    
+    guard let url = Bundle.main.url(forResource: "Airports", withExtension: "geojson") else {
+      print("error with url")
+      return
+    }
+    
+    var source = GeoJSONSource(id: Id.source)
+    source.data = .url(url)
+    
+//    source.cluster = true
+//    source.clusterRadius = 75
+    
+//    let clusteredLayer = createClusteredLayer()
+//    let unclusteredLayer = createUnclusteredLayer()
+//    let clusterCountLayer = createClusterCountLayer()
+    
+    var lg = SymbolLayer(id: Id.lgAirports, source: Id.source)
+    lg.filter = Exp(.eq) { Exp(.get) { "size" }; "Large" }
+    lg.iconImage = .constant(.name(Id.airportIcon))
+    lg.textField = .expression(Exp(.get) { "icao" })
+    lg.textSize = .constant(12)
+    lg.textOffset = .constant([0, -1.8])
+    lg.textColor = .constant(StyleColor(.white))
+    lg.visibility = .constant(.visible)
+    
+    var md = SymbolLayer(id: Id.mdAirports, source: Id.source)
+    md.filter = Exp(.eq) { Exp(.get) { "size" }; "Medium" }
+    md.iconImage = .constant(.name(Id.airportIcon))
+    md.textField = .expression(Exp(.get) { "icao" })
+    md.textSize = .constant(12)
+    md.textOffset = .constant([0, -1.8])
+    md.textColor = .constant(StyleColor(.white))
+    md.visibility = .constant(.none)
+    
+    var sm = SymbolLayer(id: Id.smAirports, source: Id.source)
+    sm.filter = Exp(.eq) { Exp(.get) { "size" }; "Small" }
+    sm.iconImage = .constant(.name(Id.airportIcon))
+    sm.textField = .expression(Exp(.get) { "icao" })
+    sm.textSize = .constant(12)
+    sm.textOffset = .constant([0, -1.8])
+    sm.textColor = .constant(StyleColor(.white))
+    sm.visibility = .constant(.none)
+    
+    
+    try map.addSource(source)
+    try map.addLayer(lg)
+    try map.addLayer(md)
+    try map.addLayer(sm)
+//    try map.addLayer(clusteredLayer)
+//    try map.addLayer(unclusteredLayer)
+//    try map.addLayer(clusterCountLayer)
+  }
+  
+  /*
+  func createClusteredLayer() -> CircleLayer {
+    var clusteredLayer = CircleLayer(id: Id.clusterCircle, source: Id.source)
+    clusteredLayer.filter = Exp(.all) {
+      Exp(.has) { "point_count" }
+      Exp(.gt) {
+        Exp(.get) { "sm_md_count" }
+        0
+      }
+    }
+    clusteredLayer.filter = Exp(.has) { "point_count" }
+    
+    clusteredLayer.circleColor = .constant(StyleColor(.mvfr))
+    clusteredLayer.circleRadius = .constant(16)
+    return clusteredLayer
+  }
+  
+  func createUnclusteredLayer() -> SymbolLayer {
+    var layer = SymbolLayer(id: Id.point, source: Id.source)
+    layer.filter = Exp(.not) {
+      Exp(.has) { "point_count" }
+    }
+    
+    layer.iconImage = .constant(.name(Id.airportIcon))
+//    layer.iconColor = .constant(StyleColor(UIColor.vfr))
+    layer.textField = .expression(Exp(.get) { "icao" })
+    layer.textSize = .constant(12)
+    layer.textOffset = .constant([0, -1.8])
+    layer.textColor = .constant(StyleColor(.white))
+    
+    return layer
+  }
+  
+  func createClusterCountLayer() -> SymbolLayer {
+    var numLayer = SymbolLayer(id: Id.count, source: Id.source)
+    numLayer.filter = Exp(.has) { "point_count" }
+    
+    numLayer.textField = .expression(Exp(.get) { "point_count" })
+    numLayer.textSize = .constant(12)
+    
+    return numLayer
+  }
+  */
+}
+
+private enum Id {
+//  static let clusterCircle = "AirportClusterCirleLayer"
+//  static let point = "AirportUnclusteredSymbolLayer"
+//  static let count = "AirportClusterCountLayer"
+  static let source = "AirportsSource"
+  static let airportIcon = "lg-airport-vfr"
+  static let lgAirports = "LargeAirportsLayer"
+  static let mdAirports = "MediumAirportsLayer"
+  static let smAirports = "SmallAirportsLayer"
 }
 
 #Preview {
   MapScreen(selectedTab: .constant(.map))
-}
-
-// MARK: SimConnect Traffic
-extension MapScreen {
-  func tempUpdateOwnship(ship: SimConnectShip, proxy: MapProxy) async {
-    do {
-      try proxy.map?.updateLayer(withId: "OwnshipLayer", type: LocationIndicatorLayer.self) { layer in
-        layer.location = .constant([ship.coordinate.latitude, ship.coordinate.longitude, ship.altitude])
-        layer.bearing = .constant(ship.heading)
-      }
-    } catch {
-      print("Error updating ownship layer to MapScreen: \(error)")
-    }
-  }
-  
-  func tempUpdateTraffic(traffic: [SimConnectShip], proxy: MapProxy) async {
-    // loop through simconnect.traffic
-    // update anything already created
-    //  if not created, create
-    //  check prune traffic
-    
-    for tfc in traffic {
-      if (proxy.map?.layerExists(withId: String(describing: tfc.fs2ffid)) != nil) {
-        updateTrafficLayer(id: String(describing: tfc.fs2ffid), ship: tfc, proxy: proxy)
-        
-        if self.featureCollection.features.contains(where: { $0.identifier == .string(String(describing: tfc.fs2ffid)) }) {
-          updateTrafficFeature(traffic: tfc, proxy: proxy)
-        } else {
-          addTrafficFeature(traffic: tfc)
-        }
-      } else {
-        addTrafficLayer(id: String(describing: tfc.fs2ffid), proxy: proxy)
-      }
-      
-    }
-    if simConnect.pruneTrafficArray.value != [] {
-      for tfc in simConnect.pruneTrafficArray.value {
-        pruneTrafficLayer(id: String(describing: tfc.fs2ffid), proxy: proxy)
-        removeTrafficFeature(id: String(describing: tfc.fs2ffid))
-      }
-    }
-  }
-  
-  func addTrafficFeature(traffic: SimConnectShip) {
-    var feature = Feature(geometry: .point(Point(traffic.coordinate)))
-    feature.identifier = .string(String(describing: traffic.fs2ffid))
-    feature.properties = ["reg": .init(stringLiteral: traffic.registration ?? ""), "alt": .init(floatLiteral: traffic.altitude), "onGround": .init(booleanLiteral: traffic.onGround ?? false)]
-    self.featureCollection.features.append(feature)
-  }
-  
-  func updateTrafficFeature(traffic: SimConnectShip, proxy: MapProxy) {
-    self.featureCollection.features.forEach { feature in
-      var updatedFeature = Feature(geometry: .point(Point(traffic.coordinate)))
-      updatedFeature.identifier = .string(String(describing: traffic.fs2ffid))
-      updatedFeature.properties = ["reg": .init(stringLiteral: traffic.registration ?? ""), "alt": .init(floatLiteral: traffic.altitude), "onGround": .init(booleanLiteral: traffic.onGround ?? false)]
-      
-      proxy.map?.updateGeoJSONSourceFeatures(forSourceId: "TrafficTextID", features: [updatedFeature])
-    }
-  }
-  
-  func removeTrafficFeature(id: String) {
-    self.featureCollection.features.removeAll { $0.identifier?.string == id }
-  }
-  
-  func addOwnshipLayer() {
-    do {
-      var layer = LocationIndicatorLayer(id: "OwnshipLayer")
-      layer.topImage = .constant(ResolvedImage.name("ShipArrow"))
-      layer.slot = .top
-      try proxyMap?.map?.addLayer(layer)
-    } catch {
-      print("Error adding ownship layer to MapScreen: \(error)")
-    }
-  }
-  
-  func updateTrafficLayer(id: String, ship: SimConnectShip, proxy: MapProxy) {
-    do {
-      try proxy.map?.updateLayer(withId: id, type: LocationIndicatorLayer.self) { layer in
-        layer.location = .constant([ship.coordinate.latitude, ship.coordinate.longitude, ship.altitude])
-        layer.bearing = .constant(ship.heading)
-      }
-    } catch {
-      print("Error updating traffic layer for ID: \(id): \(error)")
-      addTrafficLayer(id: id, proxy: proxy)
-    }
-  }
-  
-  func addTrafficLayer(id: String, proxy: MapProxy) {
-    do {
-      var layer = LocationIndicatorLayer(id: id)
-      layer.topImage = .constant(ResolvedImage.name("TrafficArrow"))
-      layer.slot = .middle
-      try proxy.map?.addLayer(layer)
-    } catch {
-      print("Error adding traffic layer for id: \(id): \(error)")
-    }
-  }
-  
-  func pruneTrafficLayer(id: String, proxy: MapProxy) {
-    guard let tfcID = Int(id) else {
-      print("err casting traffic id")
-      return
-    }
-    do {
-      try proxy.map?.removeLayer(withId: id)
-      simConnect.pruneTrafficArray.value.removeAll(where: { $0.fs2ffid == tfcID })
-      print("Pruned traffic in MapScreen: \(id)")
-    } catch {
-      print("Unable to remove pruned traffic layer for id: \(id): \(error)")
-    }
-    simConnect.pruneTrafficArray.value.removeAll(where: { $0.fs2ffid == tfcID })
-  }
-}
-
-// MARK: Weather and Satellite Radar
-extension MapScreen {
-  // MARK: addRasterRadarSource
-  func addWeatherRadarSource() {
-    // https://api.rainviewer.com/public/weather-maps.json
-    /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
-    if let currentRadar = mapViewModel.currentRadar {
-      let radarData = currentRadar.radar?.nowcast?.first?.path ?? ""
-      let stringPaths = "{z}/{x}/{y}"
-      let mapColor = "4"
-      let options = "1_1" // smooth_snow
-      let url = String("https://tilecache.rainviewer.com\(radarData)/512/\(stringPaths)/\(mapColor)/\(options).png")
-      
-      var rasterSource = RasterSource(id: mapViewModel.wxRadarSourceID)
-      rasterSource.tiles = [url]
-      rasterSource.tileSize = 512
-      
-      var rasterLayer = RasterLayer(id: mapViewModel.wxRadarSourceID, source: rasterSource.id)
-      rasterLayer.rasterOpacity = .constant(0.4)
-      
-      do {
-        try proxyMap?.map?.addSource(rasterSource)
-        try proxyMap?.map?.addLayer(rasterLayer)
-      } catch {
-        rasterRadarAlertVisible = true
-        print("Failed to update map style with Wx Radar: \(error)")
-      }
-    }
-  }
-  
-  // MARK: removeRasterRadarSource
-  func removeWeatherRadarSource() {
-    do {
-      try proxyMap?.map?.removeLayer(withId: mapViewModel.wxRadarSourceID)
-      try proxyMap?.map?.removeSource(withId: mapViewModel.wxRadarSourceID)
-    } catch {
-      print("Failed to remove radar source. Error: \(error)")
-    }
-  }
-  
-  func addSatelliteRadarSource() {
-    if let currentRadar = mapViewModel.currentRadar {
-
-      let radarData = currentRadar.satellite?.infrared?.first?.path ?? ""
-      let stringPaths = "{z}/{x}/{y}"
-      let mapColor = "0"
-      let options = "0_0" // smooth_snow always 0 for satellite
-      let url = String("https://tilecache.rainviewer.com\(radarData)/512/\(stringPaths)/\(mapColor)/\(options).png")
-      
-      var rasterSource = RasterSource(id: mapViewModel.satelliteRadarSourceID)
-      rasterSource.tiles = [url]
-      rasterSource.tileSize = 512
-      
-      var rasterLayer = RasterLayer(id: mapViewModel.satelliteRadarSourceID, source: rasterSource.id)
-      rasterLayer.rasterOpacity = .constant(0.4)
-      
-      do {
-        try proxyMap?.map?.addSource(rasterSource)
-        try proxyMap?.map?.addLayer(rasterLayer)
-      } catch {
-        rasterRadarAlertVisible = true
-        print("Failed to update map style with Satellite or Wx Radar: \(error)")
-      }
-    }
-  }
-  
-  func removeSatelliteRadarSource() {
-    do {
-      try proxyMap?.map?.removeLayer(withId: mapViewModel.satelliteRadarSourceID)
-      try proxyMap?.map?.removeSource(withId: mapViewModel.satelliteRadarSourceID)
-    } catch {
-      print("Failed to remove satellite source: \(error)")
-    }
-  }
-}
-
-// MARK: Deprecated Functions
-extension MapScreen {
-  // handleCameraChange
-  /**
-   Handle zoom level changes and load map annotations
-   - Large  Airport Threshold: 5.25
-   - Medium  Airport Threshold: 6.0
-   - Small Airport Threshold: 6.5
-   - Airport Gate Threshold: 14.0
-   */
-  func handleCameraChange(zoom: CGFloat, bounds: CoordinateBounds) {
-    if zoom >= 11.0 { return }
-    let lgAirportThreshold: CGFloat = 5.0
-    let mdAirportThreshold: CGFloat = 6.0
-    let smAirportThreshold: CGFloat = 6.5
-    
-    if zoom >= lgAirportThreshold {
-//      loadAirports(bounds: bounds, size: "Large")
-//      airportJSONModel.fetchVisibleAirports(size: "Large", bounds: bounds)
-//      mapViewModel.fetchLargeAirports(bounds: bounds)
-    } else if zoom < lgAirportThreshold {
-//      removeAirports(size: "Large")
-//      airportJSONModel.hideAirports(size: "Large")
-//      mapViewModel.hideLargeAirports()
-    }
-    if zoom >= mdAirportThreshold {
-//      loadAirports(bounds: bounds, size: "Medium")
-//      airportJSONModel.fetchVisibleAirports(size: "Medium", bounds: bounds)
-//      mapViewModel.fetchMediumAirports(bounds: bounds)
-    } else if zoom < mdAirportThreshold {
-//      removeAirports(size: "Medium")
-//      airportJSONModel.hideAirports(size: "Medium")
-//      mapViewModel.hideMediumAirports()
-    }
-    if zoom >= smAirportThreshold {
-//      loadAirports(bounds: bounds, size: "Small")
-//      airportJSONModel.fetchVisibleAirports(size: "Small", bounds: bounds)
-//      mapViewModel.fetchSmallAirports(bounds: bounds)
-    } else if zoom < smAirportThreshold {
-//      removeAirports(size: "Small")
-//      airportJSONModel.hideAirports(size: "Small")
-//      mapViewModel.hideSmallAirports()
-    }
-    
-  }
-  
-  // MARK: calculateVisibleMapRegion
-  func calculateVisibleMapRegion(center: CLLocationCoordinate2D, zoom: CGFloat, geometry: GeometryProxy) -> CoordinateBounds {
-    // TODO: Handle errors when zoomed out and panning to North or South pole
-    // TODO: Fix calculation - not covering all of what is visible on map
-    let aspectRatio = Double(geometry.size.width / geometry.size.height)
-    // landscape: > 1 | portrait: < 1
-    var spanLong = 0.0
-    var spanLat = 0.0
-    if aspectRatio < 1 {
-      spanLong = 360.0 / pow(2.0, zoom) * aspectRatio
-      spanLat = 180.0 / pow(2.0, zoom) / aspectRatio
-    } else {
-      spanLong = 360.0 / pow(2.0, zoom) * aspectRatio - geometry.safeAreaInsets.leading
-      spanLat = 180.0 / pow(2.0, zoom) * aspectRatio
-    }
-    
-    let sw = CLLocationCoordinate2D(latitude: center.latitude - spanLat, longitude: center.longitude - spanLong)
-    let ne = CLLocationCoordinate2D(latitude: center.latitude + spanLat, longitude: center.longitude + spanLong)
-    
-    let coordBounds = CoordinateBounds(southwest: sw, northeast: ne)
-    
-    return coordBounds
-  }
-  
 }
