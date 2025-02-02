@@ -10,7 +10,6 @@ import SwiftData
 
 struct ScratchPadCRAFT: View {
   @Environment(SimBriefViewModel.self) private var simbrief
-  var TESTroute = "DCT BJC DCT DBL DCT UTI DCT LAX"
   
   struct Item: Identifiable, Hashable {
     let letter: String
@@ -38,10 +37,11 @@ struct ScratchPadCRAFT: View {
   func Card(letter: String, desc: String) -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 20)
+        .foregroundStyle(.secondary)
       HStack {
         VStack(alignment: .leading) {
           Text(letter)
-            .foregroundStyle(.secondary)
+//            .foregroundStyle(.secondary)
             .font(.system(size: 45))
             .fontWeight(.semibold)
           Text(desc)
@@ -70,28 +70,6 @@ struct ScratchPadCRAFT: View {
           .padding(.leading, 50)
           .padding(.top, 20)
         }
-        
-        
-//        if letter == "C" {
-//          VStack {
-//            Text("KLAX")
-//              .font(.title2)
-//            Spacer()
-//          }
-//          .padding(.leading, 50)
-//          .padding(.top, 20)
-//        }
-//        if letter == "R" {
-//          VStack {
-//            Text(TESTroute)
-//              .font(.title2)
-//            Spacer()
-//          }
-//          .padding(.leading, 50)
-//          .padding(.top, 20)
-//        }
-        
-        
         Spacer()
       }
       .padding()

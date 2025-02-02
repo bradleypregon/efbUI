@@ -38,10 +38,11 @@ struct ScratchPadATIS: View {
   func Card(header: String) -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 20)
+        .foregroundStyle(.secondary)
       HStack {
         VStack(alignment: .leading) {
           Text(header)
-            .foregroundStyle(.secondary)
+//            .foregroundStyle(.primary)
             .font(.title)
             .fontWeight(.semibold)
             .padding([.leading, .top], 8)
@@ -56,10 +57,11 @@ struct ScratchPadATIS: View {
   func WindCard() -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 20)
+        .foregroundStyle(.secondary)
       HStack {
         VStack(alignment: .leading) {
           Text("Wind")
-            .foregroundStyle(.secondary)
+//            .foregroundStyle(.primary)
             .font(.title)
             .fontWeight(.semibold)
             .padding([.leading, .top], 8)
@@ -71,12 +73,12 @@ struct ScratchPadATIS: View {
         Spacer()
           .frame(width: 150)
         Text("@")
-          .foregroundStyle(.secondary)
+//          .foregroundStyle(.secondary)
           .font(.title)
           .fontWeight(.semibold)
         Spacer()
         Text("G")
-          .foregroundStyle(.secondary)
+//          .foregroundStyle(.secondary)
           .font(.title)
           .fontWeight(.semibold)
         Spacer()
@@ -88,10 +90,11 @@ struct ScratchPadATIS: View {
   func SkyCard() -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 20)
+        .foregroundStyle(.secondary)
       HStack {
         VStack(alignment: .leading) {
           Text("Sky")
-            .foregroundStyle(.secondary)
+//            .foregroundStyle(.secondary)
             .font(.title)
             .fontWeight(.semibold)
             .padding([.leading, .top], 8)
@@ -125,13 +128,13 @@ struct ScratchPadATIS: View {
         Text("FEW")
         Text("@")
       }
-      .foregroundStyle(.secondary)
+//      .foregroundStyle(.secondary)
       .font(.title2)
       .fontWeight(.semibold)
       Spacer()
       Text("Clear")
         .padding([.trailing], 40)
-        .foregroundStyle(.secondary)
+//        .foregroundStyle(.secondary)
         .font(.title2)
         .fontWeight(.semibold)
     }
