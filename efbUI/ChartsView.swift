@@ -208,7 +208,6 @@ struct ChartsView: View {
           ForEach(charts.dp, id: \.id) { chart in
             HStack {
               Button {
-                // TODO: Clicking chart keeps adding it to starred
                 if starred.contains(chart) {
                   starred.removeAll { $0.id == chart.id }
                 } else {

@@ -65,11 +65,9 @@ struct SimbriefScreen: View {
     for nav in navlog {
       // TODO: fix this, we dont need to query database
       // keep in mind: how to determine waypoint type
-      Task {
-        let res = SQLiteManager.shared.searchTables(query: nav.ident)
-        guard let temp = res.first else { return }
-        routeManager.waypoints.append(temp)
-      }
+      let res = SQLiteManager.shared.searchTables(query: nav.ident)
+      guard let temp = res.first else { return }
+      routeManager.waypoints.append(temp)
     }
   }
 }

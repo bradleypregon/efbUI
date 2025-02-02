@@ -55,24 +55,24 @@ final class ServerListener {
   }
   
   func start() {
-    self.listener?.stateUpdateHandler = { [weak self] state in
+    self.listener?.stateUpdateHandler = { state in
       switch state {
       case .ready:
         print("Listener is ready")
         break
       case .failed, .cancelled:
-        self?.listening = false
+        self.listening = false
         print("Listener did fail")
-        self?.stopListener()
+        self.stopListener()
       default:
         print("default triggered in listener state update")
-        self?.listening = true
+        self.listening = true
         break
       }
     }
     
-    self.listener?.newConnectionHandler = { [weak self] connection in
-      self?.createConnection(connection: connection)
+    self.listener?.newConnectionHandler = { connection in
+      self.createConnection(connection: connection)
     }
     self.listener?.start(queue: DispatchQueue.global(qos: .userInitiated))
   }
@@ -80,18 +80,18 @@ final class ServerListener {
   private func createConnection(connection: NWConnection) {
     self.connection = connection
     
-    self.connection?.stateUpdateHandler = { [weak self] state in
+    self.connection?.stateUpdateHandler = { state in
       switch state {
       case .ready:
         ServerStatus.shared.status = .running
         print("Connection ready to receive message")
-        self?.consumeData()
+        self.consumeData()
 //        self.consumeDataGDL90()
       case .cancelled, .failed:
         ServerStatus.shared.status = .stopped
-        self?.listening = false
+        self.listening = false
         print("Connection stopped")
-        self?.listener?.cancel()
+        self.listener?.cancel()
       default:
         print("default triggered in connection createConnection")
         print("Connection waiting to receive message")
@@ -125,18 +125,10 @@ final class ServerListener {
     self.connection?.receive(minimumIncompleteLength: 1, maximumLength: 64000) { (data, _, isComplete, error) in
       
       guard let data = data else { return }
+      // i think data.first is some hex value declaring message start?
       switch data.first {
       case 0x10: // Ownship Report
         print("Type ownship")
-         
-        //              return [
-        //                  "type": "Ownship Report",
-        //                  "latitude": latitude,
-        //                  "longitude": longitude,
-        //                  "altitude": altitude,
-        //                  "northSouthVelocity": northSouthVelocity,
-        //                  "eastWestVelocity": eastWestVelocity
-        //              ]
       default:
         print("unknown") // Unsupported message type
       }

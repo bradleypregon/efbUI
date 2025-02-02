@@ -6,7 +6,6 @@
 //
 
 import Foundation
-// TODO: Handle data
 
 class IvaoAPI {
   func fetchATIS(icao: String) async throws -> String {
