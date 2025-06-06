@@ -7,31 +7,43 @@
 
 import SwiftUI
 import PencilKit
+import Observation
+
+enum SPCanvasPad: String, CaseIterable, Identifiable {
+  case atis = "ATIS"
+  case craft = "CRAFT"
+  case scratch = "Scratch"
+  
+  var id: String { rawValue }
+}
 
 struct ScratchPadView: View {
-  @State var atisCanvas = PKCanvasView()
-  @State var craftCanvas = PKCanvasView()
-  @State var scratchCanvas = PKCanvasView()
+  @State private var selectedPad: SPCanvasPad = .atis
+  @State private var drawings: [SPCanvasPad: PKDrawing] = SPCanvasPad.allCases.reduce(into: [:]) { $0[$1] = PKDrawing() }
   
-  private enum ScratchPadTabs: String, CaseIterable, Identifiable {
-    case ATIS, CRAFT, Blank
-    var id: Self { self }
-  }
-  
-  @State private var selectedTab: ScratchPadTabs = .ATIS
-  
+  @State private var tool: PKTool = PKInkingTool(.pen, color: .red, width: 10)
+
   var body: some View {
     VStack {
       HStack {
         /// Picker
-        Picker("ScrachPad", selection: $selectedTab) {
-          ForEach(ScratchPadTabs.allCases) { tab in
-            Text(tab.rawValue)
+        Picker("Pad", selection: $selectedPad) {
+          ForEach(SPCanvasPad.allCases) { pad in
+            Text(pad.rawValue).tag(pad)
           }
         }
         .pickerStyle(.segmented)
         
         /// PencilKit control buttons
+        CanvasToolbarView(
+          selTool: $tool,
+          onClear: {
+            drawings[selectedPad] = PKDrawing()
+          }
+        )
+        
+        // OLD Toolbar
+        /*
         HStack(spacing: 20) {
           Button {
             switch selectedTab {
@@ -84,9 +96,29 @@ struct ScratchPadView: View {
           
         }
         .padding([.leading, .trailing], 40)
+        */
       }
-        .frame(height: 70)
+        .frame(idealHeight: 70)
       
+      ZStack {
+        switch selectedPad {
+        case .atis:
+          SPATISTemplateView()
+        case .craft:
+          SPCRAFTTemplateView()
+        case .scratch:
+          EmptyView()
+        }
+        
+        DrawingView(drawing: Binding(
+          get: { drawings[selectedPad] ?? PKDrawing() },
+          set: { drawings[selectedPad] = $0 }
+        ), tool: $tool)
+        
+      }
+      
+      // OLD ZStack
+      /*
       ZStack {
         switch selectedTab {
         case .ATIS:
@@ -98,11 +130,10 @@ struct ScratchPadView: View {
         default:
           DrawingView(canvas: $scratchCanvas)
         }
-        
       }
+      */
       
     }
-    
   }
 }
 

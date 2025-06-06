@@ -46,6 +46,9 @@ struct MapScreen: View {
   @State var radarPopoverVisible: Bool = false
   @State var displaySheet: Bool = false
   
+  @State private var selectedTool: PKTool = PKInkingTool(.pen, color: .red, width: 10)
+  @State private var drawing: PKDrawing = PKDrawing()
+  
   var body: some View {
     ZStack {
       GeometryReader { geometry in
@@ -71,22 +74,18 @@ struct MapScreen: View {
                   .textColor(.white)
                   .textSize(12)
                   .onTapGesture { context in
-                    // get departures and arrivals
                     selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                     mapPopoverSelectedPoint = UnitPoint(
-                      x: (context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))),
-                      y: (context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom)))
+                      x:
+                        (context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))),
+                      y:
+                        (context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom)))
                     )
                     displaySheet.toggle()
                     return true
                   }
-          //                    .onLongPressGesture { context in
-          //                      mapPopoverSelectedAirport = airport
-          //                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
-          //                      return true
-          //                    }
               }
-              .slot("Top")
+              .slot(Slot.top)
             }
             
             
@@ -102,21 +101,14 @@ struct MapScreen: View {
                   .onTapGesture { context in
                     selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                     mapPopoverSelectedPoint = UnitPoint(
-                      x: (
-                        context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))
-                      ),
-                      y: (
-                        context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom))
-                      )
+                      x:
+                        (context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))),
+                      y:
+                        (context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom)))
                     )
                     displaySheet.toggle()
                     return true
                   }
-          //                    .onLongPressGesture { context in
-          //                      mapPopoverSelectedAirport = airport
-          //                      mapPopoverSelectedPoint = UnitPoint(x: (context.point.x / geometry.size.width), y: (context.point.y / (geometry.size.height + 35)))
-          //                      return true
-          //                    }
               }
               .clusterOptions(ClusterOptions(clusterRadius: 75.0, clusterMaxZoom: 8.0))
             }
@@ -134,12 +126,10 @@ struct MapScreen: View {
                   .onTapGesture { context in
                     selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                     mapPopoverSelectedPoint = UnitPoint(
-                      x: (
-                        context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))
-                      ),
-                      y: (
-                        context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom))
-                      )
+                      x:
+                        (context.point.x / (geometry.size.width - (geometry.safeAreaInsets.leading + geometry.safeAreaInsets.trailing))),
+                      y:
+                        (context.point.y / (geometry.size.height - (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom)))
                     )
                     displaySheet.toggle()
                     return true
@@ -350,47 +340,47 @@ struct MapScreen: View {
               mapViewModel.displayRadar = false
             }
           }
-          .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
-            let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
-            let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
-            
-            VStack {
-              Text(airport.name)
-              
-              Button {
-                print("View Airport (INOP)")
-              } label: {
-                Text("View Airport")
-              }
-              
-              Menu("View Procedures") {
-                if (!sids.isEmpty) {
-                  Button {
-                    let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-                    let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
-                    mapViewModel.sidRoute = Array(grouped.values)
-                    mapViewModel.displaySID.toggle()
-                  } label: {
-                    Text("View SIDs")
-                  }
-                }
-                
-                if (!stars.isEmpty) {
-                  Button {
-                    let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-                    let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
-                    mapViewModel.starRoute = Array(grouped.values)
-                    mapViewModel.displaySTAR.toggle()
-                  } label: {
-                    Text("View STARs")
-                  }
-                }
-                
-              }
-            }
-            .frame(idealWidth: 150, idealHeight: 300)
-            
-          }
+//          .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
+//            let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
+//            let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
+//            
+//            VStack {
+//              Text(airport.name)
+//              
+//              Button {
+//                print("View Airport (INOP)")
+//              } label: {
+//                Text("View Airport")
+//              }
+//              
+//              Menu("View Procedures") {
+//                if (!sids.isEmpty) {
+//                  Button {
+//                    let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+//                    let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
+//                    mapViewModel.sidRoute = Array(grouped.values)
+//                    mapViewModel.displaySID.toggle()
+//                  } label: {
+//                    Text("View SIDs")
+//                  }
+//                }
+//                
+//                if (!stars.isEmpty) {
+//                  Button {
+//                    let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+//                    let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
+//                    mapViewModel.starRoute = Array(grouped.values)
+//                    mapViewModel.displaySTAR.toggle()
+//                  } label: {
+//                    Text("View STARs")
+//                  }
+//                }
+//                
+//              }
+//            }
+//            .frame(idealWidth: 150, idealHeight: 300)
+//            
+//          }
           .onReceive(simConnect.ownship) { ship in
             Task {
               await tempUpdateOwnship(ship: ship, proxy: proxy)
@@ -407,15 +397,23 @@ struct MapScreen: View {
           }
         }
         .ignoresSafeArea()
-        .overlay {
+        .overlay(alignment: .bottom) {
           if drawingEnabled {
             VStack {
               Spacer()
-              DrawingView(canvas: $canvas)
-                .frame(width: geometry.size.width, height: (geometry.size.height * 0.3), alignment: .bottom)
-                .background(.ultraThinMaterial)
+              CanvasToolbarView(
+                selTool: $selectedTool,
+                onClear: {
+                  drawing = PKDrawing()
+                }
+              )
+              .frame(maxWidth: .infinity, alignment: .trailing)
+              
+              DrawingView(drawing: $drawing, tool: $selectedTool)
+              
             }
-            
+            .frame(width: geometry.size.width, height: (geometry.size.height * 0.33), alignment: .bottom)
+            .background(.ultraThinMaterial)
           }
         }
         
@@ -614,7 +612,7 @@ struct MapScreen: View {
       return .init(.gray)
     }
   }
-  
+  /*
   func setupAirportClusterLayer() async throws {
 //    let image = UIImage(named: Id.airportIcon)?.resize(newWidth: 28)?.withRenderingMode(.alwaysTemplate) ?? UIImage()
     let image = UIImage(named: Id.airportIcon) ?? UIImage()
@@ -682,6 +680,7 @@ struct MapScreen: View {
 //    try map.addLayer(unclusteredLayer)
 //    try map.addLayer(clusterCountLayer)
   }
+  */
   
   /*
   func createClusteredLayer() -> CircleLayer {
@@ -727,6 +726,7 @@ struct MapScreen: View {
   }
   */
 }
+
 
 private enum Id {
 //  static let clusterCircle = "AirportClusterCirleLayer"
