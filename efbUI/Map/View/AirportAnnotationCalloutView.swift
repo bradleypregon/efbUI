@@ -8,6 +8,8 @@
 import SwiftUI
 import CoreLocation
 
+// TODO: Airport SIDs and STARs
+
 struct AirportAnnotationCalloutView: View {
   @Environment(AirportScreenViewModel.self) private var airportVM
   

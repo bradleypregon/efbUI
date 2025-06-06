@@ -14,6 +14,7 @@ import CoreLocation
 //  At same time, when AirportDetailViewModel.selectedAirportICAO is changed, it will not be necessary to call all fetch() functions
 //    - Simply just update properties from SidebarView
 
+/*
 struct AirportAnnotationSidebarView: View {
   @Binding var columnVisibility: NavigationSplitViewVisibility
   @Binding var selectedTab: efbTab
@@ -208,3 +209,5 @@ struct AirportAnnotationSidebarView: View {
     }
   }
 }
+
+*/
