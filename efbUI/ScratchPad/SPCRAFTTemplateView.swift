@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct ScratchPadCRAFT: View {
+struct SPCRAFTTemplateView: View {
   @Environment(SimBriefViewModel.self) private var simbrief
   
   struct Item: Identifiable, Hashable {
@@ -79,5 +79,5 @@ struct ScratchPadCRAFT: View {
 }
 
 #Preview {
-  ScratchPadCRAFT()
+  SPCRAFTTemplateView()
 }

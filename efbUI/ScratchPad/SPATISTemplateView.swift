@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ScratchPadATIS: View {
+struct SPATISTemplateView: View {
   
   var body: some View {
     VStack(spacing: 12) {
@@ -143,5 +143,5 @@ struct ScratchPadATIS: View {
 }
 
 #Preview {
-  ScratchPadATIS()
+  SPATISTemplateView()
 }
