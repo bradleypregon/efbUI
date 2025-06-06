@@ -5,6 +5,8 @@ import SwiftUI
 /**
  A custom callout view to be be passed as an MKMarkerAnnotationView, where you can use a SwiftUI View as it's base.
  */
+
+/*
 class MapCalloutView: UIView {
   
   //create the UIHostingController we need. For now just adding a generic UI
@@ -54,3 +56,5 @@ class MapCalloutView: UIView {
     
   }
 }
+ 
+*/
