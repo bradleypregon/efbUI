@@ -23,52 +23,62 @@ extension MapScreen {
   }
   
   func tempUpdateTraffic(traffic: [SimConnectShip], proxy: MapProxy) async {
-    // loop through simconnect.traffic
-    // update anything already created
-    //  if not created, create
-    //  check prune traffic
     
     for tfc in traffic {
-      if (proxy.map?.layerExists(withId: String(describing: tfc.fs2ffid)) != nil) {
-        updateTrafficLayer(id: String(describing: tfc.fs2ffid), ship: tfc, proxy: proxy)
+      /// Check if LocationIndicatorLayer exists for Traffic fs2ffid
+      if (proxy.map?.layerExists(withId: String(tfc.fs2ffid)) != nil) {
+        updateTrafficLayer(id: String(tfc.fs2ffid), ship: tfc, proxy: proxy)
         
-        if self.featureCollection.features.contains(where: { $0.identifier == .string(String(describing: tfc.fs2ffid)) }) {
-          updateTrafficFeature(traffic: tfc, proxy: proxy)
+        /// Check if FeatureCollection Features contains an entry for ID
+        if self.featureCollection.features.contains(where: { $0.identifier == .string(String(tfc.fs2ffid))}) {
+          if let feature = self.featureCollection.features.first(where: { $0.identifier == .string(String(tfc.fs2ffid))}) {
+            updateTrafficFeature(feature: feature, traffic: tfc, proxy: proxy)
+          }
         } else {
           addTrafficFeature(traffic: tfc)
         }
       } else {
-        addTrafficLayer(id: String(describing: tfc.fs2ffid), proxy: proxy)
-      }
-      
-    }
-    if simConnect.pruneTrafficArray.value != [] {
-      for tfc in simConnect.pruneTrafficArray.value {
-        pruneTrafficLayer(id: String(describing: tfc.fs2ffid), proxy: proxy)
-        removeTrafficFeature(id: String(describing: tfc.fs2ffid))
+        addTrafficLayer(id: String(tfc.fs2ffid), proxy: proxy)
       }
     }
   }
   
   func addTrafficFeature(traffic: SimConnectShip) {
     var feature = Feature(geometry: .point(Point(traffic.coordinate)))
-    feature.identifier = .string(String(describing: traffic.fs2ffid))
-    feature.properties = ["reg": .init(stringLiteral: traffic.registration ?? ""), "alt": .init(floatLiteral: traffic.altitude), "onGround": .init(booleanLiteral: traffic.onGround ?? false)]
+    feature.identifier = .string(String(traffic.fs2ffid))
+    feature.properties = [
+      "reg": .init(stringLiteral: traffic.registration ?? ""),
+      "alt": .init(floatLiteral: traffic.altitude),
+      "onGround": .init(booleanLiteral: traffic.onGround ?? false)
+    ]
     self.featureCollection.features.append(feature)
   }
   
-  func updateTrafficFeature(traffic: SimConnectShip, proxy: MapProxy) {
+  func updateTrafficFeature(feature: Feature, traffic: SimConnectShip, proxy: MapProxy) {
+    var temp = feature
+    temp.geometry = .point(Point(traffic.coordinate))
+    temp.properties = [
+      "reg": .string(traffic.registration ?? ""),
+      "alt": .init(floatLiteral: traffic.altitude),
+      "onGround": .init(booleanLiteral: traffic.onGround ?? false)
+    ]
+    
+    proxy.map?.updateGeoJSONSourceFeatures(forSourceId: "TrafficTextID", features: [temp])
+    
+    // TODO: Remove forEach
+    /*
     self.featureCollection.features.forEach { feature in
       var updatedFeature = Feature(geometry: .point(Point(traffic.coordinate)))
-      updatedFeature.identifier = .string(String(describing: traffic.fs2ffid))
-      updatedFeature.properties = ["reg": .init(stringLiteral: traffic.registration ?? ""), "alt": .init(floatLiteral: traffic.altitude), "onGround": .init(booleanLiteral: traffic.onGround ?? false)]
+      updatedFeature.identifier = .string(String(traffic.fs2ffid))
+      updatedFeature.properties = [
+        "reg": .init(stringLiteral: traffic.registration ?? ""),
+        "alt": .init(floatLiteral: traffic.altitude),
+        "onGround": .init(booleanLiteral: traffic.onGround ?? false)
+      ]
       
       proxy.map?.updateGeoJSONSourceFeatures(forSourceId: "TrafficTextID", features: [updatedFeature])
     }
-  }
-  
-  func removeTrafficFeature(id: String) {
-    self.featureCollection.features.removeAll { $0.identifier?.string == id }
+    */
   }
   
   func addOwnshipLayer() {
@@ -105,19 +115,27 @@ extension MapScreen {
     }
   }
   
-  func pruneTrafficLayer(id: String, proxy: MapProxy) {
-    guard let tfcID = Int(id) else {
-      print("err casting traffic id")
-      return
+  func pruneTraffic(prune: [SimConnectShip], proxy: MapProxy) {
+    for tfc in prune {
+      removeTrafficLayer(id: String(tfc.fs2ffid), proxy: proxy)
+      removeTrafficFeature(id: String(tfc.fs2ffid))
     }
+  }
+  
+  func removeTrafficLayer(id: String, proxy: MapProxy) {
     do {
       try proxy.map?.removeLayer(withId: id)
-      simConnect.pruneTrafficArray.value.removeAll(where: { $0.fs2ffid == tfcID })
-      print("Pruned traffic in MapScreen: \(id)")
+      
+      simConnect.pruneTrafficArray.value.removeAll(where: { String($0.fs2ffid) == id })
+      
+      print("MapScreen pruned traffic: \(id)")
     } catch {
-      print("Unable to remove pruned traffic layer for id: \(id): \(error)")
+      print("MapScreen unable to prune traffic: \(id): \(error)")
     }
-    simConnect.pruneTrafficArray.value.removeAll(where: { $0.fs2ffid == tfcID })
+  }
+  
+  func removeTrafficFeature(id: String) {
+    self.featureCollection.features.removeAll { $0.identifier?.string == id }
   }
 }
 

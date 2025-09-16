@@ -14,7 +14,6 @@ struct DrawingView: UIViewRepresentable {
   var pencilOnly: Bool?
   
   func makeUIView(context: Context) -> PKCanvasView {
-//    let canvas = (pencilOnly ?? false) ? PencilOnlyCanvasView() : PKCanvasView()
     let canvas = PKCanvasView()
     canvas.becomeFirstResponder()
     canvas.delegate = context.coordinator
@@ -53,33 +52,4 @@ struct DrawingView: UIViewRepresentable {
     Coordinator(self)
   }
   
-}
-
-/*
- Used for PDFKit View in ChartsView to allow finger touches on PDF but pencil on Canvas
- */
-class PencilOnlyCanvasView: PKCanvasView {
-  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if touches.first?.type == .pencil {
-      super.touchesBegan(touches, with: event)
-    }
-  }
-  
-  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if touches.first?.type == .pencil {
-      super.touchesMoved(touches, with: event)
-    }
-  }
-  
-  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if touches.first?.type == .pencil {
-      super.touchesEnded(touches, with: event)
-    }
-  }
-  
-  override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if touches.first?.type == .pencil {
-      super.touchesCancelled(touches, with: event)
-    }
-  }
 }

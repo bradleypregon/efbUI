@@ -391,6 +391,11 @@ struct MapScreen: View {
               await tempUpdateTraffic(traffic: traffic, proxy: proxy)
             }
           }
+          .onReceive(simConnect.pruneTrafficArray) { prune in
+            if prune != [] {
+              pruneTraffic(prune: prune, proxy: proxy)
+            }
+          }
           .popover(item: $selectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
             AirportAnnotationCalloutView(selectedTab: $selectedTab, airport: airport)
               .frame(width: 300, height: 375)

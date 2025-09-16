@@ -14,7 +14,7 @@ struct TopBarView: View {
   @State private var currentZuluTime24: String = "00:00z"
   @Environment(SimConnectShipObserver.self) var simConnect
   @State private var serverRunning: Bool = false
-  @State var ship: SimConnectShip = .init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero)
+  @State var ship: SimConnectShip = .init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero, fs2ffid: .zero, lastUpdated: Date())
   
   var server: ServerListener {
     ServerListener(ship: simConnect)

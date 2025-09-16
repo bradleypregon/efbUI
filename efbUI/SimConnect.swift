@@ -11,22 +11,20 @@ import CoreLocation
 import Combine
 import Observation
 
-struct SimConnectShip: Identifiable, Equatable {
-  let id = UUID()
-  
+struct SimConnectShip: Equatable {
   var coordinate: CLLocationCoordinate2D
   var altitude: Double
   var heading: Double
   var speed: Double
-  var fs2ffid: Int?
+  var fs2ffid: Int
   var onGround: Bool?
   var registration: String?
-  var lastUpdated: Date?
+  var lastUpdated: Date
 }
 
 @Observable
 final class SimConnectShipObserver: Sendable {
-  var ownship = CurrentValueSubject<SimConnectShip, Never>(.init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero))
+  var ownship = CurrentValueSubject<SimConnectShip, Never>(.init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero, fs2ffid: .zero, lastUpdated: Date()))
   var trafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
   var pruneTrafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
 }
@@ -43,15 +41,19 @@ class ServerStatus {
 // MARK: NWListener
 final class ServerListener {
   var ship: SimConnectShipObserver
-  private let port: NWEndpoint.Port = 49002
+  private var port: NWEndpoint.Port = 49002
 //  private let port: NWEndpoint.Port = 4000
   private var listener: NWListener?
   private var connection: NWConnection?
   private var listening: Bool = true
+  private var timer: Timer?
   
   init(ship: SimConnectShipObserver) {
     self.ship = ship
     self.listener = try? NWListener(using: .udp, on: port)
+    self.timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
+      self.prune()
+    }
   }
   
   func start() {
@@ -144,20 +146,8 @@ final class ServerListener {
     let heading = Double(components[4]) ?? .zero
     let speed = Double(components[5]) ?? .zero
     
-    let ship = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed)
+    let ship = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: .zero, lastUpdated: Date())
     self.ship.ownship.send(ship)
-    
-    for traffic in self.ship.trafficArray.value {
-      guard let tfcTS = traffic.lastUpdated else { print("bad traffic timestamp"); return }
-      print(Date().timeIntervalSince(tfcTS))
-      // if traffic is on ground, do a longer time interval
-      // if not on the ground, do a shorter interval
-      if Date().timeIntervalSince(tfcTS) > 30 {
-        print("greater than 30")
-        self.ship.pruneTrafficArray.send([traffic])
-        self.ship.trafficArray.value.removeAll(where: { $0.fs2ffid == traffic.fs2ffid })
-      }
-    }
   }
   
   private func updateTraffic(_ components: [String]) {
@@ -172,44 +162,24 @@ final class ServerListener {
     let speed = Double(components[8]) ?? .zero
     let callsign = String(components[9])
     let onGround = components[6] == "1" ? true : false
+    
     let plane: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: fs2ffID, onGround: onGround, registration: callsign, lastUpdated: Date())
-    
-    // How to handle planes no longer here? If the leave the game, their annotation will persist
-    // Add timestamp property to SimConnectShip
-    // for ship in traffic hashmap
-    //  if ship.timestamp is greater than now minus 1 minute
-    //    add ship to 'prune' hash of ships, remove from traffic hashmap
-    //    or, just remove it from traffic hashmap?
-    //      how will MapScreen know to remove the layer
-    
-//    for ship in self.ship.traffic {
-//      if ship.fs2ffid == plane.fs2ffid {
-//        self.ship.traffic.removeAll(where: { $0.fs2ffid == plane.fs2ffid })
-//      }
-//    }
-//    self.ship.traffic.append(plane)
-    
-//    self.ship.traffic[String(describing: plane.fs2ffid)] = plane
     
     self.ship.trafficArray.send([plane])
     
+  }
+  
+  func prune() {
+    let now = Date()
     
-//    for traffic in self.ship.trafficArray {
-//      guard let trafficTimestamp = traffic.lastUpdated else { return }
-//      if trafficTimestamp < Int(Date().timeIntervalSinceNow) - 60 {
-//        self.ship.pruneTrafficArray.append(traffic)
-//        self.ship.trafficArray.removeAll(where: { $0.fs2ffid == traffic.fs2ffid })
-//      }
-//    }
+    let oldShips = self.ship.trafficArray.value.filter({now.timeIntervalSince($0.lastUpdated) >= 30 })
+    // $0.lastUpdated <= Date().addingTimeInterval(-30)
+    if oldShips != [] {
+      print("old ships: \(oldShips)")
+    }
     
-//    for (ffid, traffic) in self.ship.traffic {
-//      guard let trafficTimestamp = traffic.lastUpdated else { return }
-//      if trafficTimestamp < Int(Date().timeIntervalSinceNow) - 60 {
-//        self.ship.pruneTraffic[ffid] = traffic
-//        self.ship.traffic.removeValue(forKey: ffid)
-//      }
-//    }
-    
+    self.ship.pruneTrafficArray.value.append(contentsOf: oldShips)
+    self.ship.trafficArray.value.removeAll { self.ship.pruneTrafficArray.value.contains($0) }
   }
   
   private func stopListener() {

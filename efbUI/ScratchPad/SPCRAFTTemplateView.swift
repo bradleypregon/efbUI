@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct SPCRAFTTemplateView: View {
   @Environment(SimBriefViewModel.self) private var simbrief

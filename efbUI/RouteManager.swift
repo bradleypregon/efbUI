@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import Observation
-import CoreLocation
 
 /*
  Generic route type that includes all details of other waypoints/airports/etc
@@ -57,10 +55,15 @@ import CoreLocation
 enum WaypointType: String {
   case airport
   case navaid
-  case airway
+  case airway // how to handle airways
   case sid
   case star
   case waypoint
+}
+
+struct WaypointDetail: Hashable {
+  // stage, via, distance, track, fuel?
+  let stage: String
 }
 
 struct MyWaypoint: Identifiable, Hashable {
@@ -70,6 +73,7 @@ struct MyWaypoint: Identifiable, Hashable {
   let lat: Double
   let long: Double
   let type: WaypointType
+//  let detail: WaypointDetail?
 }
 
 @Observable

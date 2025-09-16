@@ -27,7 +27,6 @@
 		A20620242B49B6AB0034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A20620232B49B6AB0034D902 /* MapboxMaps */; };
 		A20620262B49DC890034D902 /* AirportScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20620252B49DC890034D902 /* AirportScreenViewModel.swift */; };
 		A206A69C2CEFEB4A00BAB2D9 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A206A69B2CEFEB4A00BAB2D9 /* SearchView.swift */; };
-		A206A69F2CF1927400BAB2D9 /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = A206A69E2CF1927400BAB2D9 /* AsyncAlgorithms */; };
 		A207E90A2C78ED8400E4C4EE /* SimbriefTabDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = A207E9092C78ED8400E4C4EE /* SimbriefTabDetails.swift */; };
 		A21B02372B5034850041D60B /* PDFKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02362B5034850041D60B /* PDFKitView.swift */; };
 		A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A21B02382B55C8760041D60B /* SimBriefUserData.swift */; };
@@ -170,7 +169,6 @@
 				A2C06DC62D2C24EF00DF7EF6 /* GRDB in Frameworks */,
 				A20620202B49B6100034D902 /* MapboxMaps in Frameworks */,
 				A232CCBC2B250659005C3E2E /* MapboxMaps in Frameworks */,
-				A206A69F2CF1927400BAB2D9 /* AsyncAlgorithms in Frameworks */,
 				A20620242B49B6AB0034D902 /* MapboxMaps in Frameworks */,
 				A20620222B49B61D0034D902 /* SQLite in Frameworks */,
 				A2B1F1792B26152700E39C09 /* MapboxMaps in Frameworks */,
@@ -513,7 +511,6 @@
 				A206201F2B49B6100034D902 /* MapboxMaps */,
 				A20620212B49B61D0034D902 /* SQLite */,
 				A20620232B49B6AB0034D902 /* MapboxMaps */,
-				A206A69E2CF1927400BAB2D9 /* AsyncAlgorithms */,
 				A2C06DC52D2C24EF00DF7EF6 /* GRDB */,
 			);
 			productName = efbUI;
@@ -547,7 +544,6 @@
 			packageReferences = (
 				A25CB27E2B2494E0008E9FEF /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
-				A206A69D2CF1927400BAB2D9 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 				A2C06DC42D2C24EF00DF7EF6 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 3AE11B2627319450005974E5 /* Products */;
@@ -868,14 +864,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		A206A69D2CF1927400BAB2D9 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.2;
-			};
-		};
 		A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/mapbox/mapbox-maps-ios.git";
@@ -922,11 +910,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A232CCBA2B250659005C3E2E /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
 			productName = MapboxMaps;
-		};
-		A206A69E2CF1927400BAB2D9 /* AsyncAlgorithms */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A206A69D2CF1927400BAB2D9 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
-			productName = AsyncAlgorithms;
 		};
 		A232CCBB2B250659005C3E2E /* MapboxMaps */ = {
 			isa = XCSwiftPackageProductDependency;
