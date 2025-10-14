@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1C626DC82E9F03AA0088651B /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = 1C626DC72E9F03AA0088651B /* navdata.db */; };
-		1C626DCA2E9F09DA0088651B /* Keys.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 1C626DC92E9F09DA0088651B /* Keys.xcconfig */; };
 		3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0111CC2737253C001CFDC5 /* AirportScreen.swift */; };
 		3A1BB44F278A1849001AC228 /* AirportAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */; };
 		3A1BB451278A3FB9001AC228 /* AirportAnnotationCalloutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */; };
@@ -494,7 +493,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1310;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					3AE11B2427319450005974E5 = {
 						CreatedOnToolsVersion = 13.1;
@@ -531,7 +530,6 @@
 			files = (
 				1C626DC82E9F03AA0088651B /* navdata.db in Resources */,
 				3AE11B3027319452005974E5 /* Preview Assets.xcassets in Resources */,
-				1C626DCA2E9F09DA0088651B /* Keys.xcconfig in Resources */,
 				A29479BD2BDC3A2A00B89CE9 /* Airports.json in Resources */,
 				3AE11B2D27319452005974E5 /* Assets.xcassets in Resources */,
 				A290AAA22D4024E200EDCF1D /* Airports.geojson in Resources */,
@@ -649,6 +647,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 7M3KWP53AL;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -671,6 +670,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -714,6 +714,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 7M3KWP53AL;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -729,6 +730,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -745,7 +747,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"efbUI/Preview Content\"";
-				DEVELOPMENT_TEAM = 7M3KWP53AL;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -783,7 +784,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"efbUI/Preview Content\"";
-				DEVELOPMENT_TEAM = 7M3KWP53AL;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
