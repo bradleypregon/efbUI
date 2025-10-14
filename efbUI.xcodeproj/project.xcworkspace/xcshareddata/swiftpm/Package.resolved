@@ -7,7 +7,7 @@
       "location" : "https://github.com/groue/GRDB.swift.git",
       "state" : {
         "branch" : "master",
-        "revision" : "d90ba851feecf044b0e2753d46467cf6b5be0922"
+        "revision" : "18497b68fdbb3a09528d260a0a0e1e7e61c8c53d"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapbox/mapbox-common-ios.git",
       "state" : {
-        "revision" : "76cf6fa29a5541c20b0d52ec947ca41445c29418",
-        "version" : "24.15.0"
+        "revision" : "8aea2e22ff6465a786c27bf06cadc1d5ff3bdfac",
+        "version" : "24.15.3"
       }
     },
     {
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapbox/mapbox-core-maps-ios.git",
       "state" : {
-        "revision" : "a6256b67e80cc2ca5476470b98ba0d5a924936af",
-        "version" : "11.15.0"
+        "revision" : "8195b38387d0fa95078ceb8648f868793641d7d7",
+        "version" : "11.15.3"
       }
     },
     {
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapbox/mapbox-maps-ios.git",
       "state" : {
-        "revision" : "48093e34bc5ae2815cfd1dba784fc61feda8a929",
-        "version" : "11.15.0"
+        "revision" : "aad63bab0719ddbea81f16a42ad299ec89a9f3a7",
+        "version" : "11.15.3"
       }
     },
     {

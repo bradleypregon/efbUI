@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C626DC82E9F03AA0088651B /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = 1C626DC72E9F03AA0088651B /* navdata.db */; };
+		1C626DCA2E9F09DA0088651B /* Keys.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 1C626DC92E9F09DA0088651B /* Keys.xcconfig */; };
 		3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0111CC2737253C001CFDC5 /* AirportScreen.swift */; };
 		3A1BB44F278A1849001AC228 /* AirportAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */; };
 		3A1BB451278A3FB9001AC228 /* AirportAnnotationCalloutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */; };
@@ -80,12 +82,13 @@
 		A2DE93DA2B925E340065FEF6 /* SPCRAFTTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D92B925E340065FEF6 /* SPCRAFTTemplateView.swift */; };
 		A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */; };
 		A2E40FD12D4BBAF00081B2D6 /* MapScreen+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E40FD02D4BBAEB0081B2D6 /* MapScreen+Extensions.swift */; };
-		A2E40FD32D53A9050081B2D6 /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = A2E40FD22D53A9050081B2D6 /* navdata.db */; };
 		A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */; };
 		A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1C626DC72E9F03AA0088651B /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = navdata.db; sourceTree = "<group>"; };
+		1C626DC92E9F09DA0088651B /* Keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Keys.xcconfig; sourceTree = "<group>"; };
 		3A0111CC2737253C001CFDC5 /* AirportScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportScreen.swift; sourceTree = "<group>"; };
 		3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotation.swift; sourceTree = "<group>"; };
 		3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotationCalloutView.swift; sourceTree = "<group>"; };
@@ -130,7 +133,6 @@
 		A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangedSliderView.swift; sourceTree = "<group>"; };
 		A26F9BBB2B996E6E00687F77 /* SimbriefScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefScreen.swift; sourceTree = "<group>"; };
 		A2710D042BCEB1BB0034889B /* IvaoAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IvaoAPI.swift; sourceTree = "<group>"; };
-		A273A6012B261EE100D2979B /* Keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Keys.xcconfig; sourceTree = "<group>"; };
 		A283DBC22CDE88680022CFF8 /* RouteScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteScreen.swift; sourceTree = "<group>"; };
 		A283DBC62CE51B620022CFF8 /* SimbriefTabRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefTabRoute.swift; sourceTree = "<group>"; };
 		A290AAA12D4024E200EDCF1D /* Airports.geojson */ = {isa = PBXFileReference; lastKnownFileType = text; path = Airports.geojson; sourceTree = "<group>"; };
@@ -152,7 +154,6 @@
 		A2DE93D92B925E340065FEF6 /* SPCRAFTTemplateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SPCRAFTTemplateView.swift; sourceTree = "<group>"; };
 		A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportIcon.swift; sourceTree = "<group>"; };
 		A2E40FD02D4BBAEB0081B2D6 /* MapScreen+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapScreen+Extensions.swift"; sourceTree = "<group>"; };
-		A2E40FD22D53A9050081B2D6 /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = navdata.db; sourceTree = "<group>"; };
 		A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerAPI.swift; sourceTree = "<group>"; };
 		A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerSchema.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -252,7 +253,7 @@
 			children = (
 				3AE11B2C27319452005974E5 /* Assets.xcassets */,
 				3AC3392E273B6E7700ED025B /* Info.plist */,
-				A273A6012B261EE100D2979B /* Keys.xcconfig */,
+				1C626DC92E9F09DA0088651B /* Keys.xcconfig */,
 				3AE11B2827319450005974E5 /* efbUIApp.swift */,
 				A26E17AD2B9EA30C002B4090 /* Sigmet */,
 				A2EF3F942B6FE1B10096933A /* Radar */,
@@ -271,7 +272,6 @@
 				3A27F356282F5D1800C4B82A /* Map */,
 				3A24A79027324142000D98E5 /* ScratchPad */,
 				A2EC6FDA2B49B00C00F31364 /* Settings */,
-				A2D5FE192BA7C7730084AE7E /* Extra */,
 				A22322D42B20B74E001274CA /* Extensions.swift */,
 				3AE11B2E27319452005974E5 /* Preview Content */,
 				A2EC6FD72B49AF9A00F31364 /* Deprecated */,
@@ -339,7 +339,7 @@
 		A25CB27B2B249215008E9FEF /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				A2E40FD22D53A9050081B2D6 /* navdata.db */,
+				1C626DC72E9F03AA0088651B /* navdata.db */,
 				A2D13D202BA6357100E5AFEE /* Airports */,
 				A257E1B32B2A75C6003B1859 /* SQLiteManager.swift */,
 				A257E1B52B2AB514003B1859 /* DBTableStructs.swift */,
@@ -361,33 +361,9 @@
 		A2710D002BCEB1830034889B /* IVAO */ = {
 			isa = PBXGroup;
 			children = (
-				A2710D032BCEB1950034889B /* TAF */,
-				A2710D022BCEB1900034889B /* METAR */,
-				A2710D012BCEB18C0034889B /* ATIS */,
 				A2710D042BCEB1BB0034889B /* IvaoAPI.swift */,
 			);
 			path = IVAO;
-			sourceTree = "<group>";
-		};
-		A2710D012BCEB18C0034889B /* ATIS */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ATIS;
-			sourceTree = "<group>";
-		};
-		A2710D022BCEB1900034889B /* METAR */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = METAR;
-			sourceTree = "<group>";
-		};
-		A2710D032BCEB1950034889B /* TAF */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = TAF;
 			sourceTree = "<group>";
 		};
 		A278ABE42BA64BEF00EC27FA /* Toast */ = {
@@ -438,13 +414,6 @@
 				A2D13D232BA6361200E5AFEE /* AirportSchema.swift */,
 			);
 			path = Airports;
-			sourceTree = "<group>";
-		};
-		A2D5FE192BA7C7730084AE7E /* Extra */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Extra;
 			sourceTree = "<group>";
 		};
 		A2EC6FD72B49AF9A00F31364 /* Deprecated */ = {
@@ -560,8 +529,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2E40FD32D53A9050081B2D6 /* navdata.db in Resources */,
+				1C626DC82E9F03AA0088651B /* navdata.db in Resources */,
 				3AE11B3027319452005974E5 /* Preview Assets.xcassets in Resources */,
+				1C626DCA2E9F09DA0088651B /* Keys.xcconfig in Resources */,
 				A29479BD2BDC3A2A00B89CE9 /* Airports.json in Resources */,
 				3AE11B2D27319452005974E5 /* Assets.xcassets in Resources */,
 				A290AAA22D4024E200EDCF1D /* Airports.geojson in Resources */,
@@ -644,7 +614,7 @@
 /* Begin XCBuildConfiguration section */
 		3AE11B4727319452005974E5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A273A6012B261EE100D2979B /* Keys.xcconfig */;
+			baseConfigurationReference = 1C626DC92E9F09DA0088651B /* Keys.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -696,7 +666,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -709,7 +679,7 @@
 		};
 		3AE11B4827319452005974E5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A273A6012B261EE100D2979B /* Keys.xcconfig */;
+			baseConfigurationReference = 1C626DC92E9F09DA0088651B /* Keys.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -755,7 +725,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -768,6 +738,7 @@
 		};
 		3AE11B4A27319452005974E5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1C626DC92E9F09DA0088651B /* Keys.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -786,7 +757,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -805,6 +776,7 @@
 		};
 		3AE11B4B27319452005974E5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1C626DC92E9F09DA0088651B /* Keys.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -823,7 +795,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
