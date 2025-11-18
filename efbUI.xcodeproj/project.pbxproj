@@ -7,7 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C31A65F2EBCFC0D00E25772 /* NotePadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A65E2EBCFC0D00E25772 /* NotePadView.swift */; };
+		1C31A6612EBD009F00E25772 /* CurveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A6602EBD009F00E25772 /* CurveView.swift */; };
+		1C31A6632EBD29BE00E25772 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A6622EBD29BD00E25772 /* MapView.swift */; };
+		1C31A6692EBD4CAF00E25772 /* MainOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A6682EBD4CAF00E25772 /* MainOptionsView.swift */; };
+		1C31A66B2EBD6DCC00E25772 /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A66A2EBD6DCC00E25772 /* TabBarView.swift */; };
 		1C626DC82E9F03AA0088651B /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = 1C626DC72E9F03AA0088651B /* navdata.db */; };
+		1CB026D12ECC3189008B1414 /* WeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB026D02ECC3189008B1414 /* WeatherView.swift */; };
+		1CB026D32ECC31C8008B1414 /* PinboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB026D22ECC31C8008B1414 /* PinboardView.swift */; };
+		1CB026D52ECC3206008B1414 /* TelemetryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB026D42ECC3206008B1414 /* TelemetryView.swift */; };
+		1CB026D72ECC32AA008B1414 /* DetailPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB026D62ECC32AA008B1414 /* DetailPanelView.swift */; };
+		1CD2E5C22EB515AE001510C3 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CD2E5C12EB515AE001510C3 /* MainView.swift */; };
 		3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0111CC2737253C001CFDC5 /* AirportScreen.swift */; };
 		3A1BB44F278A1849001AC228 /* AirportAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */; };
 		3A1BB451278A3FB9001AC228 /* AirportAnnotationCalloutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */; };
@@ -86,8 +96,18 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1C31A65E2EBCFC0D00E25772 /* NotePadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotePadView.swift; sourceTree = "<group>"; };
+		1C31A6602EBD009F00E25772 /* CurveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveView.swift; sourceTree = "<group>"; };
+		1C31A6622EBD29BD00E25772 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		1C31A6682EBD4CAF00E25772 /* MainOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainOptionsView.swift; sourceTree = "<group>"; };
+		1C31A66A2EBD6DCC00E25772 /* TabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarView.swift; sourceTree = "<group>"; };
 		1C626DC72E9F03AA0088651B /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = navdata.db; sourceTree = "<group>"; };
 		1C626DC92E9F09DA0088651B /* Keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Keys.xcconfig; sourceTree = "<group>"; };
+		1CB026D02ECC3189008B1414 /* WeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherView.swift; sourceTree = "<group>"; };
+		1CB026D22ECC31C8008B1414 /* PinboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinboardView.swift; sourceTree = "<group>"; };
+		1CB026D42ECC3206008B1414 /* TelemetryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryView.swift; sourceTree = "<group>"; };
+		1CB026D62ECC32AA008B1414 /* DetailPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailPanelView.swift; sourceTree = "<group>"; };
+		1CD2E5C12EB515AE001510C3 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		3A0111CC2737253C001CFDC5 /* AirportScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportScreen.swift; sourceTree = "<group>"; };
 		3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotation.swift; sourceTree = "<group>"; };
 		3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotationCalloutView.swift; sourceTree = "<group>"; };
@@ -227,6 +247,7 @@
 				3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */,
 				A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */,
 				A21B5C252CD973F40017778C /* MapScreenWaypointView.swift */,
+				1C31A6622EBD29BD00E25772 /* MapView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -254,6 +275,15 @@
 				3AC3392E273B6E7700ED025B /* Info.plist */,
 				1C626DC92E9F09DA0088651B /* Keys.xcconfig */,
 				3AE11B2827319450005974E5 /* efbUIApp.swift */,
+				1CD2E5C12EB515AE001510C3 /* MainView.swift */,
+				1CB026D62ECC32AA008B1414 /* DetailPanelView.swift */,
+				1CB026D42ECC3206008B1414 /* TelemetryView.swift */,
+				1CB026D22ECC31C8008B1414 /* PinboardView.swift */,
+				1CB026D02ECC3189008B1414 /* WeatherView.swift */,
+				1C31A66A2EBD6DCC00E25772 /* TabBarView.swift */,
+				1C31A65E2EBCFC0D00E25772 /* NotePadView.swift */,
+				1C31A6602EBD009F00E25772 /* CurveView.swift */,
+				1C31A6682EBD4CAF00E25772 /* MainOptionsView.swift */,
 				A26E17AD2B9EA30C002B4090 /* Sigmet */,
 				A2EF3F942B6FE1B10096933A /* Radar */,
 				A21B023A2B55D48D0041D60B /* SimBrief */,
@@ -553,12 +583,14 @@
 				A2C6ED152B2E3DA400856381 /* OpenMeteoAPI.swift in Sources */,
 				A2710D052BCEB1BB0034889B /* IvaoAPI.swift in Sources */,
 				A23B5BB52BC309BB00DA5A08 /* AtisAPISchema.swift in Sources */,
+				1C31A6612EBD009F00E25772 /* CurveView.swift in Sources */,
 				A22322D52B20B74E001274CA /* Extensions.swift in Sources */,
 				3AE11B5327319480005974E5 /* SimConnect.swift in Sources */,
 				A2B98D6C2B9BB5A700A91977 /* Toast.swift in Sources */,
 				3AE11B2B27319450005974E5 /* MapScreen.swift in Sources */,
 				A21B02372B5034850041D60B /* PDFKitView.swift in Sources */,
 				A266BF3B2D3F605C0002AB80 /* SQLManager.swift in Sources */,
+				1C31A6632EBD29BE00E25772 /* MapView.swift in Sources */,
 				A25CC0612B97A25D00716E1A /* RouteManager.swift in Sources */,
 				A20620262B49DC890034D902 /* AirportScreenViewModel.swift in Sources */,
 				A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */,
@@ -572,9 +604,11 @@
 				A266BF392D3C99E90002AB80 /* VatsimInfoAPI.swift in Sources */,
 				A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */,
 				A283DBC72CE51B620022CFF8 /* SimbriefTabRoute.swift in Sources */,
+				1C31A6692EBD4CAF00E25772 /* MainOptionsView.swift in Sources */,
 				A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */,
 				A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */,
 				A22696062CB8686F006CE148 /* OpenMeteoSchema.swift in Sources */,
+				1CB026D72ECC32AA008B1414 /* DetailPanelView.swift in Sources */,
 				A247DE4E2DE21E9400949A13 /* CanvasToolbarView.swift in Sources */,
 				A26E17AF2B9EA39E002B4090 /* SigmetSchema.swift in Sources */,
 				3AE11B2927319450005974E5 /* efbUIApp.swift in Sources */,
@@ -585,23 +619,29 @@
 				A237AF822B63490300646AAF /* ChartsView.swift in Sources */,
 				A2D13D242BA6361200E5AFEE /* AirportSchema.swift in Sources */,
 				A26E17AC2B9C11D9002B4090 /* AirportRunwayView.swift in Sources */,
+				1CB026D12ECC3189008B1414 /* WeatherView.swift in Sources */,
 				3A1BB451278A3FB9001AC228 /* AirportAnnotationCalloutView.swift in Sources */,
 				A2C6ED1A2B3005A700856381 /* FetchAirportWx.swift in Sources */,
 				A2C6ED232B300A8B00856381 /* AirportChartAPISchema.swift in Sources */,
 				A257E1B42B2A75C6003B1859 /* SQLiteManager.swift in Sources */,
 				A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */,
 				A23B5BB32BC3096800DA5A08 /* FaaAtisAPI.swift in Sources */,
+				1CB026D32ECC31C8008B1414 /* PinboardView.swift in Sources */,
 				A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */,
 				A26F9BBC2B996E6E00687F77 /* SimbriefScreen.swift in Sources */,
 				A2C6ED1D2B3005C900856381 /* FetchAirportCharts.swift in Sources */,
+				1C31A65F2EBCFC0D00E25772 /* NotePadView.swift in Sources */,
 				3A1BB44F278A1849001AC228 /* AirportAnnotation.swift in Sources */,
 				A21B5C262CD973F40017778C /* MapScreenWaypointView.swift in Sources */,
+				1C31A66B2EBD6DCC00E25772 /* TabBarView.swift in Sources */,
 				A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */,
 				3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */,
 				A2DE93D82B9237390065FEF6 /* SPATISTemplateView.swift in Sources */,
 				A26E17B12B9EA3A5002B4090 /* SigmetAPI.swift in Sources */,
 				A2C6ED172B2E3DCE00856381 /* OSMWeatherSchema.swift in Sources */,
+				1CB026D52ECC3206008B1414 /* TelemetryView.swift in Sources */,
 				A2DE93DA2B925E340065FEF6 /* SPCRAFTTemplateView.swift in Sources */,
+				1CD2E5C22EB515AE001510C3 /* MainView.swift in Sources */,
 				A290AAA42D40267700EDCF1D /* MapAirports.swift in Sources */,
 				A2C6ED1F2B30068300856381 /* AirportMetarAPISchema.swift in Sources */,
 			);
