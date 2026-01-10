@@ -8,6 +8,8 @@
 	<string>$(OSMWeatherAPI_Key)</string>
 	<key>MapStyleURI</key>
 	<string>mapbox://styles/bradleypregon/clpvnz3y900yn01qmby0f9xn6</string>
+	<key>MapStyleURIv2</key>
+	<string>mapbox://styles/bradleypregon/cmi42g7cf00qz01sc5axr2896</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This app uses the local network to find and connect to FS2FF</string>
 </dict>

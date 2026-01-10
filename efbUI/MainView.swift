@@ -24,19 +24,20 @@ struct MainView: View {
   
   @State private var test: Bool = false
   
-  // Sidebar
-  private let detailPanelWidth: CGFloat = 250
+  // Sidebar vars
+  private let detailPanelWidth: CGFloat = 300
   @State private var detailPanelVisibleWidth: CGFloat = 0
   
   var body: some View {
+    // Tab Bar -> Main Content View
     HStack(spacing: 0) {
       // Tab Bar
-      TabBarView(detailPanelVisible: $detailPanelVisible, notePadVisible: $notePadVisible)
+      TabBarView(detailPanelVisible: $detailPanelVisible, notePadVisible: $notePadVisible, selectedTab: $selectedTab)
         .zIndex(3)
       
+      // Main Content
       ZStack(alignment: .leading) {
-        // Map control view can interface with mapviewmodel
-        
+        // Gets pushed over when detailPanelVisible is true
         VStack {
           ZStack {
             MapView()
@@ -56,6 +57,7 @@ struct MainView: View {
             if test {
               Color.blue.opacity(0.75)
                 .border(.red, width: 2)
+                .ignoresSafeArea()
             }
           }
           
@@ -83,11 +85,10 @@ struct MainView: View {
         .padding(.leading, detailPanelVisibleWidth)
         .animation(.easeInOut, value: detailPanelVisibleWidth)
         
-        
-        
         // Tab Bar Detail View
+        // Displays over previous VStack
         if detailPanelVisible {
-          DetailPanelView(detailPanelVisible: $detailPanelVisible)
+          DetailPanelView(selectedTab: $selectedTab, detailPanelVisible: $detailPanelVisible)
             .padding()
             .frame(width: detailPanelWidth, alignment: .topLeading)
             .frame(height: .infinity)

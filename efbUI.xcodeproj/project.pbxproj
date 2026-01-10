@@ -19,9 +19,7 @@
 		1CB026D72ECC32AA008B1414 /* DetailPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB026D62ECC32AA008B1414 /* DetailPanelView.swift */; };
 		1CD2E5C22EB515AE001510C3 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CD2E5C12EB515AE001510C3 /* MainView.swift */; };
 		3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0111CC2737253C001CFDC5 /* AirportScreen.swift */; };
-		3A1BB44F278A1849001AC228 /* AirportAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */; };
 		3A1BB451278A3FB9001AC228 /* AirportAnnotationCalloutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */; };
-		3A1BB456278A5A0E001AC228 /* MapCalloutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BB455278A5A0E001AC228 /* MapCalloutView.swift */; };
 		3A24A78D27321C15000D98E5 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A24A78C27321C15000D98E5 /* TabBar.swift */; };
 		3A24A79227324259000D98E5 /* ScratchPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A24A79127324259000D98E5 /* ScratchPadView.swift */; };
 		3A81763F27339AA100445CDA /* TopBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A81763E27339AA100445CDA /* TopBarView.swift */; };
@@ -31,7 +29,6 @@
 		3AE11B2D27319452005974E5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3AE11B2C27319452005974E5 /* Assets.xcassets */; };
 		3AE11B3027319452005974E5 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3AE11B2F27319452005974E5 /* Preview Assets.xcassets */; };
 		3AE11B5327319480005974E5 /* SimConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE11B5227319480005974E5 /* SimConnect.swift */; };
-		A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2046B0A2B28E58300E04BEA /* MKViewRepresentable.swift */; };
 		A206201C2B49B4F80034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A206201B2B49B4F80034D902 /* MapboxMaps */; };
 		A20620202B49B6100034D902 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A206201F2B49B6100034D902 /* MapboxMaps */; };
 		A20620222B49B61D0034D902 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A20620212B49B61D0034D902 /* SQLite */; };
@@ -71,7 +68,6 @@
 		A283DBC72CE51B620022CFF8 /* SimbriefTabRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = A283DBC62CE51B620022CFF8 /* SimbriefTabRoute.swift */; };
 		A290AAA22D4024E200EDCF1D /* Airports.geojson in Resources */ = {isa = PBXBuildFile; fileRef = A290AAA12D4024E200EDCF1D /* Airports.geojson */; };
 		A290AAA42D40267700EDCF1D /* MapAirports.swift in Sources */ = {isa = PBXBuildFile; fileRef = A290AAA32D40267700EDCF1D /* MapAirports.swift */; };
-		A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */; };
 		A29479BD2BDC3A2A00B89CE9 /* Airports.json in Resources */ = {isa = PBXBuildFile; fileRef = A29479BC2BDC3A2A00B89CE9 /* Airports.json */; };
 		A2A243682B00368B00245A0F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A243672B00368B00245A0F /* SettingsView.swift */; };
 		A2B1F1792B26152700E39C09 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = A2B1F1782B26152700E39C09 /* MapboxMaps */; };
@@ -85,11 +81,9 @@
 		A2C6ED1D2B3005C900856381 /* FetchAirportCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED1C2B3005C900856381 /* FetchAirportCharts.swift */; };
 		A2C6ED1F2B30068300856381 /* AirportMetarAPISchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED1E2B30068300856381 /* AirportMetarAPISchema.swift */; };
 		A2C6ED232B300A8B00856381 /* AirportChartAPISchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED222B300A8B00856381 /* AirportChartAPISchema.swift */; };
-		A2C6ED282B3763D800856381 /* AirportAnnotationSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C6ED272B3763D800856381 /* AirportAnnotationSidebarView.swift */; };
 		A2D13D242BA6361200E5AFEE /* AirportSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D13D232BA6361200E5AFEE /* AirportSchema.swift */; };
 		A2DE93D82B9237390065FEF6 /* SPATISTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D72B9237390065FEF6 /* SPATISTemplateView.swift */; };
 		A2DE93DA2B925E340065FEF6 /* SPCRAFTTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D92B925E340065FEF6 /* SPCRAFTTemplateView.swift */; };
-		A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */; };
 		A2E40FD12D4BBAF00081B2D6 /* MapScreen+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E40FD02D4BBAEB0081B2D6 /* MapScreen+Extensions.swift */; };
 		A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */; };
 		A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */; };
@@ -109,9 +103,7 @@
 		1CB026D62ECC32AA008B1414 /* DetailPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailPanelView.swift; sourceTree = "<group>"; };
 		1CD2E5C12EB515AE001510C3 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		3A0111CC2737253C001CFDC5 /* AirportScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportScreen.swift; sourceTree = "<group>"; };
-		3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotation.swift; sourceTree = "<group>"; };
 		3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotationCalloutView.swift; sourceTree = "<group>"; };
-		3A1BB455278A5A0E001AC228 /* MapCalloutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCalloutView.swift; sourceTree = "<group>"; };
 		3A24A78C27321C15000D98E5 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
 		3A24A79127324259000D98E5 /* ScratchPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadView.swift; sourceTree = "<group>"; };
 		3A81763E27339AA100445CDA /* TopBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBarView.swift; sourceTree = "<group>"; };
@@ -123,7 +115,6 @@
 		3AE11B2C27319452005974E5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3AE11B2F27319452005974E5 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3AE11B5227319480005974E5 /* SimConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimConnect.swift; sourceTree = "<group>"; };
-		A2046B0A2B28E58300E04BEA /* MKViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKViewRepresentable.swift; sourceTree = "<group>"; };
 		A20620252B49DC890034D902 /* AirportScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportScreenViewModel.swift; sourceTree = "<group>"; };
 		A206A69B2CEFEB4A00BAB2D9 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		A207E9092C78ED8400E4C4EE /* SimbriefTabDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefTabDetails.swift; sourceTree = "<group>"; };
@@ -156,7 +147,6 @@
 		A283DBC62CE51B620022CFF8 /* SimbriefTabRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimbriefTabRoute.swift; sourceTree = "<group>"; };
 		A290AAA12D4024E200EDCF1D /* Airports.geojson */ = {isa = PBXFileReference; lastKnownFileType = text; path = Airports.geojson; sourceTree = "<group>"; };
 		A290AAA32D40267700EDCF1D /* MapAirports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapAirports.swift; sourceTree = "<group>"; };
-		A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AirplaneAnnotation.swift; sourceTree = "<group>"; };
 		A29479BC2BDC3A2A00B89CE9 /* Airports.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Airports.json; sourceTree = "<group>"; };
 		A2A243672B00368B00245A0F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A2B98D6B2B9BB5A700A91977 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
@@ -167,11 +157,9 @@
 		A2C6ED1C2B3005C900856381 /* FetchAirportCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchAirportCharts.swift; sourceTree = "<group>"; };
 		A2C6ED1E2B30068300856381 /* AirportMetarAPISchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportMetarAPISchema.swift; sourceTree = "<group>"; };
 		A2C6ED222B300A8B00856381 /* AirportChartAPISchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportChartAPISchema.swift; sourceTree = "<group>"; };
-		A2C6ED272B3763D800856381 /* AirportAnnotationSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportAnnotationSidebarView.swift; sourceTree = "<group>"; };
 		A2D13D232BA6361200E5AFEE /* AirportSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportSchema.swift; sourceTree = "<group>"; };
 		A2DE93D72B9237390065FEF6 /* SPATISTemplateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SPATISTemplateView.swift; sourceTree = "<group>"; };
 		A2DE93D92B925E340065FEF6 /* SPCRAFTTemplateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SPCRAFTTemplateView.swift; sourceTree = "<group>"; };
-		A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportIcon.swift; sourceTree = "<group>"; };
 		A2E40FD02D4BBAEB0081B2D6 /* MapScreen+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapScreen+Extensions.swift"; sourceTree = "<group>"; };
 		A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerAPI.swift; sourceTree = "<group>"; };
 		A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerSchema.swift; sourceTree = "<group>"; };
@@ -276,11 +264,11 @@
 				1C626DC92E9F09DA0088651B /* Keys.xcconfig */,
 				3AE11B2827319450005974E5 /* efbUIApp.swift */,
 				1CD2E5C12EB515AE001510C3 /* MainView.swift */,
+				1C31A66A2EBD6DCC00E25772 /* TabBarView.swift */,
 				1CB026D62ECC32AA008B1414 /* DetailPanelView.swift */,
 				1CB026D42ECC3206008B1414 /* TelemetryView.swift */,
 				1CB026D22ECC31C8008B1414 /* PinboardView.swift */,
 				1CB026D02ECC3189008B1414 /* WeatherView.swift */,
-				1C31A66A2EBD6DCC00E25772 /* TabBarView.swift */,
 				1C31A65E2EBCFC0D00E25772 /* NotePadView.swift */,
 				1C31A6602EBD009F00E25772 /* CurveView.swift */,
 				1C31A6682EBD4CAF00E25772 /* MainOptionsView.swift */,
@@ -448,12 +436,6 @@
 		A2EC6FD72B49AF9A00F31364 /* Deprecated */ = {
 			isa = PBXGroup;
 			children = (
-				A2DE93DB2B9273430065FEF6 /* AirportIcon.swift */,
-				A2C6ED272B3763D800856381 /* AirportAnnotationSidebarView.swift */,
-				3A1BB44E278A1849001AC228 /* AirportAnnotation.swift */,
-				A293CFFB2AF313E3004D2814 /* AirplaneAnnotation.swift */,
-				3A1BB455278A5A0E001AC228 /* MapCalloutView.swift */,
-				A2046B0A2B28E58300E04BEA /* MKViewRepresentable.swift */,
 			);
 			path = Deprecated;
 			sourceTree = "<group>";
@@ -594,19 +576,15 @@
 				A25CC0612B97A25D00716E1A /* RouteManager.swift in Sources */,
 				A20620262B49DC890034D902 /* AirportScreenViewModel.swift in Sources */,
 				A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */,
-				A2C6ED282B3763D800856381 /* AirportAnnotationSidebarView.swift in Sources */,
 				A207E90A2C78ED8400E4C4EE /* SimbriefTabDetails.swift in Sources */,
 				A2A243682B00368B00245A0F /* SettingsView.swift in Sources */,
-				3A1BB456278A5A0E001AC228 /* MapCalloutView.swift in Sources */,
 				3A24A78D27321C15000D98E5 /* TabBar.swift in Sources */,
 				A2B98D6E2B9BBFF600A91977 /* ToastTestContentView.swift in Sources */,
 				3A81763F27339AA100445CDA /* TopBarView.swift in Sources */,
 				A266BF392D3C99E90002AB80 /* VatsimInfoAPI.swift in Sources */,
-				A293CFFC2AF313E3004D2814 /* AirplaneAnnotation.swift in Sources */,
 				A283DBC72CE51B620022CFF8 /* SimbriefTabRoute.swift in Sources */,
 				1C31A6692EBD4CAF00E25772 /* MainOptionsView.swift in Sources */,
 				A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */,
-				A2046B0B2B28E58300E04BEA /* MKViewRepresentable.swift in Sources */,
 				A22696062CB8686F006CE148 /* OpenMeteoSchema.swift in Sources */,
 				1CB026D72ECC32AA008B1414 /* DetailPanelView.swift in Sources */,
 				A247DE4E2DE21E9400949A13 /* CanvasToolbarView.swift in Sources */,
@@ -627,11 +605,9 @@
 				A21B023C2B55D4A00041D60B /* SimBriefAPI.swift in Sources */,
 				A23B5BB32BC3096800DA5A08 /* FaaAtisAPI.swift in Sources */,
 				1CB026D32ECC31C8008B1414 /* PinboardView.swift in Sources */,
-				A2DE93DC2B9273430065FEF6 /* AirportIcon.swift in Sources */,
 				A26F9BBC2B996E6E00687F77 /* SimbriefScreen.swift in Sources */,
 				A2C6ED1D2B3005C900856381 /* FetchAirportCharts.swift in Sources */,
 				1C31A65F2EBCFC0D00E25772 /* NotePadView.swift in Sources */,
-				3A1BB44F278A1849001AC228 /* AirportAnnotation.swift in Sources */,
 				A21B5C262CD973F40017778C /* MapScreenWaypointView.swift in Sources */,
 				1C31A66B2EBD6DCC00E25772 /* TabBarView.swift in Sources */,
 				A21B02392B55C8760041D60B /* SimBriefUserData.swift in Sources */,

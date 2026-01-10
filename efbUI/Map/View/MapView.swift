@@ -16,7 +16,7 @@ struct MapView: View {
     MapReader { proxy in
       Map(viewport: $viewport) { }
         .mapStyle(
-          MapStyle(uri: StyleURI(rawValue: Bundle.main.object(forInfoDictionaryKey: "MapStyleURI") as? String ?? "") ?? .dark)
+          MapStyle(uri: StyleURI(rawValue: Bundle.main.object(forInfoDictionaryKey: "MapStyleURIv2") as? String ?? "") ?? .dark)
         )
         .ornamentOptions(ornamentOptions)
     }
