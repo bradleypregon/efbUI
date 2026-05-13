@@ -48,42 +48,6 @@ struct DetailPanelView: View {
   }
 }
 
-struct TabSearchView: View {
-  @State private var searchText: String = "asdf"
-  
-  var body: some View {
-    VStack {
-      TextField("Search", text: $searchText)
-        .padding()
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-      List {
-        Text("AIrport")
-        Text("VOR")
-      }
-      .listStyle(.insetGrouped)
-    }
-  }
-}
-
-struct TabFlightView: View {
-  var body: some View {
-    Text("Some flight info here")
-  }
-}
-
-struct TabAirportsView: View {
-  var body: some View {
-    Text("Open Airport")
-    Text("Open Charts")
-  }
-}
-
-struct TabSettingsView: View {
-  var body: some View {
-    Text("Settings here")
-  }
-}
-
 #Preview {
   DetailPanelView(selectedTab: .constant(SelectedTab.search), detailPanelVisible: .constant(true))
 }

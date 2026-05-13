@@ -12,6 +12,7 @@ struct MainOptionsView: View {
   @Binding var weatherVisible: Bool
   @Binding var telemetryVisible: Bool
   @Binding var pinboardVisible: Bool
+  @Binding var mapViewModel: MapScreenViewModel
   
   var body: some View {
     VStack(alignment: .leading) {
@@ -79,20 +80,20 @@ struct MainOptionsView: View {
           .contentTransition(.symbolEffect)
         
         Divider()
-          .frame(width: 24)
+          .frame(width: 32)
         
         Group {
-          Toggle("Lg", systemImage: "l.square", isOn: .constant(true))
+          Toggle("Lg", systemImage: mapViewModel.displayLg ? "l.square.fill" : "l.square", isOn: $mapViewModel.displayLg)
             .tint(.vfr)
             .toggleStyle(.button)
             .labelStyle(.iconOnly)
           
-          Toggle("Md", systemImage: "m.square", isOn: .constant(true))
+          Toggle("Md", systemImage: mapViewModel.displayMd ? "m.square.fill" : "m.square", isOn: $mapViewModel.displayMd)
             .tint(.vfr)
             .toggleStyle(.button)
             .labelStyle(.iconOnly)
           
-          Toggle("Sm", systemImage: "s.square", isOn: .constant(true))
+          Toggle("Sm", systemImage: mapViewModel.displaySm ? "s.square.fill" : "s.square", isOn: $mapViewModel.displaySm)
             .tint(.primary)
             .toggleStyle(.button)
             .labelStyle(.iconOnly)
@@ -157,6 +158,7 @@ struct MainOptionsView: View {
     routeVisible: .constant(false),
     weatherVisible: .constant(true),
     telemetryVisible: .constant(false),
-    pinboardVisible: .constant(true)
+    pinboardVisible: .constant(true),
+    mapViewModel: .constant(MapScreenViewModel())
   )
 }
