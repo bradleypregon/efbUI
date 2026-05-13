@@ -7,7 +7,7 @@
       "location" : "https://github.com/groue/GRDB.swift.git",
       "state" : {
         "branch" : "master",
-        "revision" : "18497b68fdbb3a09528d260a0a0e1e7e61c8c53d"
+        "revision" : "36e30a6f1ef10e4194f6af0cff90888526f0c115"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapbox/mapbox-common-ios.git",
       "state" : {
-        "revision" : "8aea2e22ff6465a786c27bf06cadc1d5ff3bdfac",
-        "version" : "24.15.3"
+        "revision" : "f9ae004513903cdc40b5c5135e84c98a2a370a4d",
+        "version" : "24.23.1"
       }
     },
     {
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapbox/mapbox-core-maps-ios.git",
       "state" : {
-        "revision" : "8195b38387d0fa95078ceb8648f868793641d7d7",
-        "version" : "11.15.3"
+        "revision" : "bde36cdf6936f7c779b99048b333a4e7f8df80d8",
+        "version" : "11.23.1"
       }
     },
     {
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapbox/mapbox-maps-ios.git",
       "state" : {
-        "revision" : "aad63bab0719ddbea81f16a42ad299ec89a9f3a7",
-        "version" : "11.15.3"
+        "revision" : "87ddb192623ea9a615903faff12901052966b724",
+        "version" : "11.23.1"
       }
     },
     {
@@ -42,17 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/stephencelis/SQLite.swift.git",
       "state" : {
-        "revision" : "392dd6058624d9f6c5b4c769d165ddd8c7293394",
-        "version" : "0.15.4"
-      }
-    },
-    {
-      "identity" : "swift-toolchain-sqlite",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftlang/swift-toolchain-sqlite",
-      "state" : {
-        "revision" : "b626d3002773b1a1304166643e7f118f724b2132",
-        "version" : "1.0.4"
+        "revision" : "964c300fb0736699ce945c9edb56ecd62eba27a3",
+        "version" : "0.16.0"
       }
     },
     {
