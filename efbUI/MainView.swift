@@ -22,7 +22,6 @@ class MainViewModel {
 }
 
 struct MainView: View {
-  @Environment(SimConnectShipObserver.self) var ship
   @State var mainVM = MainViewModel()
   @State var mapViewModel = MapScreenViewModel()
   

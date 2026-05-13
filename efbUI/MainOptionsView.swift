@@ -7,12 +7,15 @@
 import SwiftUI
 
 struct MainOptionsView: View {
+  @Environment(SimConnectShipObserver.self) var ship
   @State private var expanded: Bool = true
   @Binding var routeVisible: Bool
   @Binding var weatherVisible: Bool
   @Binding var telemetryVisible: Bool
   @Binding var pinboardVisible: Bool
   @Binding var mapViewModel: MapScreenViewModel
+  
+  @State private var listener: ServerListener?
   
   var body: some View {
     VStack(alignment: .leading) {
@@ -35,8 +38,17 @@ struct MainOptionsView: View {
             .tint(weatherVisible ? .vfr : .primary)
           
           Toggle("Telemetry", systemImage: "gauge.with.needle", isOn: $telemetryVisible)
-            .tint(telemetryVisible ? .vfr : .primary)
+            .tint(tint(for: listener?.status ?? .idle, isOn: telemetryVisible))
             .symbolEffect(.rotate.clockwise.byLayer, options: .nonRepeating, value: telemetryVisible)
+            .onChange(of: telemetryVisible) { old, new in
+              if new && listener == nil {
+                listener = ServerListener(ship: ship)
+                listener?.start()
+              } else {
+                listener?.stop()
+                listener = nil
+              }
+            }
           
           // Disabled if no route
           Toggle("Pin Board", systemImage: "pin", isOn: .constant(true))
@@ -151,6 +163,18 @@ struct MainOptionsView: View {
       .clipShape(Capsule())
     }
   }
+  
+  private func tint(for status: TelemetryStatus, isOn: Bool) -> Color {
+    guard isOn else { return .primary }        // toggle is off
+    switch status {
+    case .idle:        return .primary         // on but idle (or stopped)
+    case .connecting:  return .yellow          // connecting
+    case .heartbeat:   return .yellow          // heartbeat-only
+    case .receiving:   return .vfr             // good/green
+    case .error:       return .red             // error state
+    }
+  }
+  
 }
 
 #Preview {

@@ -203,13 +203,12 @@ final class SimConnectShipObserver: Sendable {
   var pruneTrafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
 }
 
-class ServerStatus {
-  @MainActor static let shared = ServerStatus()
-  var status: Status = .stopped
-  
-  enum Status {
-    case running, heartbeat, stopped
-  }
+enum TelemetryStatus: Equatable {
+  case idle
+  case connecting
+  case heartbeat
+  case receiving
+  case error(String?)
 }
 
 // MARK: ServerListener
@@ -220,21 +219,24 @@ final class ServerListener {
     case gdl90     // Binary GDL90 protocol
   }
   
-  var ship: SimConnectShipObserver
+  private(set) var status: TelemetryStatus = .idle
+  
+  var ship: SimConnectShipObserver = SimConnectShipObserver()
   private var port: NWEndpoint.Port = 49002 // 4000 for gdl90
   private var listener: NWListener?
   private var heartbeatConnection: NWConnection?
   private var connection: NWConnection?
-  private var listening: Bool = true
+  private var listening: Bool = false
   
   // Protocol selection
   var protocolType: ProtocolType = .textBased
   
   private var timer: DispatchSourceTimer
-  private var lastHeartbeat: Date = Date.distantPast
-  private var lastPrune: Date = Date.distantPast
+  private var lastHeartbeat: Date = Date()
+  private var lastPrune: Date = Date()
   
   init(ship: SimConnectShipObserver, protocolType: ProtocolType = .textBased) {
+    self.listening = true
     self.ship = ship
     self.protocolType = protocolType
     
@@ -271,6 +273,7 @@ final class ServerListener {
   }
   
   func start() {
+    self.status = .connecting
     self.listener?.stateUpdateHandler = { [self] state in
       Task { @MainActor in
         switch state {
@@ -301,7 +304,6 @@ final class ServerListener {
         if now.timeIntervalSince(self.lastHeartbeat) >= 5 {
           self.lastHeartbeat = now
           if let heartbeatConnection = self.heartbeatConnection {
-            ServerStatus.shared.status = .heartbeat
             self.heartbeatTest(conn: heartbeatConnection)
           } else {
             print("Issue with heartbeat connection - attempting to recreate")
@@ -332,7 +334,7 @@ final class ServerListener {
       Task { @MainActor in
         switch state {
         case .ready:
-          ServerStatus.shared.status = .running
+          self.status = .receiving
           print("Connection ready to receive message")
           switch self.protocolType {
           case .textBased:
@@ -341,7 +343,7 @@ final class ServerListener {
             self.consumeDataGDL90()
           }
         case .cancelled, .failed:
-          ServerStatus.shared.status = .stopped
+          self.status = .error("stopped")
           self.listening = false
           print("Connection stopped")
           self.listener?.cancel()
@@ -542,14 +544,12 @@ final class ServerListener {
     print("Sending FS2FF heartbeat")
     
     // fs2ff expects exactly this JSON structure
-    struct HeartbeatMessage: Codable {
+    struct HeartbeatMessage: Encodable {
       var App: String = "ForeFlight"
     }
     
     do {
       let data = try JSONEncoder().encode(HeartbeatMessage())
-      print("Heartbeat data: \(String(data: data, encoding: .utf8) ?? "Unable to decode")")
-      
       conn.send(content: data, completion: .contentProcessed { error in
         if let error {
           print("FS2FFService: Heartbeat send error: \(error)")
@@ -575,13 +575,11 @@ final class ServerListener {
   
   func stop() {
     self.timer.cancel()
-    stopListener()
-    stopConnection()
     self.heartbeatConnection?.cancel()
     self.heartbeatConnection = nil
-    ServerStatus.shared.status = .stopped
+    
+    stopListener()
+    stopConnection()
   }
+  
 }
-
-
-

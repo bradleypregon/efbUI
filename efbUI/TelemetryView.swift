@@ -8,12 +8,14 @@
 import SwiftUI
 
 struct TelemetryView: View {
+  @Environment(SimConnectShipObserver.self) var ship
+  
   var body: some View {
     HStack {
       VStack {
         Text("IAS")
           .font(.subheadline)
-        Text("123kt")
+        Text("\(ship.ownship.value.speed)kt")
           .fontWeight(.semibold)
       }
       .clipShape(Capsule())
@@ -21,9 +23,9 @@ struct TelemetryView: View {
       
       
       VStack {
-        Text("Alt")
+        Text("ALT")
           .font(.subheadline)
-        Text("36,000ft")
+        Text("\(ship.ownship.value.altitude)ft")
           .fontWeight(.semibold)
       }
       .clipShape(Capsule())

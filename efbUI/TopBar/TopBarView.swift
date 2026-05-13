@@ -27,7 +27,6 @@ struct TopBarView: View {
       
       Toggle("SimConnect", systemImage: serverRunning ? "wifi" : "wifi.slash", isOn: $serverRunning)
         .font(.title2)
-        .tint(getServerState())
         .toggleStyle(.button)
         .labelStyle(.iconOnly)
         .contentTransition(.symbolEffect)
@@ -82,17 +81,6 @@ struct TopBarView: View {
     }
     .onReceive(simConnect.ownship) { ship in
       self.ship = ship
-    }
-  }
-  
-  func getServerState() -> Color {
-    switch ServerStatus.shared.status {
-    case .running:
-      return .vfr
-    case .heartbeat:
-      return .mvfr
-    case .stopped:
-      return .ifr
     }
   }
   
