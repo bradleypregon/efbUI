@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		1C31A65F2EBCFC0D00E25772 /* NotePadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A65E2EBCFC0D00E25772 /* NotePadView.swift */; };
 		1C31A6612EBD009F00E25772 /* CurveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A6602EBD009F00E25772 /* CurveView.swift */; };
-		1C31A6632EBD29BE00E25772 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A6622EBD29BD00E25772 /* MapView.swift */; };
 		1C31A6692EBD4CAF00E25772 /* MainOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A6682EBD4CAF00E25772 /* MainOptionsView.swift */; };
 		1C31A66B2EBD6DCC00E25772 /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C31A66A2EBD6DCC00E25772 /* TabBarView.swift */; };
 		1C626DC82E9F03AA0088651B /* navdata.db in Resources */ = {isa = PBXBuildFile; fileRef = 1C626DC72E9F03AA0088651B /* navdata.db */; };
@@ -96,7 +95,6 @@
 /* Begin PBXFileReference section */
 		1C31A65E2EBCFC0D00E25772 /* NotePadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotePadView.swift; sourceTree = "<group>"; };
 		1C31A6602EBD009F00E25772 /* CurveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveView.swift; sourceTree = "<group>"; };
-		1C31A6622EBD29BD00E25772 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		1C31A6682EBD4CAF00E25772 /* MainOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainOptionsView.swift; sourceTree = "<group>"; };
 		1C31A66A2EBD6DCC00E25772 /* TabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarView.swift; sourceTree = "<group>"; };
 		1C626DC72E9F03AA0088651B /* navdata.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = navdata.db; sourceTree = "<group>"; };
@@ -243,7 +241,6 @@
 				3A1BB450278A3FB9001AC228 /* AirportAnnotationCalloutView.swift */,
 				A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */,
 				A21B5C252CD973F40017778C /* MapScreenWaypointView.swift */,
-				1C31A6622EBD29BD00E25772 /* MapView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -585,7 +582,6 @@
 				3AE11B2B27319450005974E5 /* MapScreen.swift in Sources */,
 				A21B02372B5034850041D60B /* PDFKitView.swift in Sources */,
 				A266BF3B2D3F605C0002AB80 /* SQLManager.swift in Sources */,
-				1C31A6632EBD29BE00E25772 /* MapView.swift in Sources */,
 				A25CC0612B97A25D00716E1A /* RouteManager.swift in Sources */,
 				A20620262B49DC890034D902 /* AirportScreenViewModel.swift in Sources */,
 				A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */,
