@@ -11,9 +11,8 @@ import CoreLocation
 // TODO: Airport SIDs and STARs
 
 struct AirportAnnotationCalloutView: View {
-  @Environment(AirportScreenViewModel.self) private var airportVM
+  @Environment(AppCoordinator.self) private var appCoordinator
   
-  @Binding var selectedTab: efbTab
   var airport: AirportTable
   @State private var vm = AirportDetails()
   
@@ -156,8 +155,8 @@ struct AirportAnnotationCalloutView: View {
         .foregroundStyle(.gray)
         
         Button("View Airport") {
-          airportVM.selectedAirportICAO = airport.airportIdentifier
-          selectedTab = .airports
+//          airportVM.selectedAirportICAO = airport.airportIdentifier
+          appCoordinator.openAirport(airport.airportIdentifier)
         }
         .buttonStyle(.bordered)
         .frame(maxWidth: .infinity)

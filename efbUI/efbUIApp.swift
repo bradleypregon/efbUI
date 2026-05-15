@@ -11,30 +11,50 @@ import SwiftUI
 @main
 struct efbUIApp: App {
   @State private var simConnectShip: SimConnectShipObserver = SimConnectShipObserver()
-  // TODO: This no longer needs to be Environment
-  @State private var airportDetailViewModel: AirportScreenViewModel = AirportScreenViewModel()
   @State private var simbrief: SimBriefViewModel = SimBriefViewModel()
   @State private var routeManager: RouteManager = RouteManager()
+  @State private var appCoordinator: AppCoordinator = AppCoordinator()
   
   var body: some Scene {
     WindowGroup {
       
-      //VStack {
-      //  TabBar()
-      //  TopBarView()
-      //    .clipShape(
-      //      UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 10, bottomTrailingRadius: 10, topTrailingRadius: 0)
-      //    )
-      //    .frame(height: 50)
-      //    .background(.bar)
-      //}
-      
-      MainView()
+      VStack {
+        TabBar()
+        TopBarView()
+          .clipShape(
+            UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 10, bottomTrailingRadius: 10, topTrailingRadius: 0)
+          )
+          .frame(height: 50)
+          .background(.bar)
+      }
       .environment(simConnectShip)
-      .environment(airportDetailViewModel)
+      .environment(appCoordinator)
       .environment(simbrief)
       .environment(routeManager)
     }
     .modelContainer(for: UserSettings.self)
+  }
+}
+
+@Observable
+final class AppCoordinator {
+  var tab: efbTab = .airports
+  var selectedICAO: String? = nil {
+    didSet {
+      print("Get charts here?")
+    }
+  }
+  var focusMap: Bool = false
+  var charts: AirportChartAPISchema? = nil
+  
+  func openAirport(_ icao: String) {
+    selectedICAO = icao
+    tab = .airports
+  }
+  
+  func openMap(focusOn icao: String) {
+    selectedICAO = icao
+    focusMap = true
+    tab = .map
   }
 }

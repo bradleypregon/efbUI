@@ -11,15 +11,13 @@ import Observation
 import PencilKit
 
 struct MapScreen: View {
-  @Binding var selectedTab: efbTab
+  @Environment(AppCoordinator.self) private var coordinator
   @Environment(SimConnectShipObserver.self) var simConnect
 //  @Environment(Settings.self) private var settings
-  @Environment(AirportScreenViewModel.self) private var airportVM
   @Environment(RouteManager.self) private var routeManager
   
   @State private var viewport: Viewport = .camera(center: CLLocationCoordinate2D(latitude: 39.5, longitude: -98.0), zoom: 4, bearing: 0, pitch: 0)
   private let ornamentOptions = OrnamentOptions(scaleBar: ScaleBarViewOptions(visibility: .hidden))
-  private let style = "mapbox://styles/bradleypregon/clpvnz3y900yn01qmby0f9xn6"
   
   @State var mapViewModel = MapScreenViewModel()
   
@@ -50,6 +48,7 @@ struct MapScreen: View {
   @State private var drawing: PKDrawing = PKDrawing()
   
   var body: some View {
+    @Bindable var coordinator = coordinator
     ZStack {
       GeometryReader { geometry in
         MapReader { proxy in
@@ -57,13 +56,12 @@ struct MapScreen: View {
             // MARK: Airport Annotations
             // MARK: Large Airports
             
-            /*
+            /* Testing
             RasterSource(id: "VFR-Sectional")
               .tiles(["https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer/tile/{z}/{y}/{x}.png"])
               
             RasterLayer(id: "VFR-Sectional-Layer", source: "VFR-Sectional")
             */
-            
             
             if mapViewModel.displayLg {
               PointAnnotationGroup(mapViewModel.largeAirports) { airport in
@@ -292,7 +290,9 @@ struct MapScreen: View {
 //                }
 //              }
           }
-          .mapStyle(.init(uri: StyleURI(rawValue: style) ?? StyleURI.dark))
+          .mapStyle(
+            MapStyle(uri: StyleURI(rawValue: Bundle.main.object(forInfoDictionaryKey: "MapStyleURIv2") as? String ?? "") ?? .dark)
+          )
           .ornamentOptions(ornamentOptions)
           .onStyleLoaded { _ in
             do {
@@ -316,21 +316,23 @@ struct MapScreen: View {
                 }
               }
             }
-            
+            /*
             if context.cameraState.zoom >= 7.5 {
-//                mapViewModel.gatesVisible = true
-//                mapViewModel.fetchVisibleGates()
+              mapViewModel.gatesVisible = true
+              mapViewModel.fetchVisibleGates()
             } else {
-//                mapViewModel.gatesVisible = false
+              mapViewModel.gatesVisible = false
             }
+             */
           }
           .onAppear {
+            // TODO: Make safe
             proxyMap = proxy
-            if airportVM.requestMap {
+            if coordinator.focusMap, let icao = coordinator.selectedICAO {
               Task {
-                guard let temp = airportVM.selectedAirport else { return }
-                proxy.camera?.ease(to: CameraOptions(center: CLLocationCoordinate2DMake(temp.airportRefLat, temp.airportRefLong), zoom: 13), duration: 1.25)
-                airportVM.requestMap = false
+                let coords = SQLiteManager.shared.getAirportCoords(for: icao)
+                proxy.camera?.ease(to: CameraOptions(center: CLLocationCoordinate2DMake(coords.lat, coords.long), zoom: 13), duration: 1.25)
+                coordinator.focusMap = false
               }
             }
           }
@@ -397,7 +399,7 @@ struct MapScreen: View {
             }
           }
           .popover(item: $selectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
-            AirportAnnotationCalloutView(selectedTab: $selectedTab, airport: airport)
+            AirportAnnotationCalloutView(airport: airport)
               .frame(width: 300, height: 375)
           }
         }
@@ -745,5 +747,5 @@ private enum Id {
 }
 
 #Preview {
-  MapScreen(selectedTab: .constant(.map))
+  MapScreen()
 }

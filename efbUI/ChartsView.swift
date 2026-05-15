@@ -14,8 +14,7 @@ enum TestChartType: String, CaseIterable, Identifiable {
 }
 
 struct ChartsView: View {
-  @Binding var selectedTab: efbTab
-  @Environment(AirportScreenViewModel.self) private var airportDetailViewModel
+  @Environment(AppCoordinator.self) private var coordinator
   @Environment(SimBriefViewModel.self) private var sbViewModel
   
   @State private var columnVisibility: NavigationSplitViewVisibility = .all
@@ -188,7 +187,7 @@ struct ChartsView: View {
   @MainActor
   func charts() -> some View {
     List {
-      if let charts = airportDetailViewModel.selectedAirportCharts {
+      if let charts = coordinator.charts {
         DisclosureGroup("General") {
           ForEach(charts.general, id: \.id) { chart in
             HStack {
@@ -405,5 +404,5 @@ private enum AirportChart: String, CaseIterable, Identifiable {
 }
 
 #Preview {
-  ChartsView(selectedTab: .constant(.charts))
+  ChartsView()
 }

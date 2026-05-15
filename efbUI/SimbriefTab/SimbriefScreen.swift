@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 import CoreLocation
 
+// TODO: Move OFP here
 struct SimbriefScreen: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(SimBriefViewModel.self) var simbrief

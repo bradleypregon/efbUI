@@ -26,7 +26,7 @@ enum RouteCategory: Equatable, Hashable {
 }
 
 struct TabBar: View {
-  @State var selectedTab: efbTab = .airports
+  @Environment(AppCoordinator.self) private var coordinator: AppCoordinator
   @Environment(SimConnectShipObserver.self) private var ship
   @Environment(RouteManager.self) private var route
   @Query var userSettings: [UserSettings]
@@ -42,36 +42,24 @@ struct TabBar: View {
   private let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
   
   var body: some View {
-    TabView(selection: $selectedTab) {
+    @Bindable var coordinator = coordinator
+    
+    TabView(selection: $coordinator.tab) {
       Tab(value: .search, role: .search) {
-        SearchView(tab: $selectedTab)
+        SearchView()
       }
       Tab("Airport", systemImage: "scope", value: .airports) {
-        AirportScreen(selectedTab: $selectedTab)
+        AirportScreen()
       }
       Tab("Charts", systemImage: "doc.on.doc", value: .charts) {
-        ChartsView(selectedTab: $selectedTab)
+        ChartsView()
           .ignoresSafeArea(edges: .top)
       }
-      
-      // MARK: Saving TabSection for a later date when fixed/functions better
-//      TabSection {
-//        Tab("Route", systemImage: "point.topleft.down.to.point.bottomright.curvepath", value: efbTab.routeCategories(.route)) {
-//          RouteScreen()
-//        }
-//        Tab("Simbrief", systemImage: "point.topleft.down.to.point.bottomright.curvepath", value: .routeCategories(.simbrief)) {
-//          SimbriefScreen()
-//        }
-//      } header: {
-//        Label("Route", systemImage: "point.topleft.down.to.point.bottomright.curvepath")
-//      }
-      
       Tab("Simbrief", systemImage: "point.topleft.down.to.point.bottomright.curvepath", value: .routeCategories(.simbrief)) {
         SimbriefScreen()
       }
-      
       Tab("Map", systemImage: "map", value: .map) {
-        MapScreen(selectedTab: $selectedTab)
+        MapScreen()
       }
       Tab("ScratchPad", systemImage: "square.and.pencil", value: .scratchPad) {
         ScratchPadView()

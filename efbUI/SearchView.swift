@@ -54,7 +54,6 @@ import Combine
 
 struct SearchView: View {
   @State private var viewModel = SearchViewModel()
-  @Binding var tab: efbTab
   
   let columns = [GridItem(.adaptive(minimum: 250))]
   
@@ -64,7 +63,7 @@ struct SearchView: View {
       ScrollView {
         LazyVGrid(columns: columns) {
           ForEach(viewModel.airports) { airport in
-            AirportSearchResultCard(tab: $tab, airport: airport)
+            AirportSearchResultCard(airport: airport)
           }
         }
       }
@@ -76,26 +75,23 @@ struct SearchView: View {
 }
 
 struct AirportSearchResultCard: View {
-  @Environment(AirportScreenViewModel.self) private var airportScreenViewModel
-  @Binding var tab: efbTab
+  @Environment(AppCoordinator.self) private var coordinator
   let airport: AirportTable
   
   var body: some View {
+    @Bindable var coordinator = coordinator
     HStack(spacing: 10) {
       VStack {
         Text(airport.airportIdentifier)
         Text(airport.airportName)
       }
       Button {
-        airportScreenViewModel.selectedAirportICAO = airport.airportIdentifier
-        tab = .airports
+        coordinator.openAirport(airport.airportIdentifier)
       } label: {
         Text("Details")
       }
       Button {
-        airportScreenViewModel.selectedAirportICAO = airport.airportIdentifier
-        airportScreenViewModel.requestMap = true
-        tab = .map
+        coordinator.openMap(focusOn: airport.airportIdentifier)
       } label: {
         Text("Map")
       }
@@ -109,5 +105,5 @@ struct AirportSearchResultCard: View {
 }
 
 #Preview {
-  SearchView(tab: .constant(.search))
+  SearchView()
 }

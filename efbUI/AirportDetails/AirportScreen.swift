@@ -43,27 +43,24 @@ struct AirportSunriseSunsetView: View {
 }
 
 struct AirportScreen: View {
-  @Binding var selectedTab: efbTab
-  @Environment(AirportScreenViewModel.self) private var viewModel
-//  @State private var textFieldFocused: Bool = false
+  @Environment(AppCoordinator.self) private var coordinator
+  @State private var vm: AirportScreenViewModel = AirportScreenViewModel()
   
   var body: some View {
-    @Bindable var viewModel = viewModel
-    
     NavigationStack {
       ZStack {
-        if viewModel.selectedAirport != nil {
+        if vm.selectedAirport != nil {
           VStack(spacing: 20) {
             HStack {
               Grid(alignment: .leading) {
                 GridRow {
-                  Text(viewModel.cityServed)
+                  Text(vm.cityServed)
                 }
                 GridRow {
-                  Text(viewModel.formatAirportCoordinates(lat: viewModel.selectedAirport?.airportRefLat ?? .zero, long: viewModel.selectedAirport?.airportRefLong ?? .zero))
+                  Text(vm.formatAirportCoordinates(lat: vm.selectedAirport?.airportRefLat ?? .zero, long: vm.selectedAirport?.airportRefLong ?? .zero))
                 }
                 GridRow {
-                  AirportSunriseSunsetView(weather: viewModel.localWeatherResults)
+                  AirportSunriseSunsetView(weather: vm.localWeatherResults)
                 }
               }
               .frame(maxWidth: .infinity, alignment: .leading)
@@ -73,10 +70,10 @@ struct AirportScreen: View {
                   GridRow {
                     Text("Wx Category")
                       .font(.subheadline)
-                    if !viewModel.faaMetar.isEmpty {
-                      Text(viewModel.wxCategory.rawValue)
+                    if !vm.faaMetar.isEmpty {
+                      Text(vm.wxCategory.rawValue)
                         .fontWeight(.semibold)
-                        .foregroundStyle(viewModel.wxCategoryColor(for: viewModel.wxCategory))
+                        .foregroundStyle(vm.wxCategoryColor(for: vm.wxCategory))
                     } else {
                       Text("N/A")
                         .fontWeight(.semibold)
@@ -85,19 +82,18 @@ struct AirportScreen: View {
                   GridRow {
                     Text("Elevation")
                       .font(.subheadline)
-                    Text("\(viewModel.selectedAirport?.elevation ?? .zero)'")
+                    Text("\(vm.selectedAirport?.elevation ?? .zero)'")
                       .fontWeight(.semibold)
                   }
                   GridRow(alignment: .center) {
                     Button {
-                      selectedTab = .charts
+                      coordinator.tab = .charts
                     } label: {
                       Text("Charts")
                     }
                     .buttonStyle(.bordered)
                     Button {
-                      viewModel.requestMap = true
-                      selectedTab = .map
+                      coordinator.openMap(focusOn: "")
                     } label: {
                       Image(systemName: "map")
                     }
@@ -108,25 +104,25 @@ struct AirportScreen: View {
                   GridRow {
                     Text("ATIS")
                       .font(.subheadline)
-                    Text(viewModel.getCommunicationType(comms: viewModel.comms, type: "ATI"))
+                    Text(vm.getCommunicationType(comms: vm.comms, type: "ATI"))
                       .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Clearance")
                       .font(.subheadline)
-                    Text(viewModel.getCommunicationType(comms: viewModel.comms, type: "CLD"))
+                    Text(vm.getCommunicationType(comms: vm.comms, type: "CLD"))
                       .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Ground")
                       .font(.subheadline)
-                    Text(viewModel.getCommunicationType(comms: viewModel.comms, type: "GND"))
+                    Text(vm.getCommunicationType(comms: vm.comms, type: "GND"))
                       .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Tower")
                       .font(.subheadline)
-                    Text(viewModel.getCommunicationType(comms: viewModel.comms, type: "TWR"))
+                    Text(vm.getCommunicationType(comms: vm.comms, type: "TWR"))
                       .fontWeight(.semibold)
                   }
                 }
@@ -135,14 +131,14 @@ struct AirportScreen: View {
               
             }
             
-            Picker(selection: $viewModel.selectedInfoTab, label: Text("Picker")) {
+            Picker(selection: $vm.selectedInfoTab, label: Text("Picker")) {
               ForEach(AirportsScreenInfoTabs.allCases, id: \.id) { tab in
                 Text(tab.rawValue)
                   .tag(tab)
               }
             }
             .pickerStyle(.segmented)
-            AirportScreenInfoTabBuilder(selectedTab: viewModel.selectedInfoTab, airportVM: viewModel)
+            AirportScreenInfoTabBuilder(selectedTab: vm.selectedInfoTab, airportVM: vm)
             Spacer()
           }
         } else {
@@ -154,13 +150,19 @@ struct AirportScreen: View {
           }
         }
       }
-      .navigationTitle(viewModel.selectedAirport != nil ? "\(viewModel.selectedAirport?.airportIdentifier ?? "") | \(viewModel.selectedAirport?.airportName ?? "")" : "Airport Details")
+      .navigationTitle(vm.selectedAirport != nil ? "\(vm.selectedAirport?.airportIdentifier ?? "") | \(vm.selectedAirport?.airportName ?? "")" : "Airport Details")
       .navigationBarTitleDisplayMode(.large)
     }
     .task {
       // fetch metar, weather, local weather, etc
-      if viewModel.selectedAirportICAO != viewModel.prevICAO {
-        await viewModel.fetchFaaMetar(icao: viewModel.selectedAirportICAO)
+      if vm.selectedAirportICAO != vm.prevICAO {
+        await vm.fetchFaaMetar(icao: vm.selectedAirportICAO)
+      }
+    }
+    .onAppear {
+      if coordinator.selectedICAO != "" && vm.selectedAirportICAO != vm.prevICAO {
+        vm.selectedAirportICAO = coordinator.selectedICAO ?? ""
+        vm.selectedAirport = SQLiteManager.shared.selectAirport(vm.selectedAirportICAO)
       }
     }
   }
@@ -364,7 +366,7 @@ struct AirportScreenLocalWxTab: View {
 }
 
 
-//#Preview {
-//  AirportScreen(selectedTab: .constant(0))
-//}
+#Preview {
+  AirportScreen()
+}
 
