@@ -10,32 +10,40 @@ import CoreLocation
 import SwiftData
 
 struct TopBarView: View {
-  private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-  @State private var currentZuluTime24: String = "00:00z"
+  private let zuluTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+  @State private var zuluTime: String = "--:--z"
+  
   @Environment(SimConnectShipObserver.self) var simConnect
   @State private var serverRunning: Bool = false
-  @State var ship: SimConnectShip = .init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero, fs2ffid: .zero, lastUpdated: Date())
-  
-  var server: ServerListener {
-    ServerListener(ship: simConnect)
-  }
+  @State private var server: ServerListener?
   
   var body: some View {
     HStack(alignment: .center) {
-      Text(currentZuluTime24)
+      Text("\(zuluTime)z")
         .padding(.leading, 10)
+        .onReceive(zuluTimer) { _ in
+          let df = DateFormatter()
+          df.dateFormat = "HH:mm"
+          df.timeZone = .gmt
+          zuluTime = df.string(from: Date())
+        }
       
       Toggle("SimConnect", systemImage: serverRunning ? "wifi" : "wifi.slash", isOn: $serverRunning)
         .font(.title2)
         .toggleStyle(.button)
         .labelStyle(.iconOnly)
         .contentTransition(.symbolEffect)
-        .onChange(of: serverRunning) {
-          if serverRunning {
-            server.start()
+        .tint(tint(for: server?.status ?? .idle, isOn: serverRunning))
+        .padding([.leading, .trailing], 10)
+        .onChange(of: serverRunning) { old, new in
+          if new && server == nil {
+            server = ServerListener(ship: simConnect)
+            server?.start()
+          } else {
+            server?.stop()
+            server = nil
           }
         }
-        .padding([.leading, .trailing], 10)
       
       Spacer()
         .frame(width: 20)
@@ -44,53 +52,27 @@ struct TopBarView: View {
         VStack {
           Text("Heading")
             .font(.caption)
-          Text("\(roundToTenths(ship.heading))º")
+          Text("\(roundToTenths(simConnect.ownship.value.heading))º")
         }
         .frame(width: 100)
         VStack {
           Text("GPS Alt")
             .font(.caption)
-          Text("\(roundToTenths((ship.altitude) * 3.281))'") // meters to feet
+          Text("\(roundToTenths((simConnect.ownship.value.altitude) * 3.281))'") // meters to feet
         }
         .frame(width: 100)
         VStack {
           Text("Spd (GS)")
             .font(.caption)
-          Text("\(roundToTenths((ship.speed) * 1.944))kt") // m/s to knots
+          Text("\(roundToTenths((simConnect.ownship.value.speed) * 1.944))kt") // m/s to knots
         }
         .frame(width: 100)
       }
       .fontWeight(.semibold)
       
       Spacer()
-//        TextField("Search Airports...", text: $tempSearchText)
-//          .autocorrectionDisabled()
-//          .textFieldStyle(.roundedBorder)
-//          .frame(width: 350)
-//          .onTapGesture {
-//            textFieldFocused.toggle()
-//          }
-//          .popover(isPresented: $textFieldFocused) {
-//            Text("Hello there")
-//          }
-//          .padding(.trailing, 10)
     }
     .padding(.top, 15)
-    .onReceive(timer) { _ in
-      getCurrentZuluTime24()
-    }
-    .onReceive(simConnect.ownship) { ship in
-      self.ship = ship
-    }
-  }
-  
-  func getCurrentZuluTime24() {
-    let df = DateFormatter()
-    df.dateFormat = "HH:mm"
-    df.timeZone = TimeZone(identifier: "UTC")
-    let currentDate = Date()
-    let zulu = df.string(from: currentDate)
-    currentZuluTime24 = "\(zulu)z"
   }
   
   func roundToTenths(_ number: Double) -> String {
@@ -99,6 +81,17 @@ struct TopBarView: View {
     nf.minimumFractionDigits = 0
     nf.maximumFractionDigits = 0
     return nf.string(from: NSNumber(value: roundedNumber)) ?? ""
+  }
+  
+  private func tint(for status: TelemetryStatus, isOn: Bool) -> Color {
+    guard isOn else { return .primary }        // toggle is off
+    switch status {
+    case .idle:        return .primary         // on but idle (or stopped)
+    case .connecting:  return .yellow          // connecting
+    case .heartbeat:   return .yellow          // heartbeat-only
+    case .receiving:   return .vfr             // good/green
+    case .error:       return .red             // error state
+    }
   }
   
 }
