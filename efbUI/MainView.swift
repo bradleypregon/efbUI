@@ -44,7 +44,7 @@ struct MainView: View {
         // Gets pushed over when detailPanelVisible is true
         VStack {
           ZStack {
-            MapView(mapViewModel: mapViewModel)
+            //MapView(mapViewModel: mapViewModel)
             
             GeometryReader { geometry in
               MainOptionsView(
