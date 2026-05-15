@@ -6,7 +6,7 @@
 	<string>$(MBXAccessToken)</string>
 	<key>OSMWeatherAPI_Key</key>
 	<string>$(OSMWeatherAPI_Key)</string>
-	<key>MapStyleURI</key>
+	<key>MapStyleURI_DEPRECATE</key>
 	<string>mapbox://styles/bradleypregon/clpvnz3y900yn01qmby0f9xn6</string>
 	<key>MapStyleURIv2</key>
 	<string>mapbox://styles/bradleypregon/cmi42g7cf00qz01sc5axr2896</string>
