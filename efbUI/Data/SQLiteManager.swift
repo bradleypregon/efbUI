@@ -567,4 +567,10 @@ class SQLiteManager {
     }
   }
   
+  func getAirportCoords(for icao: String) -> AirportCoordinates {
+    let airport = selectAirport(icao)
+    guard let airport = airport else { return AirportCoordinates(lat: .zero, long: .zero)}
+    return AirportCoordinates(lat: airport.airportRefLat, long: airport.airportRefLong)
+  }
+  
 }

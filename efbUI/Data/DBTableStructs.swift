@@ -7,6 +7,10 @@
 
 import Foundation
 
+struct AirportCoordinates {
+  let lat, long: Double
+}
+
 struct AirportTable: Identifiable, Hashable {
   let areaCode: String
   let icaoCode: String
