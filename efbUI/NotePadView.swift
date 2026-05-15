@@ -7,6 +7,14 @@
 
 import SwiftUI
 
+/*
+ .overlay(alignment: .trailing) {
+ NotePadView(isVisible: $notePadVisible)
+ .padding(16)
+ .allowsHitTesting(true)
+ .zIndex(1000)
+ }
+ */
 struct NotePadView: View {
   @Binding var isVisible: Bool
   @State private var dragOffset: CGSize = .zero
