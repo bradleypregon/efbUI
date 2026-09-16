@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import SwiftUI
 import CoreLocation
+import MapKit
 
 extension Double {
   func rounded(toPlaces places: Int) -> Double {
@@ -21,12 +22,13 @@ extension LosslessStringConvertible {
   var string: String { .init(self) }
 }
 
+/*
 extension CLLocation {
   func fetchCityState(completion: @escaping (_ city: String?, _ state:  String?, _ error: Error?) -> ()) {
     CLGeocoder().reverseGeocodeLocation(self) { completion($0?.first?.locality, $0?.first?.administrativeArea, $1) }
   }
 }
-
+*/
 // TODO: Remove? Possibly not needed
 extension UIImage {
   func resize(newWidth: CGFloat) -> UIImage? {

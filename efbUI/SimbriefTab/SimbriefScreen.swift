@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 import CoreLocation
 
-// TODO: Move OFP here
 struct SimbriefScreen: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(SimBriefViewModel.self) var simbrief
@@ -88,6 +87,7 @@ struct SimbriefDetails: View {
     case arr = "Arrival"
     case alt = "Alternate"
     case route = "Route"
+    case ofp = "OFP"
     
     var id: Self { self }
   }
@@ -183,6 +183,8 @@ struct SimbriefDetails: View {
       SimbriefTabDetails(alternates: ofp.alternate)
     case .route:
       SimbriefTabRoute(route: ofp.navlog)
+    case .ofp:
+      SimbriefTabOFP(ofpURL: "\(ofp.files.directory)\(ofp.files.pdf.link)")
     }
   }
   
@@ -207,3 +209,12 @@ struct SimbriefDetails: View {
 //    .modelContainer(previewContainer)
 //}
 
+struct SimbriefTabOFP: View {
+  let ofpURL: String
+  
+  var body: some View {
+    if let url = URL(string: ofpURL) {
+      PDFKitView(url: url)
+    }
+  }
+}

@@ -54,7 +54,9 @@ struct AirportScreen: View {
             HStack {
               Grid(alignment: .leading) {
                 GridRow {
-                  Text(vm.cityServed)
+                  //Text(vm.cityServed)
+                  // TODO: Replace with MKReverseGeocodingRequest
+                  Text("City, ST")
                 }
                 GridRow {
                   Text(vm.formatAirportCoordinates(lat: vm.selectedAirport?.airportRefLat ?? .zero, long: vm.selectedAirport?.airportRefLong ?? .zero))
@@ -160,6 +162,7 @@ struct AirportScreen: View {
       }
     }
     .onAppear {
+      vm.selectedAirportICAO = coordinator.selectedICAO ?? ""
       if coordinator.selectedICAO != "" && vm.selectedAirportICAO != vm.prevICAO {
         vm.selectedAirportICAO = coordinator.selectedICAO ?? ""
         vm.selectedAirport = SQLiteManager.shared.selectAirport(vm.selectedAirportICAO)

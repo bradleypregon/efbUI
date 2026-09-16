@@ -41,11 +41,15 @@ final class AppCoordinator {
   var tab: efbTab = .airports
   var selectedICAO: String? = nil {
     didSet {
-      print("Get charts here?")
+      if let icao = selectedICAO {
+        Task {
+          await getCharts(for: icao)
+        }
+      }
     }
   }
   var focusMap: Bool = false
-  var charts: AirportChartAPISchema? = nil
+  var charts: ChartAPISchema? = nil
   
   func openAirport(_ icao: String) {
     selectedICAO = icao
@@ -56,5 +60,15 @@ final class AppCoordinator {
     selectedICAO = icao
     focusMap = true
     tab = .map
+  }
+  
+  func getCharts(for icao: String) async {
+    do {
+      charts = try await ChartAPI().fetchCharts(icao: icao)
+    } catch let error as ChartAPIError {
+      print(error.localizedDescription)
+    } catch {
+      print("Unexpected error fetching airport charts: \(error)")
+    }
   }
 }

@@ -16,7 +16,7 @@ struct AirportRunwayView: View {
   @State private var popoverPresented: Bool = false
   
   var body: some View {
-    VStack {
+    VStack(spacing: 12) {
       Text(runway.runwayIdentifier)
         .foregroundStyle(longest ? .orange : .secondary)
         .fontWeight(.semibold)
@@ -25,33 +25,37 @@ struct AirportRunwayView: View {
         popoverPresented.toggle()
       } label: {
         ZStack {
-          if optimal {
-            RoundedRectangle(cornerRadius: 20)
-              .stroke(.vfr, lineWidth: 10)
-              .frame(width: 200, height: 200)
-          } else {
-            RoundedRectangle(cornerRadius: 20)
-              .frame(width: 200, height: 200)
-          }
+          RoundedRectangle(cornerRadius: 32)
+            .stroke(optimal ? .vfr : .primary, lineWidth: 8)
+            .frame(width: 200, height: 200)
           
           ZStack {
             ZStack {
-              RoundedRectangle(cornerRadius: 4)
-                .stroke(.white, lineWidth: 5)
-                .frame(width: 45, height: 190)
+              Rectangle()
+                .fill(.gray)
+                .frame(width: 50, height: 180)
               
-              Text(runway.runwayIdentifier.split(separator: "RW")[0])
+              VStack {
+                ForEach(1...10, id: \.self) { blah in
+                  Rectangle()
+                    .frame(width: 5, height: 10)
+                    .foregroundStyle(.white.opacity(0.5))
+                }
+              }
+              
+              Text("`\(runway.runwayIdentifier.split(separator: "RW")[0])`")
                 .foregroundStyle(.white)
-                .fontWeight(.semibold)
-                .offset(y: 80)
+                .background(.gray)
+                .font(.title.bold())
+                .offset(y: 70)
             }
             .rotationEffect(.degrees(runway.runwayMagneticBearing))
             
             if let windDir = weather?.wdir, let dir = windDir.asInt {
               Image(systemName: "arrow.up")
-                .foregroundStyle(.blue)
+                .foregroundStyle(.indigo)
                 .rotationEffect(.degrees(Double(invertDegree(for: dir))))
-                .font(.system(size: 55))
+                .font(.system(size: 70))
             }
           }
         }
@@ -70,23 +74,39 @@ struct AirportRunwayView: View {
         Text("True: \(runway.runwayTrueBearing)")
       }
       .listStyle(.inset)
-      .frame(width: 200, height: 145)
+      .frame(width: 200, height: 200)
     })
   }
   
   func invertDegree(for heading: Int) -> Int {
     return (heading < 180) ? (heading + 180) : (heading - 180)
   }
-  
-  func getRunwaySurface() {
-    
-  }
-  
-  func getRunwaySurfaceColor() {
-    
-  }
 }
 
 #Preview(traits: .sizeThatFitsLayout) {
-  AirportRunwayView(runway: .init(areaCode: "", icaoCode: "", airportIdentifier: "", runwayIdentifier: "RW10", runwayLatitude: .zero, runwayLongitude: .zero, runwayGradient: .zero, runwayMagneticBearing: 360, runwayTrueBearing: 010, landingThresholdElevation: 1000, displacedThresholdDistance: 100, thresholdCrossingHeight: 100, runwayLength: 6000, runwayWidth: 200, llzIdentifier: "", llz_mls_gls_category: "", surfaceCode: 5, id: ""), weather: nil, optimal: false, longest: true)
+  AirportRunwayView(
+    runway: .init(
+      areaCode: "",
+      icaoCode: "",
+      airportIdentifier: "",
+      runwayIdentifier: "RW10",
+      runwayLatitude: .zero,
+      runwayLongitude: .zero,
+      runwayGradient: .zero,
+      runwayMagneticBearing: 010,
+      runwayTrueBearing: 010,
+      landingThresholdElevation: 1000,
+      displacedThresholdDistance: 100,
+      thresholdCrossingHeight: 100,
+      runwayLength: 6901,
+      runwayWidth: 200,
+      llzIdentifier: "",
+      llz_mls_gls_category: "",
+      surfaceCode: 5,
+      id: ""
+    ),
+    weather: .init(metarID: nil, icaoID: nil, receiptTime: nil, obsTime: nil, reportTime: nil, temp: nil, dewp: nil, wdir: .int(010), wspd: nil, wgst: nil, visib: nil, altim: nil, slp: nil, qcField: nil, wxString: nil, presTend: nil, maxT: nil, minT: nil, maxT24: nil, minT24: nil, precip: nil, pcp3hr: nil, pcp6hr: nil, pcp24hr: nil, snow: nil, vertVis: nil, metarType: nil, rawOb: nil, mostRecent: nil, lat: nil, lon: nil, elev: nil, prior: nil, name: nil, clouds: []),
+    optimal: false,
+    longest: false
+  )
 }

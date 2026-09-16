@@ -51,7 +51,7 @@ struct SimbriefTabDetails: View {
       }
       
     } else if let alternates {
-      Text("")
+      Text("\(alternates.first?.metar ?? "no metar")")
     }
   }
   

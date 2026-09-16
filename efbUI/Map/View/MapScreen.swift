@@ -68,9 +68,11 @@ struct MapScreen: View {
                 PointAnnotation(coordinate: CLLocationCoordinate2DMake(airport.lat, airport.long), isDraggable: false)
                   .image(named: "lg-airport-vfr")
                   .textField(airport.icao)
-                  .textOffset(x: 0.0, y: -1.8)
+                  .textOffset(x: 0.0, y: -1.85)
                   .textColor(.white)
                   .textSize(12)
+                  .textHaloWidth(1)
+                  .textHaloColor(.black)
                   .onTapGesture { context in
                     selectedAirport = SQLiteManager.shared.selectAirport(airport.icao)
                     mapPopoverSelectedPoint = UnitPoint(

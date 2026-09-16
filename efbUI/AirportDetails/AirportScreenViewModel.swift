@@ -318,9 +318,9 @@ class AirportScreenViewModel: AirportDetails {
   var requestMap: Bool = false
   var selectedAirport: AirportTable?
   var localWeatherResults: OpenMeteoSchema?
-  var cityServed = ""
+  //var cityServed = ""
   var selectedInfoTab: AirportsScreenInfoTabs = .freq
-  var selectedAirportCharts: AirportChartAPISchema?
+  //var selectedAirportCharts: ChartAPISchema?
   
   var selectedAirportICAO: String = "" {
     didSet {
@@ -341,8 +341,8 @@ class AirportScreenViewModel: AirportDetails {
    */
   private func queryAirportData(airport: AirportTable) async {
     await fetchLocalWeather(lat: airport.airportRefLat, long: airport.airportRefLong)
-    fetchCityState(lat: airport.airportRefLat, long: airport.airportRefLong)
-    await fetchAirportCharts(icao: airport.airportIdentifier)
+    //fetchCityState(lat: airport.airportRefLat, long: airport.airportRefLong)
+    //await fetchAirportCharts(icao: airport.airportIdentifier)
   }
   
   func fetchLocalWeather(lat: Double, long: Double) async {
@@ -354,6 +354,7 @@ class AirportScreenViewModel: AirportDetails {
     
   }
   
+  /*
   func fetchCityState(lat: Double, long: Double) {
     let location = CLLocation(latitude: lat, longitude: long)
     location.fetchCityState { city, state, error in
@@ -362,6 +363,7 @@ class AirportScreenViewModel: AirportDetails {
       self.cityServed = cityState
     }
   }
+  */
   
   func formatAirportCoordinates(lat: Double, long: Double) -> String {
     let formattedLat = String(format: "%.2f", lat)
@@ -369,15 +371,17 @@ class AirportScreenViewModel: AirportDetails {
     return "\(formattedLat) / \(formattedLong)"
   }
   
+  /*
   func fetchAirportCharts(icao: String) async {
     do {
-      self.selectedAirportCharts = try await AirportChartAPI().fetchCharts(icao: icao)
-    } catch let error as AirportChartAPIError {
+      self.selectedAirportCharts = try await ChartAPI().fetchCharts(icao: icao)
+    } catch let error as ChartAPIError {
       print(error.localizedDescription)
     } catch {
       print("Unexpected error fetching airport charts: \(error)")
     }
   }
+   */
   
 }
 

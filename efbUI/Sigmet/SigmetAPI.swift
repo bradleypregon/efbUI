@@ -49,7 +49,6 @@ class SigmetAPI {
     df.timeZone = TimeZone(identifier: "UTC")
     let currentDate = Date()
     let zulu = df.string(from: currentDate)
-    print("\(zulu)Z")
     return "\(zulu)Z"
   }
   

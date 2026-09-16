@@ -51,36 +51,26 @@ struct TopBarView: View {
       LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]) {
         VStack {
           Text("Heading")
-            .font(.caption)
-          Text("\(roundToTenths(simConnect.ownship.value.heading))º")
+          Text("\(Int((simConnect.ownship.value.heading).rounded()))º")
         }
         .frame(width: 100)
         VStack {
           Text("GPS Alt")
-            .font(.caption)
-          Text("\(roundToTenths((simConnect.ownship.value.altitude) * 3.281))'") // meters to feet
+          Text("\(Int((simConnect.ownship.value.altitude).rounded()))'")
         }
         .frame(width: 100)
         VStack {
           Text("Spd (GS)")
-            .font(.caption)
-          Text("\(roundToTenths((simConnect.ownship.value.speed) * 1.944))kt") // m/s to knots
+          Text("\(Int((simConnect.ownship.value.speed).rounded()))kt")
         }
         .frame(width: 100)
       }
+      .font(.caption)
       .fontWeight(.semibold)
       
       Spacer()
     }
     .padding(.top, 15)
-  }
-  
-  func roundToTenths(_ number: Double) -> String {
-    let roundedNumber = number.rounded(toPlaces: 0)
-    let nf = NumberFormatter()
-    nf.minimumFractionDigits = 0
-    nf.maximumFractionDigits = 0
-    return nf.string(from: NSNumber(value: roundedNumber)) ?? ""
   }
   
   private func tint(for status: TelemetryStatus, isOn: Bool) -> Color {

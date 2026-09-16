@@ -8,17 +8,12 @@
 import SwiftUI
 import PencilKit
 
-enum TestChartType: String, CaseIterable, Identifiable {
-  case favorite, current, route, ofp
-  var id: Self { self }
-}
-
 struct ChartsView: View {
   @Environment(AppCoordinator.self) private var coordinator
   @Environment(SimBriefViewModel.self) private var sbViewModel
   
   @State private var columnVisibility: NavigationSplitViewVisibility = .all
-  @State private var starred: [Chart] = []
+  @State private var starred: [ChartAPIChartSchema] = []
   @State private var selectedChartURL: String = ""
   
   @State private var rotation: Angle = .zero
@@ -26,15 +21,12 @@ struct ChartsView: View {
   @State private var zoom: CGFloat = 1
   @GestureState private var pinchZoom: CGFloat = 1
   
-  @State private var selectedCharts: AirportChart = .Curr
+  @State private var selectedTab: ChartTab = .Curr
   
   @State var searchText: String = ""
-  @State var testPickerType: TestChartType = .current
   
   @State private var drawingTool: PKTool = PKInkingTool(.pen, color: .red, width: 10)
   @State private var drawing: PKDrawing = PKDrawing()
-  
-  //  @State private var tempCharts: [TempAirportChart] = []
   
   var body: some View {
     NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -43,9 +35,9 @@ struct ChartsView: View {
           .textFieldStyle(.roundedBorder)
           .padding([.leading, .trailing])
         
-        Picker("Airport", selection: $selectedCharts) {
-          ForEach(AirportChart.allCases) { airport in
-            if airport.rawValue == AirportChart.Star.rawValue {
+        Picker("Airport", selection: $selectedTab) {
+          ForEach(ChartTab.allCases) { airport in
+            if airport.rawValue == ChartTab.Star.rawValue {
               Image(systemName: "star.fill")
                 .resizable()
             } else {
@@ -55,30 +47,7 @@ struct ChartsView: View {
         }
         .pickerStyle(.segmented)
         
-//        Picker("Chart Type", selection: $testPickerType) {
-//          ForEach(TestChartType.allCases) { type in
-//            if type == .favorite {
-//              Image(systemName: "star.fill")
-//                .resizable()
-//            } else {
-//              Text(type.rawValue.capitalized)
-//            }
-//          }
-//        }
-//        .pickerStyle(.segmented)
-        
         chartViewBuilder()
-        //        .task {
-        //          if let temp = sbViewModel.depCharts {
-        //            tempCharts.append(TempAirportChart(stage: .dep, charts: temp))
-        //          }
-        //          if let temp = sbViewModel.arrCharts {
-        //            tempCharts.append(TempAirportChart(stage: .arr, charts: temp))
-        //          }
-        //          if let temp = sbViewModel.altnCharts {
-        //            tempCharts.append(TempAirportChart(stage: .altn, charts: temp))
-        //          }
-        //        }
       }
       
     } detail: {
@@ -139,15 +108,13 @@ struct ChartsView: View {
   @MainActor
   @ViewBuilder
   func chartViewBuilder() -> some View {
-    switch selectedCharts {
+    switch selectedTab {
     case .Star:
       starredCharts()
     case .Curr:
       charts()
     case .Route:
       routeCharts()
-    case .OFP:
-      ofp()
     }
   }
   
@@ -155,7 +122,7 @@ struct ChartsView: View {
   func starredCharts() -> some View {
     // TODO: Sections with Current and Route charts
     List {
-      ForEach(starred, id: \.id) { chart in
+      ForEach(starred) { chart in
         HStack {
           Button {
             starred.removeAll { $0.id == chart.id }
@@ -166,7 +133,7 @@ struct ChartsView: View {
           Spacer()
           Button {
             DispatchQueue.main.async {
-              selectedChartURL = chart.pdfPath
+              selectedChartURL = chart.pdfURL
             }
           } label: {
             Text(chart.chartName)
@@ -187,18 +154,18 @@ struct ChartsView: View {
   @MainActor
   func charts() -> some View {
     List {
-      if let charts = coordinator.charts {
+      if let charts = coordinator.charts?.charts {
         DisclosureGroup("General") {
-          ForEach(charts.general, id: \.id) { chart in
+          ForEach(charts.general) { chart in
             HStack {
               Button {
-                if starred.contains(chart) {
+                if starred.contains(where: { $0.id == chart.id }) {
                   starred.removeAll { $0.id == chart.id }
                 } else {
                   starred.append(chart)
                 }
               } label: {
-                if starred.contains(chart) {
+                if starred.contains(where: { $0.id == chart.id }) {
                   Image(systemName: "star.fill")
                 } else {
                   Image(systemName: "star")
@@ -207,7 +174,7 @@ struct ChartsView: View {
               .buttonStyle(PlainButtonStyle())
               Spacer()
               Button {
-                selectedChartURL = chart.pdfPath
+                selectedChartURL = chart.pdfURL
               } label: {
                 Text(chart.chartName)
               }
@@ -216,16 +183,16 @@ struct ChartsView: View {
           }
         }
         DisclosureGroup("Departure") {
-          ForEach(charts.dp, id: \.id) { chart in
+          ForEach(charts.departure) { chart in
             HStack {
               Button {
-                if starred.contains(chart) {
+                if starred.contains(where: { $0.id == chart.id }) {
                   starred.removeAll { $0.id == chart.id }
                 } else {
                   starred.append(chart)
                 }
               } label: {
-                if starred.contains(chart) {
+                if starred.contains(where: { $0.id == chart.id }) {
                   Image(systemName: "star.fill")
                 } else {
                   Image(systemName: "star")
@@ -234,7 +201,7 @@ struct ChartsView: View {
               .buttonStyle(PlainButtonStyle())
               Spacer()
               Button {
-                selectedChartURL = chart.pdfPath
+                selectedChartURL = chart.pdfURL
               } label: {
                 Text(chart.chartName)
               }
@@ -243,16 +210,16 @@ struct ChartsView: View {
           }
         }
         DisclosureGroup("Arrival") {
-          ForEach(charts.star, id: \.id) { chart in
+          ForEach(charts.arrival) { chart in
             HStack {
               Button {
-                if starred.contains(chart) {
+                if starred.contains(where: { $0.id == chart.id }) {
                   starred.removeAll { $0.id == chart.id }
                 } else {
                   starred.append(chart)
                 }
               } label: {
-                if starred.contains(chart) {
+                if starred.contains(where: { $0.id == chart.id }) {
                   Image(systemName: "star.fill")
                 } else {
                   Image(systemName: "star")
@@ -261,7 +228,7 @@ struct ChartsView: View {
               .buttonStyle(PlainButtonStyle())
               Spacer()
               Button {
-                selectedChartURL = chart.pdfPath
+                selectedChartURL = chart.pdfURL
               } label: {
                 Text(chart.chartName)
               }
@@ -270,21 +237,21 @@ struct ChartsView: View {
           }
         }
         DisclosureGroup("Approach") {
-          ForEach(charts.capp, id: \.id) { chart in
+          ForEach(charts.approach) { chart in
             HStack {
               Button {
-                if starred.contains(chart) {
+                if starred.contains(where: { $0.id == chart.id }) {
                   starred.removeAll { $0.id == chart.id }
                 } else {
                   starred.append(chart)
                 }
               } label: {
-                Image(systemName: starred.contains(chart) ? "star.fill" : "star")
+                Image(systemName: starred.contains(where: { $0.id == chart.id }) ? "star.fill" : "star")
               }
               .buttonStyle(PlainButtonStyle())
               Spacer()
               Button {
-                selectedChartURL = chart.pdfPath
+                selectedChartURL = chart.pdfURL
               } label: {
                 Text(chart.chartName)
               }
@@ -302,10 +269,10 @@ struct ChartsView: View {
       // Origin
       Section {
         if let temp = sbViewModel.depCharts {
-          chartGroup(name: "General", chart: temp.general)
-          chartGroup(name: "Departure", chart: temp.dp)
-          chartGroup(name: "Arrival", chart: temp.star)
-          chartGroup(name: "Approach", chart: temp.capp)
+          chartGroup(name: "General", chart: temp.charts.general)
+          chartGroup(name: "Departure", chart: temp.charts.departure)
+          chartGroup(name: "Arrival", chart: temp.charts.arrival)
+          chartGroup(name: "Approach", chart: temp.charts.approach)
         }
       } header: {
         Text("Origin (\(sbViewModel.ofp?.origin.icaoCode ?? ""))")
@@ -314,10 +281,10 @@ struct ChartsView: View {
       // Destination
       Section {
         if let temp = sbViewModel.arrCharts {
-          chartGroup(name: "General", chart: temp.general)
-          chartGroup(name: "Departure", chart: temp.dp)
-          chartGroup(name: "Arrival", chart: temp.star)
-          chartGroup(name: "Approach", chart: temp.capp)
+          chartGroup(name: "General", chart: temp.charts.general)
+          chartGroup(name: "Departure", chart: temp.charts.departure)
+          chartGroup(name: "Arrival", chart: temp.charts.arrival)
+          chartGroup(name: "Approach", chart: temp.charts.approach)
         }
       } header: {
         Text("Destination (\(sbViewModel.ofp?.destination.icaoCode ?? ""))")
@@ -328,10 +295,10 @@ struct ChartsView: View {
       // need to fix sbViewModel.altnCharts to be actual array
       Section {
         if let temp = sbViewModel.altnCharts {
-          chartGroup(name: "General", chart: temp.general)
-          chartGroup(name: "Departure", chart: temp.dp)
-          chartGroup(name: "Arrival", chart: temp.star)
-          chartGroup(name: "Approach", chart: temp.capp)
+          chartGroup(name: "General", chart: temp.charts.general)
+          chartGroup(name: "Departure", chart: temp.charts.departure)
+          chartGroup(name: "Arrival", chart: temp.charts.arrival)
+          chartGroup(name: "Approach", chart: temp.charts.approach)
         }
       } header: {
         Text("Alternates")
@@ -340,31 +307,31 @@ struct ChartsView: View {
   }
   
   @MainActor
-  func currentCharts(charts: AirportChartAPISchema?) -> some View {
+  func currentCharts(charts: ChartAPISchema?) -> some View {
     List {
-      if let chart = charts {
+      if let chart = charts?.charts {
         chartGroup(name: "General", chart: chart.general)
-        chartGroup(name: "Departure", chart: chart.dp)
-        chartGroup(name: "Arrival", chart: chart.star)
-        chartGroup(name: "Approach", chart: chart.capp)
+        chartGroup(name: "Departure", chart: chart.departure)
+        chartGroup(name: "Arrival", chart: chart.arrival)
+        chartGroup(name: "Approach", chart: chart.approach)
       }
     }
     .listStyle(.insetGrouped)
   }
   
   @MainActor
-  func chartGroup(name: String, chart: [Chart]) -> some View {
+  func chartGroup(name: String, chart: [ChartAPIChartSchema]) -> some View {
     DisclosureGroup(name) {
-      ForEach(chart, id: \.id) { chart in
+      ForEach(chart) { chart in
         HStack {
           Button {
-            if starred.contains(chart) {
+            if starred.contains(where: { $0.id == chart.id }) {
               starred.removeAll { $0.id == chart.id }
             } else {
               starred.append(chart)
             }
           } label: {
-            if starred.contains(chart) {
+            if starred.contains(where: { $0.id == chart.id }) {
               Image(systemName: "star.fill")
             } else {
               Image(systemName: "star")
@@ -373,7 +340,7 @@ struct ChartsView: View {
           .buttonStyle(PlainButtonStyle())
           Spacer()
           Button {
-            selectedChartURL = chart.pdfPath
+            selectedChartURL = chart.pdfURL
           } label: {
             Text(chart.chartName)
           }
@@ -398,8 +365,8 @@ struct ChartsView: View {
   }
 }
 
-private enum AirportChart: String, CaseIterable, Identifiable {
-  case Star, Curr, Route, OFP
+private enum ChartTab: String, CaseIterable, Identifiable {
+  case Star, Curr, Route
   var id: Self { self }
 }
 

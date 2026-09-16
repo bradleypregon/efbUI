@@ -10,7 +10,7 @@ import Observation
 import SwiftUI
 
 @Observable
-final class SimBriefViewModel: Sendable {
+final class SimBriefViewModel {
   var ofp: OFPSchema? {
     didSet {
       if let ofp {
@@ -28,9 +28,9 @@ final class SimBriefViewModel: Sendable {
   let api = SimBriefAPI()
   var sbAPIErrorMessage: String?
   
-  var depCharts: AirportChartAPISchema?
-  var arrCharts: AirportChartAPISchema?
-  var altnCharts: AirportChartAPISchema?
+  var depCharts: ChartAPISchema?
+  var arrCharts: ChartAPISchema?
+  var altnCharts: ChartAPISchema?
   
   func fetchOFP(for id: String) async {
     do {
@@ -42,9 +42,9 @@ final class SimBriefViewModel: Sendable {
     }
   }
   
-  func fetchCharts(icao: String) async -> AirportChartAPISchema? {
+  func fetchCharts(icao: String) async -> ChartAPISchema? {
     do {
-      return try await AirportChartAPI().fetchCharts(icao: icao)
+      return try await ChartAPI().fetchCharts(icao: icao)
     } catch {
       return nil
     }

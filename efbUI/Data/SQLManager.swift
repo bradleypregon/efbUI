@@ -21,7 +21,7 @@ final class SQLManager {
   }
   
   func fetchAirports() -> [AirportTable] {
-    guard let db = queue else { return [] }
+    //guard let db = queue else { return [] }
     
     return []
   }
