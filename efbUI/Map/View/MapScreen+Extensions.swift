@@ -9,7 +9,12 @@ import SwiftUI
 import MapboxMaps
 import Observation
 
-// MARK: SimConnect Traffic
+extension MapStyle {
+  static let customStyle = MapStyle(uri: StyleURI(rawValue: Bundle.main.object(forInfoDictionaryKey: "MapStyleURI") as? String ?? "") ?? .dark)
+}
+
+// MARK: SimConnect Traffic DEPRECATE
+/*
 extension MapScreen {
   func tempUpdateOwnship(ship: SimConnectShip, proxy: MapProxy) async {
     do {
@@ -30,8 +35,8 @@ extension MapScreen {
         updateTrafficLayer(id: String(tfc.fs2ffid), ship: tfc, proxy: proxy)
         
         /// Check if FeatureCollection Features contains an entry for ID
-        if self.featureCollection.features.contains(where: { $0.identifier == .string(String(tfc.fs2ffid))}) {
-          if let feature = self.featureCollection.features.first(where: { $0.identifier == .string(String(tfc.fs2ffid))}) {
+        if self.vm.featureCollection.features.contains(where: { $0.identifier == .string(String(tfc.fs2ffid))}) {
+          if let feature = self.vm.featureCollection.features.first(where: { $0.identifier == .string(String(tfc.fs2ffid))}) {
             updateTrafficFeature(feature: feature, traffic: tfc, proxy: proxy)
           }
         } else {
@@ -51,7 +56,7 @@ extension MapScreen {
       "alt": .init(floatLiteral: traffic.altitude),
       "onGround": .init(booleanLiteral: traffic.onGround ?? false)
     ]
-    self.featureCollection.features.append(feature)
+    self.vm.featureCollection.features.append(feature)
   }
   
   func updateTrafficFeature(feature: Feature, traffic: SimConnectShip, proxy: MapProxy) {
@@ -84,7 +89,7 @@ extension MapScreen {
   func addOwnshipLayer() {
     do {
       var layer = LocationIndicatorLayer(id: "OwnshipLayer")
-      layer.topImage = .constant(ResolvedImage.name("ShipArrow"))
+      layer.topImage = .constant(ResolvedImage.name("ownship"))
       layer.slot = .top
       try proxyMap?.map?.addLayer(layer)
     } catch {
@@ -135,52 +140,113 @@ extension MapScreen {
   }
   
   func removeTrafficFeature(id: String) {
-    self.featureCollection.features.removeAll { $0.identifier?.string == id }
+    self.vm.featureCollection.features.removeAll { $0.identifier?.string == id }
+  }
+}
+*/
+
+// MARK: New Traffic
+extension MapScreen {
+  @MapContentBuilder
+  var trafficContent: some MapContent {
+    GeoJSONSource(id: "TrafficSource")
+      .data(.featureCollection(vm.trafficFeatures))
+    
+    SymbolLayer(id: "TrafficLayer", source: "TrafficSource")
+      .iconImage("traffic")
+      .iconRotate(Exp(.get) { "hdg" })
+      .iconRotationAlignment(.map)
+      .iconAllowOverlap(true)
+      .textField(Exp(.get) { "reg" })
+      .textOffset(x: 0, y: 2)
+      .textSize(7)
+      .textColor(.white)
+      .textFont(["Roboto Bold Condensed"])
+      .textOptional(true)
+      .slot(.middle)
+    
+    // Traffic Reg and Alt labels
+    SymbolLayer(id: "TrafficRegLayer", source: "TrafficSource")
+      .textField(Exp(.get) { "reg" })
+      .textOffset(x: 0, y: 2)
+      .textSize(7)
+      .textColor(.white)
+      .textFont(["Roboto Bold Condensed"])
+    SymbolLayer(id: "TrafficAltLayer", source: "TrafficSource")
+      .textField(Exp(.get) { "alt" })
+      .textSize(7)
+      .textOffset(x: 0, y: -2)
+      .textColor(.white)
+      .textFont(["Roboto Bold Condensed"])
+    
+    if let ownship = vm.ownship {
+      LocationIndicatorLayer(id: "OwnshipLayer")
+        .topImage("ownship")
+//        .location([ownship.coordinate.latitude, ownship.coordinate.longitude, ownship.altitude])
+        .bearing(ownship.heading)
+        .slot(.top)
+    }
   }
 }
 
 // MARK: Weather and Satellite Radar
 extension MapScreen {
-  // MARK: addRasterRadarSource
+  @MapContentBuilder
+  var radarContent: some MapContent {
+    let radarData:Int = vm.radarSectionVM.currentRadar?.radar?.nowcast?.first?.time ?? Int(Date().timeIntervalSince1970)
+    let mapColor = 4
+    let smooth = 1 // 1 or 0
+    let snow = 1 // 1 or 0
+    let url = String("https://api.librewxr.net/v2/radar/\(radarData)/256/{z}/{x}/{y}/\(mapColor)/\(smooth)_\(snow).png")
+    
+    RasterSource(id: "RadarSource")
+      .tiles([url])
+    
+    RasterLayer(id: "RadarLayer", source: "RadarSource")
+      .rasterOpacity(0.4)
+  }
+  
+  /*
   func addWeatherRadarSource() {
     // https://api.rainviewer.com/public/weather-maps.json
     /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
-    if let currentRadar = mapViewModel.currentRadar {
+    if let currentRadar = vm.radarSectionVM.currentRadar {
       let radarData = currentRadar.radar?.nowcast?.first?.path ?? ""
       let stringPaths = "{z}/{x}/{y}"
       let mapColor = "4"
       let options = "1_1" // smooth_snow
       let url = String("https://tilecache.rainviewer.com\(radarData)/512/\(stringPaths)/\(mapColor)/\(options).png")
       
-      var rasterSource = RasterSource(id: mapViewModel.wxRadarSourceID)
+      var rasterSource = RasterSource(id: vm.radarSectionVM.wxRadarSourceID)
       rasterSource.tiles = [url]
       rasterSource.tileSize = 512
       
-      var rasterLayer = RasterLayer(id: mapViewModel.wxRadarSourceID, source: rasterSource.id)
+      var rasterLayer = RasterLayer(id: vm.radarSectionVM.wxRadarSourceID, source: rasterSource.id)
       rasterLayer.rasterOpacity = .constant(0.4)
       
       do {
         try proxyMap?.map?.addSource(rasterSource)
         try proxyMap?.map?.addLayer(rasterLayer)
       } catch {
-        rasterRadarAlertVisible = true
+        vm.radarSectionVM.rasterRadarAlertVisible = true
         print("Failed to update map style with Wx Radar: \(error)")
       }
     }
   }
+  */
   
-  // MARK: removeRasterRadarSource
+  /*
   func removeWeatherRadarSource() {
     do {
-      try proxyMap?.map?.removeLayer(withId: mapViewModel.wxRadarSourceID)
-      try proxyMap?.map?.removeSource(withId: mapViewModel.wxRadarSourceID)
+      try proxyMap?.map?.removeLayer(withId: vm.radarSectionVM.wxRadarSourceID)
+      try proxyMap?.map?.removeSource(withId: vm.radarSectionVM.wxRadarSourceID)
     } catch {
       print("Failed to remove radar source. Error: \(error)")
     }
   }
-  
+  */
   func addSatelliteRadarSource() {
-    if let currentRadar = mapViewModel.currentRadar {
+    if let currentRadar = vm.radarSectionVM.currentRadar {
 
       let radarData = currentRadar.satellite?.infrared?.first?.path ?? ""
       let stringPaths = "{z}/{x}/{y}"
@@ -188,18 +254,18 @@ extension MapScreen {
       let options = "0_0" // smooth_snow always 0 for satellite
       let url = String("https://tilecache.rainviewer.com\(radarData)/512/\(stringPaths)/\(mapColor)/\(options).png")
       
-      var rasterSource = RasterSource(id: mapViewModel.satelliteRadarSourceID)
+      var rasterSource = RasterSource(id: vm.radarSectionVM.satelliteRadarSourceID)
       rasterSource.tiles = [url]
       rasterSource.tileSize = 512
       
-      var rasterLayer = RasterLayer(id: mapViewModel.satelliteRadarSourceID, source: rasterSource.id)
+      var rasterLayer = RasterLayer(id: vm.radarSectionVM.satelliteRadarSourceID, source: rasterSource.id)
       rasterLayer.rasterOpacity = .constant(0.4)
       
       do {
         try proxyMap?.map?.addSource(rasterSource)
         try proxyMap?.map?.addLayer(rasterLayer)
       } catch {
-        rasterRadarAlertVisible = true
+        vm.radarSectionVM.rasterRadarAlertVisible = true
         print("Failed to update map style with Satellite or Wx Radar: \(error)")
       }
     }
@@ -207,8 +273,8 @@ extension MapScreen {
   
   func removeSatelliteRadarSource() {
     do {
-      try proxyMap?.map?.removeLayer(withId: mapViewModel.satelliteRadarSourceID)
-      try proxyMap?.map?.removeSource(withId: mapViewModel.satelliteRadarSourceID)
+      try proxyMap?.map?.removeLayer(withId: vm.radarSectionVM.satelliteRadarSourceID)
+      try proxyMap?.map?.removeSource(withId: vm.radarSectionVM.satelliteRadarSourceID)
     } catch {
       print("Failed to remove satellite source: \(error)")
     }

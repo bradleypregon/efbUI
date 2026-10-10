@@ -9,10 +9,24 @@ import Observation
 import CoreLocation
 import SwiftUI
 
-enum WxCategory: String {
+enum WxCategory: String, Decodable {
   case VFR, MVFR, IFR, LIFR, NONE
+  
+  var color: Color {
+    switch self {
+    case .VFR: return .vfr
+    case .MVFR: return .mvfr
+    case .IFR: return .ifr
+    case .LIFR: return .lifr
+    default: return .icaoHalo
+    }
+  }
+  
+  init(from decoder: Decoder) throws {
+    let raw = try? decoder.singleValueContainer().decode(String.self)
+    self = WxCategory(rawValue: raw ?? "") ?? .NONE
+  }
 }
-
 
 enum WxTabs: String, Identifiable, CaseIterable {
   case metar, taf, atis
@@ -54,55 +68,55 @@ class AirportDetails {
     fetches runways, comms
    */
   func fetchAirportDetails(icao: String) async {
-    await self.fetchRunways(icao: icao)
-    await self.fetchComms(icao: icao)
+//    await self.fetchRunways(icao: icao)
+//    await self.fetchComms(icao: icao)
     await self.fetchVatsimInfo(icao: icao)
   }
   
-  func fetchRunways(icao: String) async {
-    let runways = SQLiteManager.shared.getAirportRunways(icao)
-    self.runways = runways
-  }
+//  func fetchRunways(icao: String) async {
+//    let runways = SQLiteManager.shared.getAirportRunways(icao)
+//    self.runways = runways
+//  }
+
+//  func fetchComms(icao: String) async {
+//    let comms = SQLiteManager.shared.getAirportComms(icao)
+//    self.comms = comms
+//  }
   
-  func fetchComms(icao: String) async {
-    let comms = SQLiteManager.shared.getAirportComms(icao)
-    self.comms = comms
-  }
+//  func getCommunicationType(comms: [AirportCommunicationTable]?, type: String) -> String {
+//    if comms == nil { return "" }
+//    var frequency = ""
+//    if let freq = comms?.first(where: { $0.communicationType == type && $0.frequencyUnits == "V"} ) {
+//      frequency = freq.communicationFrequency.string
+//      return frequency
+//    } else {
+//      return "n/a"
+//    }
+//  }
   
-  func getCommunicationType(comms: [AirportCommunicationTable]?, type: String) -> String {
-    if comms == nil { return "" }
-    var frequency = ""
-    if let freq = comms?.first(where: { $0.communicationType == type && $0.frequencyUnits == "V"} ) {
-      frequency = freq.communicationFrequency.string
-      return frequency
-    } else {
-      return "n/a"
-    }
-  }
+//  func getATIS(comms: [AirportCommunicationTable]?) -> [AirportCommunicationTable] {
+//    let types = ["ATI", "AWO", "ASO", "AWI", "AWS"]
+//    guard comms != nil else { return [] }
+//    guard let filter = comms?.filter({ $0.frequencyUnits == "V" && types.contains($0.communicationType)}) else { return [] }
+//    let sorted = sortWx(wx: filter)
+//    return sorted
+//  }
   
-  func getATIS(comms: [AirportCommunicationTable]?) -> [AirportCommunicationTable] {
-    let types = ["ATI", "AWO", "ASO", "AWI", "AWS"]
-    guard comms != nil else { return [] }
-    guard let filter = comms?.filter({ $0.frequencyUnits == "V" && types.contains($0.communicationType)}) else { return [] }
-    let sorted = sortWx(wx: filter)
-    return sorted
-  }
-  
-  func sortWx(wx: [AirportCommunicationTable]) -> [AirportCommunicationTable] {
-    let ranking: [String: Int] = [
-      "ATI": 1,
-      "AWO": 2,
-      "ASO": 3,
-      "AWI": 4,
-      "AWS": 5
-    ]
-    
-    return wx.sorted { (a, b) -> Bool in
-      let rankA = ranking[a.communicationType] ?? Int.max
-      let rankB = ranking[b.communicationType] ?? Int.max
-      return rankA < rankB
-    }
-  }
+//  func sortWx(wx: [AirportCommunicationTable]) -> [AirportCommunicationTable] {
+//    let ranking: [String: Int] = [
+//      "ATI": 1,
+//      "AWO": 2,
+//      "ASO": 3,
+//      "AWI": 4,
+//      "AWS": 5
+//    ]
+//    
+//    return wx.sorted { (a, b) -> Bool in
+//      let rankA = ranking[a.communicationType] ?? Int.max
+//      let rankB = ranking[b.communicationType] ?? Int.max
+//      return rankA < rankB
+//    }
+//  }
   
   func fetchBBoxMetar(ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D) async {
     do {
@@ -115,12 +129,11 @@ class AirportDetails {
   func closestField(to center: CLLocationCoordinate2D, fields: [AirportMETARSchema]) -> AirportMETARSchema? {
     guard !fields.isEmpty else { return nil }
     return fields.min { f1, f2 in
-      guard let f1Lat = f1.lat, let f1Lon = f1.lon, let f2lat = f2.lat, let f2lon = f2.lon else { return false }
-      
-      let latDiff1 = abs(center.latitude - f1Lat)
-      let lonDiff1 = abs(center.longitude - f1Lon)
-      let latDiff2 = abs(center.latitude - f2lat)
-      let lonDiff2 = abs(center.latitude - f2lon)
+      guard f1.lat != .zero, f2.lat != .zero, f1.lon != .zero, f2.lon != .zero else { return false }
+      let latDiff1 = abs(center.latitude - f1.lat)
+      let lonDiff1 = abs(center.longitude - f1.lon)
+      let latDiff2 = abs(center.latitude - f2.lat)
+      let lonDiff2 = abs(center.latitude - f2.lon)
       return (latDiff1 + lonDiff1) < (latDiff2 + lonDiff2)
     }
   }
@@ -130,7 +143,7 @@ class AirportDetails {
     do {
       let metars = try await AirportWxAPI().fetchMetar(icao: icao)
       self.faaMetar = metars
-      self.wxCategory = self.calculateWxCategory(wx: metars)
+//      self.wxCategory = self.calculateWxCategory(wx: metars)
       self.currentWxString = metars.first?.rawOb ?? "metar n/a for \(icao)"
     } catch let error as AirportWxError {
       print(error.localizedDescription)
@@ -194,6 +207,8 @@ class AirportDetails {
     }
   }
   
+  // can be deprecated
+  /*
   func calculateWxCategory(wx: [AirportMETARSchema]) -> WxCategory {
     /*
      Cloud Ceiling Def: Height of the BASE of the LOWEST clouds that cover MORE than HALF of the sky (BKN, OVC)
@@ -221,7 +236,6 @@ class AirportDetails {
     case .none:
       visib = 10
     }
-    
     // Check clouds
     if let clouds = wx.clouds {
       for cloud in clouds {
@@ -235,7 +249,6 @@ class AirportDetails {
         }
       }
     }
-    
     if lowestBase >= 3000 && visib >= 5 {
       return .VFR
     } else if lowestBase >= 1000 && visib >= 3 {
@@ -245,8 +258,8 @@ class AirportDetails {
     } else {
       return .LIFR
     }
-    
   }
+  */
   
   func fetchWx(for source: WxSources, type: WxTabs, icao: String, refresh: Bool) async {
     switch (source, type) {
@@ -325,14 +338,14 @@ class AirportScreenViewModel: AirportDetails {
   var selectedAirportICAO: String = "" {
     didSet {
       // Get selected airport
-      selectedAirport = SQLiteManager.shared.selectAirport(selectedAirportICAO)
-      if let selectedAirport {
-        Task {
-          await self.fetchAirportDetails(icao: self.selectedAirportICAO)
-          await self.queryAirportData(airport: selectedAirport)
-          await self.fetchFaaMetar(icao: self.selectedAirportICAO)
-        }
-      }
+//      selectedAirport = SQLiteManager.shared.selectAirport(selectedAirportICAO)
+//      if let selectedAirport {
+//        Task {
+//          await self.fetchAirportDetails(icao: self.selectedAirportICAO)
+//          await self.queryAirportData(airport: selectedAirport)
+//          await self.fetchFaaMetar(icao: self.selectedAirportICAO)
+//        }
+//      }
     }
   }
   
@@ -340,7 +353,7 @@ class AirportScreenViewModel: AirportDetails {
    Fetch Weather, fetch airport communications, fetch city/state
    */
   private func queryAirportData(airport: AirportTable) async {
-    await fetchLocalWeather(lat: airport.airportRefLat, long: airport.airportRefLong)
+    await fetchLocalWeather(lat: airport.airportRefLat ?? .zero, long: airport.airportRefLong ?? .zero)
     //fetchCityState(lat: airport.airportRefLat, long: airport.airportRefLong)
     //await fetchAirportCharts(icao: airport.airportIdentifier)
   }

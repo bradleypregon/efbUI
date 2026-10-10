@@ -204,11 +204,16 @@ final class SimConnectShipObserver: Sendable {
 }
 
 enum TelemetryStatus: Equatable {
-  case idle
-  case connecting
-  case heartbeat
-  case receiving
-  case error(String?)
+  case idle, connecting, heartbeat, receiving, error(String?)
+  
+  var color: Color {
+    switch self {
+    case .idle: .primary
+    case .connecting, .heartbeat: .yellow
+    case .receiving: .blue
+    case .error: .red
+    }
+  }
 }
 
 // MARK: ServerListener

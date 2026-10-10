@@ -6,70 +6,50 @@
 //
 
 import SwiftUI
-import Observation
-import Combine
 
-@MainActor
-@Observable final class SearchViewModel {
-  var airports: [AirportTable] = []
-  
-  var searchTask: Task<Void, Never>?
-  var searchTextSubject = CurrentValueSubject<String, Never>("")
-  var cancellables: Set<AnyCancellable> = []
-  
-  var requestMap: Bool = false
-  
-  init() {
-    searchTextSubject
-      .filter { $0.isEmpty }
-      .sink { _ in
-        self.searchTask?.cancel()
-        self.airports = []
-      }
-      .store(in: &cancellables)
-    
-    searchTextSubject
-      .debounce(for: .seconds(0.2), scheduler: RunLoop.main)
-      .filter { !$0.isEmpty }
-      .sink { [weak self] text in
-        guard let self else { return }
-        self.searchTask?.cancel()
-        self.searchTask = createSearchTask(text)
-      }
-      .store(in: &cancellables)
-  }
-  
-  func createSearchTask(_ text: String) -> Task<Void, Never> {
-    Task { @MainActor in
-      airports = await SQLiteManager.shared.queryAirportsAsync(text)
-    }
-  }
-  
-  var searchText: String = "" {
-    didSet {
-      searchTextSubject.send(searchText)
-    }
-  }
-}
+/**
+ TODO
+ - SearchView results -> make Multi-Type? AirportTable, RunwayTable, etc.
+ - LazyVStack -> Some type of grid, make search results a nice card view
+ - With Cards, add Favorite Airports at top, Closeset Airport, Home Airport
+ */
 
 struct SearchView: View {
-  @State private var viewModel = SearchViewModel()
+  @Environment(GRDBManager.self) private var grdb
+  @State private var results: [AirportTable] = []
+  @State private var searchText: String = ""
   
-  let columns = [GridItem(.adaptive(minimum: 250))]
+  var favorites: [AirportTable] = []
   
   var body: some View {
     NavigationStack {
-      Text("TODO: Favorite/common airports here?")
       ScrollView {
-        LazyVGrid(columns: columns) {
-          ForEach(viewModel.airports) { airport in
+        LazyVStack {
+          ForEach(results) { airport in
             AirportSearchResultCard(airport: airport)
           }
         }
       }
-      .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
+      .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
       .navigationTitle("Search")
       .navigationBarTitleDisplayMode(.large)
+      .task(id: searchText) {
+        let query = searchText.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else {
+          results = []
+          return
+        }
+
+        do {
+          // debounce
+          try await Task.sleep(for: .milliseconds(300))
+          results = try await grdb.searchAirports(searchText: query)
+        } catch is CancellationError {
+          print("The task was cancelled")
+        } catch {
+          print("GRDB Fetching error: \(error)")
+        }
+      }
     }
   }
 }
@@ -83,7 +63,7 @@ struct AirportSearchResultCard: View {
     HStack(spacing: 10) {
       VStack {
         Text(airport.airportIdentifier)
-        Text(airport.airportName)
+        Text(airport.airportName ?? "")
       }
       Button {
         coordinator.openAirport(airport.airportIdentifier)

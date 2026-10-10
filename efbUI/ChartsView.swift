@@ -21,7 +21,7 @@ struct ChartsView: View {
   @State private var zoom: CGFloat = 1
   @GestureState private var pinchZoom: CGFloat = 1
   
-  @State private var selectedTab: ChartTab = .Curr
+  @State private var selectedTab: ChartTab = .Route
   
   @State var searchText: String = ""
   
@@ -111,8 +111,8 @@ struct ChartsView: View {
     switch selectedTab {
     case .Star:
       starredCharts()
-    case .Curr:
-      charts()
+//    case .Curr:
+//      charts()
     case .Route:
       routeCharts()
     }
@@ -151,117 +151,117 @@ struct ChartsView: View {
     }
   }
   
-  @MainActor
-  func charts() -> some View {
-    List {
-      if let charts = coordinator.charts?.charts {
-        DisclosureGroup("General") {
-          ForEach(charts.general) { chart in
-            HStack {
-              Button {
-                if starred.contains(where: { $0.id == chart.id }) {
-                  starred.removeAll { $0.id == chart.id }
-                } else {
-                  starred.append(chart)
-                }
-              } label: {
-                if starred.contains(where: { $0.id == chart.id }) {
-                  Image(systemName: "star.fill")
-                } else {
-                  Image(systemName: "star")
-                }
-              }
-              .buttonStyle(PlainButtonStyle())
-              Spacer()
-              Button {
-                selectedChartURL = chart.pdfURL
-              } label: {
-                Text(chart.chartName)
-              }
-              .buttonStyle(BorderedButtonStyle())
-            }
-          }
-        }
-        DisclosureGroup("Departure") {
-          ForEach(charts.departure) { chart in
-            HStack {
-              Button {
-                if starred.contains(where: { $0.id == chart.id }) {
-                  starred.removeAll { $0.id == chart.id }
-                } else {
-                  starred.append(chart)
-                }
-              } label: {
-                if starred.contains(where: { $0.id == chart.id }) {
-                  Image(systemName: "star.fill")
-                } else {
-                  Image(systemName: "star")
-                }
-              }
-              .buttonStyle(PlainButtonStyle())
-              Spacer()
-              Button {
-                selectedChartURL = chart.pdfURL
-              } label: {
-                Text(chart.chartName)
-              }
-              .buttonStyle(BorderedButtonStyle())
-            }
-          }
-        }
-        DisclosureGroup("Arrival") {
-          ForEach(charts.arrival) { chart in
-            HStack {
-              Button {
-                if starred.contains(where: { $0.id == chart.id }) {
-                  starred.removeAll { $0.id == chart.id }
-                } else {
-                  starred.append(chart)
-                }
-              } label: {
-                if starred.contains(where: { $0.id == chart.id }) {
-                  Image(systemName: "star.fill")
-                } else {
-                  Image(systemName: "star")
-                }
-              }
-              .buttonStyle(PlainButtonStyle())
-              Spacer()
-              Button {
-                selectedChartURL = chart.pdfURL
-              } label: {
-                Text(chart.chartName)
-              }
-              .buttonStyle(BorderedButtonStyle())
-            }
-          }
-        }
-        DisclosureGroup("Approach") {
-          ForEach(charts.approach) { chart in
-            HStack {
-              Button {
-                if starred.contains(where: { $0.id == chart.id }) {
-                  starred.removeAll { $0.id == chart.id }
-                } else {
-                  starred.append(chart)
-                }
-              } label: {
-                Image(systemName: starred.contains(where: { $0.id == chart.id }) ? "star.fill" : "star")
-              }
-              .buttonStyle(PlainButtonStyle())
-              Spacer()
-              Button {
-                selectedChartURL = chart.pdfURL
-              } label: {
-                Text(chart.chartName)
-              }
-              .buttonStyle(BorderedButtonStyle())
-            }
-          }
-        }
-      }
-    }
-  }
+//  @MainActor
+//  func charts() -> some View {
+//    List {
+//      if let charts = coordinator.charts?.charts {
+//        DisclosureGroup("General") {
+//          ForEach(charts.general) { chart in
+//            HStack {
+//              Button {
+//                if starred.contains(where: { $0.id == chart.id }) {
+//                  starred.removeAll { $0.id == chart.id }
+//                } else {
+//                  starred.append(chart)
+//                }
+//              } label: {
+//                if starred.contains(where: { $0.id == chart.id }) {
+//                  Image(systemName: "star.fill")
+//                } else {
+//                  Image(systemName: "star")
+//                }
+//              }
+//              .buttonStyle(PlainButtonStyle())
+//              Spacer()
+//              Button {
+//                selectedChartURL = chart.pdfURL
+//              } label: {
+//                Text(chart.chartName)
+//              }
+//              .buttonStyle(BorderedButtonStyle())
+//            }
+//          }
+//        }
+//        DisclosureGroup("Departure") {
+//          ForEach(charts.departure) { chart in
+//            HStack {
+//              Button {
+//                if starred.contains(where: { $0.id == chart.id }) {
+//                  starred.removeAll { $0.id == chart.id }
+//                } else {
+//                  starred.append(chart)
+//                }
+//              } label: {
+//                if starred.contains(where: { $0.id == chart.id }) {
+//                  Image(systemName: "star.fill")
+//                } else {
+//                  Image(systemName: "star")
+//                }
+//              }
+//              .buttonStyle(PlainButtonStyle())
+//              Spacer()
+//              Button {
+//                selectedChartURL = chart.pdfURL
+//              } label: {
+//                Text(chart.chartName)
+//              }
+//              .buttonStyle(BorderedButtonStyle())
+//            }
+//          }
+//        }
+//        DisclosureGroup("Arrival") {
+//          ForEach(charts.arrival) { chart in
+//            HStack {
+//              Button {
+//                if starred.contains(where: { $0.id == chart.id }) {
+//                  starred.removeAll { $0.id == chart.id }
+//                } else {
+//                  starred.append(chart)
+//                }
+//              } label: {
+//                if starred.contains(where: { $0.id == chart.id }) {
+//                  Image(systemName: "star.fill")
+//                } else {
+//                  Image(systemName: "star")
+//                }
+//              }
+//              .buttonStyle(PlainButtonStyle())
+//              Spacer()
+//              Button {
+//                selectedChartURL = chart.pdfURL
+//              } label: {
+//                Text(chart.chartName)
+//              }
+//              .buttonStyle(BorderedButtonStyle())
+//            }
+//          }
+//        }
+//        DisclosureGroup("Approach") {
+//          ForEach(charts.approach) { chart in
+//            HStack {
+//              Button {
+//                if starred.contains(where: { $0.id == chart.id }) {
+//                  starred.removeAll { $0.id == chart.id }
+//                } else {
+//                  starred.append(chart)
+//                }
+//              } label: {
+//                Image(systemName: starred.contains(where: { $0.id == chart.id }) ? "star.fill" : "star")
+//              }
+//              .buttonStyle(PlainButtonStyle())
+//              Spacer()
+//              Button {
+//                selectedChartURL = chart.pdfURL
+//              } label: {
+//                Text(chart.chartName)
+//              }
+//              .buttonStyle(BorderedButtonStyle())
+//            }
+//          }
+//        }
+//      }
+//    }
+//  }
   
   @MainActor
   func routeCharts() -> some View {
@@ -366,7 +366,8 @@ struct ChartsView: View {
 }
 
 private enum ChartTab: String, CaseIterable, Identifiable {
-  case Star, Curr, Route
+//  case Star, Curr, Route
+  case Star, Route
   var id: Self { self }
 }
 

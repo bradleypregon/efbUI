@@ -8,48 +8,38 @@
 import Foundation
 
 struct AirportMETARSchema: Decodable {
-  let metarID: Int?
-  let icaoID: String?
-  let receiptTime: String?
-  let obsTime: Int?
-  let reportTime: String?
-  let temp: Double?
+  let icaoId: String?
+  let receiptTime: String
+  let obsTime: Int
+  let reportTime: String
+  let temp: Double // min 0
   let dewp: Double?
-  let wdir: Poly?
-  let wspd: Poly?
-  let wgst: Poly?
-  let visib: Poly? // "10+" or 9, 8, etc.
-  let altim: Double?
-  let slp: Double?
-  let qcField: Int?
+  let wdir: Poly? // Int>=0 or Str (VRB) (null)
+  let wspd: Int? // Int>=0 (null)
+  let wgst: Int? // Int>=0 (null)
+  let visib: Poly? // Number(double) or Str "10+" or 9, 8, etc.
+  let altim: Double? // hPa
+  let slp: Double? // sea-level press hPa
   let wxString: String?
   let presTend: Double?
   let maxT: Double?
   let minT: Double?
   let maxT24: Double?
   let minT24: Double?
-  let precip: Double?
-  let pcp3hr: Double?
-  let pcp6hr: Double?
-  let pcp24hr: Double?
+  let precip: Double? // >=0
+  let pcp3hr: Double? // >=0
+  let pcp6hr: Double? // >=0
+  let pcp24hr: Double? // >=0
   let snow: Double?
-  let vertVis: Double?
-  let metarType: String?
-  let rawOb: String?
-  let mostRecent: Int?
-  let lat: Double?
-  let lon: Double?
-  let elev: Int?
-  let prior: Int?
-  let name: String?
-  let clouds: [AirportMetarInfoClouds]?
-  
-  private enum CodingKeys: String, CodingKey {
-    case metarID = "metar_id"
-    case icaoID = "icaoId"
-    case receiptTime, obsTime, reportTime, temp, dewp, wdir, wspd, wgst, visib, altim, slp, qcField, wxString, presTend, maxT, minT, maxT24, minT24, precip, pcp3hr, pcp6hr, pcp24hr, snow, vertVis, metarType, rawOb, mostRecent, lat, lon, elev, prior, name, clouds
-  }
-  
+  let vertVis: Int? // >=0
+  let metarType: String // METAR, SPECI, SYNOP, BUOY, CMAN
+  let rawOb: String
+  let lat: Double
+  let lon: Double
+  let elev: Int
+  let name: String
+  let clouds: [AirportMetarInfoClouds]
+  let fltCat: WxCategory? // VFR, MVFR, IFR, LIFR, "" (blank)
 }
 
 enum Poly: Decodable {
@@ -98,6 +88,7 @@ enum Poly: Decodable {
 }
 
 struct AirportMetarInfoClouds: Decodable {
-  let cover: String?
-  let base: Int?
+  let cover: String // CLR, CAVOK, FEW, SCT, BKN, OVC, OVX
+  let base: Int
+  let top: Int?
 }

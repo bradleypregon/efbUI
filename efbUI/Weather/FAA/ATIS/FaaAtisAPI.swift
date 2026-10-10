@@ -10,7 +10,7 @@ import Foundation
 class FaaAtisAPI {
   func fetchATIS(icao: String) async throws -> [AtisAPISchema] {
     // https://datis.clowd.io/api/icao
-    let endpoint = "https://datis.clowd.io/api/\(icao)"
+    let endpoint = "https://atis.info/api/\(icao)"
     guard let url = URL(string: endpoint) else { throw FaaAtisError.badURL }
     
     let (data, response) = try await URLSession.shared.data(from: url)

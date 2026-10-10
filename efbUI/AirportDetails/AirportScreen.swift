@@ -106,26 +106,26 @@ struct AirportScreen: View {
                   GridRow {
                     Text("ATIS")
                       .font(.subheadline)
-                    Text(vm.getCommunicationType(comms: vm.comms, type: "ATI"))
-                      .fontWeight(.semibold)
+//                    Text(vm.getCommunicationType(comms: vm.comms, type: "ATI"))
+//                      .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Clearance")
                       .font(.subheadline)
-                    Text(vm.getCommunicationType(comms: vm.comms, type: "CLD"))
-                      .fontWeight(.semibold)
+//                    Text(vm.getCommunicationType(comms: vm.comms, type: "CLD"))
+//                      .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Ground")
                       .font(.subheadline)
-                    Text(vm.getCommunicationType(comms: vm.comms, type: "GND"))
-                      .fontWeight(.semibold)
+//                    Text(vm.getCommunicationType(comms: vm.comms, type: "GND"))
+//                      .fontWeight(.semibold)
                   }
                   GridRow {
                     Text("Tower")
                       .font(.subheadline)
-                    Text(vm.getCommunicationType(comms: vm.comms, type: "TWR"))
-                      .fontWeight(.semibold)
+//                    Text(vm.getCommunicationType(comms: vm.comms, type: "TWR"))
+//                      .fontWeight(.semibold)
                   }
                 }
               }
@@ -165,7 +165,7 @@ struct AirportScreen: View {
       vm.selectedAirportICAO = coordinator.selectedICAO ?? ""
       if coordinator.selectedICAO != "" && vm.selectedAirportICAO != vm.prevICAO {
         vm.selectedAirportICAO = coordinator.selectedICAO ?? ""
-        vm.selectedAirport = SQLiteManager.shared.selectAirport(vm.selectedAirportICAO)
+        //vm.selectedAirport = SQLiteManager.shared.selectAirport(vm.selectedAirportICAO)
       }
     }
   }
@@ -181,7 +181,8 @@ struct AirportScreenInfoTabBuilder: View {
     switch selectedTab {
     case .freq:
       if airportVM.comms != [] {
-        AirportScreenFreqTab(comms: airportVM.comms)
+//        AirportScreenFreqTab(comms: airportVM.comms)
+        Text("")
       } else {
         ContentUnavailableView("Frequencies INOP", systemImage: "", description: Text("Select an airport to view frequencies."))
       }
@@ -203,37 +204,37 @@ struct AirportScreenInfoTabBuilder: View {
   }
 }
 
-struct AirportScreenFreqTab: View {
-  let comms: [AirportCommunicationTable]
-  
-  var body: some View {
-    let groupedItems = Dictionary(grouping: comms, by: { $0.communicationType })
-    
-    ScrollView(.vertical) {
-      Grid(alignment: .leading) {
-        ForEach(groupedItems.keys.sorted(), id:\.self) { commType in
-          Section(commType) {
-            ForEach(groupedItems[commType]?.sorted(by: { $0.communicationFrequency < $1.communicationFrequency }) ?? [], id: \.self) { comm in
-              GridRow {
-                Text(comm.communicationType)
-                if comm.frequencyUnits != "V" {
-                  Text("\(comm.frequencyUnits)-\(comm.communicationFrequency.string)")
-                } else {
-                  Text("\(comm.communicationFrequency.string)")
-                }
-                Text(comm.callsign)
-              }
-              .font(.system(size: 16, design: .default))
-            }
-          }
-          .font(.title)
-          .fontWeight(.semibold)
-        }
-      }
-      .frame(idealWidth: 250)
-    }
-  }
-}
+//struct AirportScreenFreqTab: View {
+//  let comms: [AirportCommunicationTable]
+//  
+//  var body: some View {
+//    let groupedItems = Dictionary(grouping: comms, by: { $0.communicationType })
+//    
+//    ScrollView(.vertical) {
+//      Grid(alignment: .leading) {
+//        ForEach(groupedItems.keys.sorted(), id:\.self) { commType in
+//          Section(commType) {
+//            ForEach(groupedItems[commType]?.sorted(by: { $0.communicationFrequency < $1.communicationFrequency }) ?? [], id: \.self) { comm in
+//              GridRow {
+//                Text(comm.communicationType)
+//                if comm.frequencyUnits != "V" {
+//                  Text("\(comm.frequencyUnits)-\(comm.communicationFrequency.string)")
+//                } else {
+//                  Text("\(comm.communicationFrequency.string)")
+//                }
+//                Text(comm.callsign ?? "")
+//              }
+//              .font(.system(size: 16, design: .default))
+//            }
+//          }
+//          .font(.title)
+//          .fontWeight(.semibold)
+//        }
+//      }
+//      .frame(idealWidth: 250)
+//    }
+//  }
+//}
 
 // TODO: fix this ugly screen
 struct AirportScreenWxTab: View {
@@ -321,7 +322,7 @@ struct AirportScreenRwyTab: View {
     guard let runways = runways else { return }
     guard let dir = wx?.first?.wdir?.asInt, dir != 0 else { return }
     
-    let runwayDiff = runways.map { ($0, abs($0.runwayMagneticBearing - Double(dir))) }
+    let runwayDiff = runways.map { ($0, abs($0.runwayMagneticBearing ?? .zero - Double(dir))) }
     
     let sortedRunways = runwayDiff.sorted { $0.1 < $1.1 }
     
@@ -334,8 +335,10 @@ struct AirportScreenRwyTab: View {
     var longestLength = 0
     
     for runway in runways {
-      if runway.runwayLength > longestLength {
-        longestLength = runway.runwayLength
+      guard let length = runway.runwayLength else { return }
+      
+      if length > longestLength {
+        longestLength = length
         self.longestRunways = [runway]
       } else if runway.runwayLength == longestLength {
         self.longestRunways.append(runway)

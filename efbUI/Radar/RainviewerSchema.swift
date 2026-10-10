@@ -23,7 +23,7 @@ struct Radar: Codable {
 
 // MARK: - Nowcast
 struct Nowcast: Codable {
-    let time: Int?
+    let time: Int
     let path: String?
 }
 

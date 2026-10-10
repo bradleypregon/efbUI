@@ -61,6 +61,9 @@ struct WeatherDetailCard: View {
     .frame(width: 175)
     .background(.thinMaterial)
     .clipShape(.rect(cornerRadius: 32, style: .continuous))
+    .task {
+      // Fetch weather (TODO: Cached weather)
+    }
   }
 }
 
@@ -73,68 +76,88 @@ struct WeatherItem: Identifiable {
 }
 
 struct AirportDetailView: View {
-  @State private var searchText: String = ""
+  @Environment(AppCoordinator.self) private var coordinator
+  @Environment(GRDBManager.self) private var grdbMan
+  
   @State private var selectedTab: AirportTab = .Info
+  @State private var airport: AirportTable? = AirportTable.mock
+  @State private var runways: [RunwayTable] = []
   
   var body: some View {
-    NavigationSplitView {
-      List {
-        Section(header: Text("Favorites")) {
-          Text("KDSM")
-          Text("KDEN")
-        }
-        Section(header: Text("Recents")) {
-          Text("KWhatever")
+    VStack(spacing: 12) {
+      // Info
+      VStack {
+        SectionHeader(icon: "info.circle", title: airport?.airportIdentifier ?? "Info")
+          .frame(maxWidth: .infinity, alignment: .leading)
+        
+        // Grid?
+        Text("Sunrise, Sunset, Coordinates, Elevation")
+      }
+      .padding()
+      .background(.thinMaterial)
+      .containerShape(.rect(cornerRadius: 32, style: .continuous))
+      
+      Picker("AirportTab", selection: $selectedTab) {
+        ForEach(AirportTab.allCases) { type in
+          Text(type.rawValue)
         }
       }
-      .listStyle(.insetGrouped)
-      .searchable(text: $searchText)
-    } detail: {
-      VStack(spacing: 12) {
-        
-        // Info Section
-        VStack {
-          SectionHeader(icon: "info.circle", title: "Info")
-            .frame(maxWidth: .infinity, alignment: .leading)
-          
-          Text("Sunrise, Sunset, Coordinates, Elevation")
-        }
-        .padding()
-        .background(.thinMaterial)
-        .containerShape(.rect(cornerRadius: 32, style: .continuous))
-        
-        Picker("AirportTab", selection: $selectedTab) {
-          ForEach(AirportTab.allCases) { type in
-            Text(type.rawValue)
-          }
-        }
-        .pickerStyle(.segmented)
-        
-        switch selectedTab {
-        case .Info:
-          AirportInfoView()
-        case .Weather:
-          AirportWeatherView()
-        case .Runway:
-          AirportRunwayView2()
-        default:
-          EmptyView()
-        }
-        
-        Spacer()
+      .pickerStyle(.segmented)
+      
+      switch selectedTab {
+      case .Info:
+        AirportInfoView(airport: airport, runways: runways)
+      case .Weather:
+        AirportWeatherView()
+      case .Runway:
+        AirportRunwayView2(runways: runways)
+      default:
+        EmptyView()
       }
-        .padding()
-        .navigationTitle("KDSM")
-        .navigationSubtitle("Des Moines Intl Airport")
-        .navigationBarTitleDisplayMode(.large)
+      
+      Spacer()
     }
-    .navigationSplitViewStyle(.prominentDetail)
+    .padding()
+    .task {
+      if coordinator.selectedICAO == "" {
+        airport = AirportTable.mock
+        coordinator.selectedICAO = airport?.airportIdentifier
+      }
+      await fetchAirportData()
+    }
+  }
+  
+  // doing too much. split per view. RunwayView -> task to fetch runways
+  private func fetchAirportData() async {
+    guard let icao = coordinator.selectedICAO else { return }
+    do {
+      async let airportFetch = grdbMan.fetchAirport(by: icao)
+      async let runwaysFetch = grdbMan.fetchRunways(for: icao)
+      
+      airport = try await airportFetch
+      runways = try await runwaysFetch
+    } catch {
+      print("Error fetching airport data: \(error)")
+      runways = []
+      airport = nil
+    }
   }
 }
 
 struct AirportInfoView: View {
+  let airport: AirportTable?
+  let runways: [RunwayTable]
+  
   var body: some View {
-    Text("Some mf airport info here")
+    VStack(alignment: .leading, spacing: 8) {
+      Text("Some airport info here")
+      
+      DiagramView(runways: RunwayTable.mockKDSM)
+        .frame(width: 400, height: 400)
+        .padding()
+      
+    }
+    .frame(width: .infinity)
   }
 }
 
@@ -171,19 +194,17 @@ struct AirportWeatherView: View {
 }
 
 struct AirportRunwayView2: View {
-  let icao: String = "KDSM"
-  var runways: [RunwayTable] = []
+  let runways: [RunwayTable]
   
   var body: some View {
     ForEach(runways, id: \.id) { rwy in
-      
-    }
-    .task {
-      // fetch runways for icao
+      Text(rwy.runwayIdentifier)
     }
   }
 }
 
 #Preview {
   AirportDetailView()
+    .environment(AppCoordinator())
+    .environment(GRDBManager())
 }

@@ -6,19 +6,9 @@
 //
 
 import Foundation
-import SQLite
-typealias Expression = SQLite.Expression
 import MapboxMaps
 
-struct QueryAirportTextResult: Equatable, Identifiable {
-  let airportIdentifier: String
-  let airportName: String
-  
-  var id: String {
-    airportIdentifier
-  }
-}
-
+/*
 class SQLiteManager {
   @MainActor static let shared = SQLiteManager()
   private var db: Connection? = nil
@@ -574,3 +564,4 @@ class SQLiteManager {
   }
   
 }
+*/

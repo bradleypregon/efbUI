@@ -49,7 +49,7 @@ struct AirportRunwayView: View {
                 .font(.title.bold())
                 .offset(y: 70)
             }
-            .rotationEffect(.degrees(runway.runwayMagneticBearing))
+            .rotationEffect(.degrees(runway.runwayMagneticBearing ?? .zero))
             
             if let windDir = weather?.wdir, let dir = windDir.asInt {
               Image(systemName: "arrow.up")
@@ -61,7 +61,7 @@ struct AirportRunwayView: View {
         }
       }
       
-      Text("\(runway.runwayLength)'")
+      Text("\(String(describing: runway.runwayLength))'")
         .foregroundStyle(longest ? .orange : .secondary)
         .fontWeight(.semibold)
     }
@@ -85,27 +85,8 @@ struct AirportRunwayView: View {
 
 #Preview(traits: .sizeThatFitsLayout) {
   AirportRunwayView(
-    runway: .init(
-      areaCode: "",
-      icaoCode: "",
-      airportIdentifier: "",
-      runwayIdentifier: "RW10",
-      runwayLatitude: .zero,
-      runwayLongitude: .zero,
-      runwayGradient: .zero,
-      runwayMagneticBearing: 010,
-      runwayTrueBearing: 010,
-      landingThresholdElevation: 1000,
-      displacedThresholdDistance: 100,
-      thresholdCrossingHeight: 100,
-      runwayLength: 6901,
-      runwayWidth: 200,
-      llzIdentifier: "",
-      llz_mls_gls_category: "",
-      surfaceCode: 5,
-      id: ""
-    ),
-    weather: .init(metarID: nil, icaoID: nil, receiptTime: nil, obsTime: nil, reportTime: nil, temp: nil, dewp: nil, wdir: .int(010), wspd: nil, wgst: nil, visib: nil, altim: nil, slp: nil, qcField: nil, wxString: nil, presTend: nil, maxT: nil, minT: nil, maxT24: nil, minT24: nil, precip: nil, pcp3hr: nil, pcp6hr: nil, pcp24hr: nil, snow: nil, vertVis: nil, metarType: nil, rawOb: nil, mostRecent: nil, lat: nil, lon: nil, elev: nil, prior: nil, name: nil, clouds: []),
+    runway: RunwayTable.mock,
+    weather: nil,
     optimal: false,
     longest: false
   )

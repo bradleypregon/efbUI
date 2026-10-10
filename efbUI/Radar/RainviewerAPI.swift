@@ -26,7 +26,7 @@ enum RainviewerAPIError: Error, LocalizedError {
 
 class RainviewerAPI {
   func fetchRadar() async throws -> RainviewerSchema {
-    guard let url = URL(string: "https://api.rainviewer.com/public/weather-maps.json") else {
+    guard let url = URL(string: "https://api.librewxr.net/public/weather-maps.json") else {
       throw RainviewerAPIError.badURL
     }
     let request = URLRequest(url: url)

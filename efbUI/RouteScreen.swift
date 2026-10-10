@@ -97,25 +97,25 @@ struct CustomInputView: View {
   var body: some View {
     TextField("Wpt...", text: $currentInput)
     // TODO: How to handle airways?
-      .onReceive(currentInput.publisher) { val in
-        if (val == " ") {
-          let res = SQLiteManager.shared.searchTables(query: currentInput.trimmingCharacters(in: .whitespaces).uppercased())
-          if res == [] {
-            noWaypointAlertVisible = true
-            currentInput = ""
-            return
-          }
-          if res.count == 1 {
-            guard let temp = res.first else { return }
-            routeManager.waypoints.append(temp)
-          } else {
-            inputResults = res
-            modalSheetVisible.toggle()
-            currentInput = ""
-          }
-          currentInput = ""
-        }
-      }
+//      .onReceive(currentInput.publisher) { val in
+//        if (val == " ") {
+//          let res = SQLiteManager.shared.searchTables(query: currentInput.trimmingCharacters(in: .whitespaces).uppercased())
+//          if res == [] {
+//            noWaypointAlertVisible = true
+//            currentInput = ""
+//            return
+//          }
+//          if res.count == 1 {
+//            guard let temp = res.first else { return }
+//            routeManager.waypoints.append(temp)
+//          } else {
+//            inputResults = res
+//            modalSheetVisible.toggle()
+//            currentInput = ""
+//          }
+//          currentInput = ""
+//        }
+//      }
       .alert("No Waypoint Found", isPresented: $noWaypointAlertVisible) {
         Button {
           noWaypointAlertVisible = false

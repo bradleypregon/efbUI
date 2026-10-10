@@ -39,7 +39,7 @@ struct TabBar: View {
   
   @State private var toasts: [Toast] = []
   
-  private let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
+//  private let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
   
   var body: some View {
     @Bindable var coordinator = coordinator
@@ -49,7 +49,7 @@ struct TabBar: View {
         SearchView()
       }
       Tab("Airport", systemImage: "scope", value: .airports) {
-        AirportScreen()
+        AirportDetailView()
       }
       Tab("Charts", systemImage: "doc.on.doc", value: .charts) {
         ChartsView()
@@ -102,8 +102,8 @@ struct TabBar: View {
       if (shipCoord.distance(from: destCoord) * 0.000621371 <= Double(settings.atisDistance) && !atisTriggered) {
         // fetch atis/awos/ASOS? frequency from destination if airport
         guard dest.type == .airport else { return }
-        let comms = SQLiteManager.shared.getAirportComms(dest.identifier)
-        guard !comms.isEmpty else { return }
+        //let comms = SQLiteManager.shared.getAirportComms(dest.identifier)
+        //guard !comms.isEmpty else { return }
         
         
         // Try AWO if not ATI. How to handle multiple frequencies?

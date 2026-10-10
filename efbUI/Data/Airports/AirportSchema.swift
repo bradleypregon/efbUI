@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+//{"type": "Feature", "geometry": {"type": "Point", "coordinates": [-144.4298, 61.5832]}, "properties": {"name": "CHITINA", "city": "Cordova", "country": "United States", "countryCode": "US", "icao": "CCXC", "size": "Small"}}
 class AirportSchema: Decodable, Identifiable {
   var id: String = UUID().uuidString
   let lat: Double

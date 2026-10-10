@@ -24,6 +24,7 @@ enum PilotedgeAPIError: Error, LocalizedError {
   }
 }
 
+// TODO: .json instead of .txt
 class PilotedgeAPI {
   func fetchATIS(icao: String) async throws -> [String] {
     let url = "https://www.pilotedge.net/atis/\(icao).txt"

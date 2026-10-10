@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "airport_ifr_mvfr.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
