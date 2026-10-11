@@ -43,8 +43,8 @@ struct MapScreenWaypointView: View {
 //        Text("Shear: \(wpt.shear)")
         Text("Ident: \(wpt.identifier)")
         Text("Name: \(wpt.name)")
-        Text("Type: \(wpt.type)")
-        Text("Freq: \(000.000)")
+        Text("Type: \(wpt.type.rawValue)")
+        Text("Freq (inop): \(000.000)")
       }
       .font(.caption)
       .listStyle(.plain)

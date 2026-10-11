@@ -196,11 +196,15 @@ struct GDL90TrafficReport {
   }
 }
 
-@Observable
-final class SimConnectShipObserver: Sendable {
-  var ownship = CurrentValueSubject<SimConnectShip, Never>(.init(coordinate: CLLocationCoordinate2DMake(.zero, .zero), altitude: .zero, heading: .zero, speed: .zero, fs2ffid: .zero, lastUpdated: Date()))
-  var trafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
-  var pruneTrafficArray = CurrentValueSubject<[SimConnectShip], Never>([])
+@MainActor @Observable
+final class SimConnectShipObserver {
+  var ownship: SimConnectShip = .init(coordinate: .init(), altitude: 0, heading: 0, speed: 0, fs2ffid: 0, lastUpdated: Date())
+  var traffic: [Int:SimConnectShip] = [:]
+  
+  func prune() {
+    let now = Date()
+    traffic = traffic.filter { now.timeIntervalSince($0.value.lastUpdated) < 14 }
+  }
 }
 
 enum TelemetryStatus: Equatable {
@@ -208,10 +212,10 @@ enum TelemetryStatus: Equatable {
   
   var color: Color {
     switch self {
-    case .idle: .primary
-    case .connecting, .heartbeat: .yellow
-    case .receiving: .blue
-    case .error: .red
+    case .idle: .secondary
+    case .connecting, .heartbeat: .warning
+    case .receiving: .lapis
+    case .error: .error
     }
   }
 }
@@ -221,13 +225,13 @@ enum TelemetryStatus: Equatable {
 final class ServerListener {
   enum ProtocolType {
     case textBased // XGPSMSFS, XTRAFFICMSFS
-    case gdl90     // Binary GDL90 protocol
+    case gdl90
   }
   
   private(set) var status: TelemetryStatus = .idle
   
   var ship: SimConnectShipObserver = SimConnectShipObserver()
-  private var port: NWEndpoint.Port = 49002 // 4000 for gdl90
+  private var port: NWEndpoint.Port = 49002 // 4000 for gdl90, 49002 for text
   private var listener: NWListener?
   private var heartbeatConnection: NWConnection?
   private var connection: NWConnection?
@@ -320,10 +324,10 @@ final class ServerListener {
           }
         }
         
-        // Prune traffic every 10 seconds
-        if now.timeIntervalSince(self.lastPrune) >= 10 {
+        // Prune traffic every 15 seconds
+        if now.timeIntervalSince(self.lastPrune) >= 15 {
           self.lastPrune = now
-          self.prune()
+          self.ship.prune()
         }
       }
     }
@@ -389,15 +393,17 @@ final class ServerListener {
           return 
         }
         
-        print("Received: \(stringData)")
         let components = stringData.components(separatedBy: ",")
+        
         if components[0] == "XGPSMSFS" {
           self.updateOwnship(components)
         } else if components[0] == "XTRAFFICMSFS" {
           self.updateTraffic(components)
+          
         } else {
           print("Unknown message type: \(components[0])")
         }
+        
         self.consumeData()
       }
     }
@@ -482,7 +488,7 @@ final class ServerListener {
       lastUpdated: Date()
     )
     
-    self.ship.ownship.send(ship)
+    self.ship.ownship = ship
   }
   
   private func updateTrafficFromGDL90(_ report: GDL90TrafficReport) {
@@ -499,7 +505,7 @@ final class ServerListener {
       lastUpdated: Date()
     )
     
-    self.ship.trafficArray.send([plane])
+    self.ship.traffic[plane.fs2ffid] = plane
   }
   
   // XGPSMSFS, long, lat, alt, ground track, speed
@@ -512,7 +518,7 @@ final class ServerListener {
     let speed = Double(components[5]) ?? .zero
     
     let ship = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: .zero, lastUpdated: Date())
-    self.ship.ownship.send(ship)
+    self.ship.ownship = ship
   }
   
   // XTRAFFICMSFS, fs2ff id, lat, long, altitude, vertical speed, onGround (0 or 1), true heading, ground velocity, flight number or tail number
@@ -521,28 +527,16 @@ final class ServerListener {
     let long = Double(components[3])
     let coordinate = CLLocationCoordinate2D(latitude: lat ?? .zero, longitude: long ?? .zero)
     
-    let fs2ffID = Int(components[1]) ?? .zero
-    let altitude = Double(components[4]) ?? .zero
-    let heading = Double(components[7]) ?? .zero
-    let speed = Double(components[8]) ?? .zero
+    let fs2ffID = Int(components[1]) ?? 0
+    let altitude = Double(components[4]) ?? 0
+    let heading = Double(components[7]) ?? 0
+    let speed = Double(components[8]) ?? 0
     let callsign = String(components[9])
     let onGround = components[6] == "1" ? true : false
     
     let plane: SimConnectShip = SimConnectShip(coordinate: coordinate, altitude: altitude, heading: heading, speed: speed, fs2ffid: fs2ffID, onGround: onGround, registration: callsign, lastUpdated: Date())
     
-    self.ship.trafficArray.send([plane])
-    
-  }
-  
-  // Prune items from trafficArray that have not received an update for at least 30 seconds
-  func prune() {
-    let oldShips = self.ship.trafficArray.value.filter({Date().timeIntervalSince($0.lastUpdated) >= 30 })
-    if oldShips == [] { return }
-    
-    print("Old ships: \(oldShips)")
-    
-    self.ship.pruneTrafficArray.value.append(contentsOf: oldShips)
-    self.ship.trafficArray.value.removeAll { self.ship.pruneTrafficArray.value.contains($0) }
+    self.ship.traffic[plane.fs2ffid] = plane
   }
   
   private func heartbeatTest(conn: NWConnection) {

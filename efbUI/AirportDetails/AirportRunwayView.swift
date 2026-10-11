@@ -67,11 +67,11 @@ struct AirportRunwayView: View {
     }
     .popover(isPresented: $popoverPresented, content: {
       List {
-        Text("Thresh Elev: \(runway.landingThresholdElevation)")
-        Text("Width: \(runway.runwayWidth)")
-        Text("llz: \(runway.llzIdentifier)")
-        Text("Mag: \(runway.runwayMagneticBearing)")
-        Text("True: \(runway.runwayTrueBearing)")
+        Text("Thresh Elev: \(String(describing: runway.landingThresholdElevation))")
+        Text("Width: \(String(describing: runway.runwayWidth))")
+        Text("llz: \(String(describing: runway.llzIdentifier))")
+        Text("Mag: \(String(describing: runway.runwayMagneticBearing))")
+        Text("True: \(String(describing: runway.runwayTrueBearing))")
       }
       .listStyle(.inset)
       .frame(width: 200, height: 200)

@@ -72,6 +72,7 @@ struct TabBar: View {
       }
     }
     .toast($toasts)
+    /*
     .onReceive(ship.ownship) { ship in
       guard
         route.waypoints.count > 0,
@@ -128,6 +129,7 @@ struct TabBar: View {
       }
       
     }
+    */
     .onChange(of: route.waypoints) { prev, new in
       // Origin Changed
       if (prev.first != new.first) {

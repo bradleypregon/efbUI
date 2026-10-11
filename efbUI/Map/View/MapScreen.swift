@@ -15,6 +15,7 @@ struct MapScreen: View {
   @Environment(SimConnectShipObserver.self) var simConnect
   @Environment(RouteManager.self) private var routeManager
   @Environment(GRDBManager.self) private var grdb
+  let customStyle = MapStyle(uri: StyleURI(rawValue: Bundle.main.object(forInfoDictionaryKey: "MapStyleURI") as? String ?? "") ?? .dark)
   
   private let ornamentOptions = OrnamentOptions(scaleBar: ScaleBarViewOptions(visibility: .hidden))
   @State private var viewport: Viewport = .camera(center: .init(latitude: 39.5, longitude: -98.0), zoom: 4, bearing: 0, pitch: 0)
@@ -29,13 +30,13 @@ struct MapScreen: View {
   
   @GestureState private var sigmetLongPress = false
   
-  @State private var splitViewVisibility: NavigationSplitViewColumn = .detail
+  @State private var splitViewVisibility: NavigationSplitViewVisibility = .detailOnly
   
   var body: some View {
     @Bindable var vm = vm
     @Bindable var coordinator = coordinator
     
-    NavigationSplitView(preferredCompactColumn: $splitViewVisibility) {
+    NavigationSplitView(columnVisibility: $splitViewVisibility) {
       if let detail = vm.selectionDetail {
         switch detail {
         case .airport(let apt):
@@ -104,7 +105,7 @@ struct MapScreen: View {
               return false
             }
             vm.selection = .airport(icao: icao)
-            splitViewVisibility = .sidebar
+            splitViewVisibility = .all
             return true
           }
           
@@ -114,6 +115,7 @@ struct MapScreen: View {
               return false
             }
             vm.selection = .airport(icao: icao)
+            splitViewVisibility = .all
             return true
           }
           
@@ -123,6 +125,7 @@ struct MapScreen: View {
               return false
             }
             vm.selection = .airport(icao: icao)
+            splitViewVisibility = .all
             return true
           }
           
@@ -247,17 +250,15 @@ struct MapScreen: View {
             }
           }
         }
-        
-        .mapStyle(.customStyle)
+        .mapStyle(customStyle)
         .ornamentOptions(ornamentOptions)
         .onStyleLoaded { _ in
-          // Move this to function
+          // TODO: Move this to function? doesn't really matter
           do {
             try proxy.map?.addImage(.ownship, id: "ownship")
             try proxy.map?.addImage(.traffic, id: "traffic")
             try proxy.map?.addImage(.airportIfr, id: "airportIfr")
             try proxy.map?.addImage(.airportVfr, id: "airportVfr")
-//            addOwnshipLayer()
           } catch {
             print("Error adding image to map: \(error)")
           }
@@ -286,11 +287,16 @@ struct MapScreen: View {
         .onAppear {
           proxyMap = proxy
         }
+        .task(id: simConnect.ownship) {
+          vm.ownship = simConnect.ownship
+        }
+        .task(id: simConnect.traffic) {
+          vm.traffic = simConnect.traffic
+        }
         .task(id: coordinator.focusMap) {
           guard coordinator.focusMap, let icao = coordinator.selectedICAO else { return }
           do {
-            if let apt = try await grdb.fetchAirport(by: icao) {
-              guard let lat = apt.airportRefLat, let long = apt.airportRefLong else { return }
+            if let apt = try await grdb.fetchAirport(by: icao), let lat = apt.airportRefLat, let long = apt.airportRefLong {
               let coords: CLLocationCoordinate2D = .init(latitude: lat, longitude: long)
               proxy.camera?.ease(to: .init(center: coords, zoom: 13), duration: 1.25)
             }
@@ -305,54 +311,43 @@ struct MapScreen: View {
             vm.radarSectionVM.radarVisible = false
           }
         }
-        //          .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
-        //            let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
-        //            let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
-        //            VStack {
-        //              Text(airport.name)
-        //              Button {
-        //                print("View Airport (INOP)")
-        //              } label: {
-        //                Text("View Airport")
-        //              }
-        //              Menu("View Procedures") {
-        //                if (!sids.isEmpty) {
-        //                  Button {
-        //                    let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-        //                    let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
-        //                    mapViewModel.sidRoute = Array(grouped.values)
-        //                    mapViewModel.displaySID.toggle()
-        //                  } label: {
-        //                    Text("View SIDs")
-        //                  }
-        //                }
-        //                if (!stars.isEmpty) {
-        //                  Button {
-        //                    let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-        //                    let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
-        //                    mapViewModel.starRoute = Array(grouped.values)
-        //                    mapViewModel.displaySTAR.toggle()
-        //                  } label: {
-        //                    Text("View STARs")
-        //                  }
-        //                }
-        //              }
-        //            }
-        //            .frame(idealWidth: 150, idealHeight: 300)
-        //          }
-        .onReceive(simConnect.ownship) { ship in
-          vm.ownship = ship
-        }
-        .onReceive(simConnect.trafficArray) { traffic in
-          for tfc in traffic {
-            vm.traffic[tfc.fs2ffid] = tfc
+        /* Deprecated, use MapViewAnnotation with LongPressGesture
+        .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
+          let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
+          let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
+          VStack {
+            Text(airport.name)
+            Button {
+              print("View Airport (INOP)")
+            } label: {
+              Text("View Airport")
+            }
+            Menu("View Procedures") {
+              if (!sids.isEmpty) {
+                Button {
+                  let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+                  let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
+                  mapViewModel.sidRoute = Array(grouped.values)
+                  mapViewModel.displaySID.toggle()
+                } label: {
+                  Text("View SIDs")
+                }
+              }
+              if (!stars.isEmpty) {
+                Button {
+                  let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+                  let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
+                  mapViewModel.starRoute = Array(grouped.values)
+                  mapViewModel.displaySTAR.toggle()
+                } label: {
+                  Text("View STARs")
+                }
+              }
+            }
           }
-        }
-        .onReceive(simConnect.pruneTrafficArray) { pruneList in
-          for prune in pruneList {
-            vm.traffic.removeValue(forKey: prune.fs2ffid)
-          }
-        }
+          .frame(idealWidth: 150, idealHeight: 300)
+        } */
+
         .task(id: vm.selection) {
           vm.selectionDetail = nil
           guard let selection = vm.selection else { return }
@@ -360,10 +355,12 @@ struct MapScreen: View {
           case .airport(let icao):
             if let airport = try? await grdb.fetchAirport(by: icao) {
               vm.selectionDetail = .airport(airport)
+            } else {
+              print("Error setting airport")
             }
           }
         }
-        .onTapGesture { _ in vm.selection = nil } // move to Map()?
+        .onTapGesture { _ in vm.selection = nil } // allow tap of map without causing selection to nil
       }
       .ignoresSafeArea()
       .overlay(alignment: .bottom) {

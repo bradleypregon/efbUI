@@ -207,60 +207,6 @@ class AirportDetails {
     }
   }
   
-  // can be deprecated
-  /*
-  func calculateWxCategory(wx: [AirportMETARSchema]) -> WxCategory {
-    /*
-     Cloud Ceiling Def: Height of the BASE of the LOWEST clouds that cover MORE than HALF of the sky (BKN, OVC)
-     FEW: 1/8 to 2/8 | SCT: 3/8 to 4/8 | BKN: 5/8 to 7/8 | OVC: 8/8
-     
-     VFR (Green), MVFR (Blue), IFR (Red), LIFR (Magenta)
-     
-     VFR:  Ceiling >3,000ft      AND    Vis > 5sm
-     MVFR: Ceiling 1,000-3,000ft AND/OR Vis 3-5sm
-     IFR:  Ceiling 500-1000ft    AND/OR Vis 1-3sm
-     LIFR: Ceiling <500ft        AND/OR Vis <1sm
-     */
-    guard let wx = wx.first else { return .NONE }
-    
-    var lowestBase: Int = 4000
-    var visib: Double = 10
-    
-    switch wx.visib {
-    case .int(let int):
-      visib = Double(int)
-    case .double(let double):
-      visib = double
-    case .string(_):
-      visib = 10
-    case .none:
-      visib = 10
-    }
-    // Check clouds
-    if let clouds = wx.clouds {
-      for cloud in clouds {
-        if let base = cloud.base, let cover = cloud.cover {
-          if cover == "BKN" || cover == "OVC" {
-            // find lowest base of cloud
-            if base < lowestBase {
-              lowestBase = base
-            }
-          }
-        }
-      }
-    }
-    if lowestBase >= 3000 && visib >= 5 {
-      return .VFR
-    } else if lowestBase >= 1000 && visib >= 3 {
-      return .MVFR
-    } else if lowestBase >= 500 && visib >= 1 {
-      return .IFR
-    } else {
-      return .LIFR
-    }
-  }
-  */
-  
   func fetchWx(for source: WxSources, type: WxTabs, icao: String, refresh: Bool) async {
     switch (source, type) {
     case (.faa, .metar):
@@ -353,8 +299,10 @@ class AirportScreenViewModel: AirportDetails {
    Fetch Weather, fetch airport communications, fetch city/state
    */
   private func queryAirportData(airport: AirportTable) async {
-    await fetchLocalWeather(lat: airport.airportRefLat ?? .zero, long: airport.airportRefLong ?? .zero)
-    //fetchCityState(lat: airport.airportRefLat, long: airport.airportRefLong)
+    if let lat = airport.airportRefLat, let long = airport.airportRefLong {
+      await fetchLocalWeather(lat: lat, long: long)
+      //fetchCityState(lat: airport.airportRefLat, long: airport.airportRefLong)
+    }
     //await fetchAirportCharts(icao: airport.airportIdentifier)
   }
   

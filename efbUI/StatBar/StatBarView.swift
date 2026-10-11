@@ -83,7 +83,7 @@ struct StatBarView: View {
       } label: {
         VStack {
           Text("Heading")
-          Text("\(Int(simConnect.ownship.value.heading.rounded()))º")
+          Text("\(Int(simConnect.ownship.heading.rounded()))º")
             .font(.title3)
         }
         .frame(width: 110, height: 40)
@@ -107,7 +107,7 @@ struct StatBarView: View {
       } label: {
         VStack {
           Text("Altitude (GPS)")
-          Text("\(Int(simConnect.ownship.value.altitude.rounded()))º")
+          Text("\(Int(simConnect.ownship.altitude.rounded()))º")
             .font(.title3)
         }
         .frame(width: 110, height: 40)
@@ -131,7 +131,7 @@ struct StatBarView: View {
       } label: {
         VStack {
           Text("Speed (GS)")
-          Text("\(Int(simConnect.ownship.value.speed.rounded()))º")
+          Text("\(Int(simConnect.ownship.speed.rounded()))º")
             .font(.title3)
         }
         .frame(width: 110, height: 40)

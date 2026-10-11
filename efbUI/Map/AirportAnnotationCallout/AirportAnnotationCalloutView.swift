@@ -9,8 +9,6 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
-// May still want this to be in Navigation Sidebar?
-
 struct AirportAnnotationCalloutView: View {
   @Environment(AppCoordinator.self) private var appCoordinator
   @Environment(GRDBManager.self) private var grdb
@@ -18,11 +16,13 @@ struct AirportAnnotationCalloutView: View {
   var airport: AirportTable
   
   @State private var currTimeZone: TimeZone = .current
+  
   @State private var currWx: [AirportMETARSchema] = []
   @State private var wxCat: WxCategory = .NONE
+  
   @State private var comms: [AirportCommunicationTable] = []
+  
   @State private var wxString: String?
-  @State private var bestRwy: RunwayTable?
   
   
   var body: some View {
@@ -41,7 +41,6 @@ struct AirportAnnotationCalloutView: View {
         .fontWeight(.semibold)
       }
       .task(id: wxCat) {
-        // Calculate weather category
         do {
           currWx = try await AirportWxAPI().fetchMetar(icao: airport.airportIdentifier)
         } catch {
@@ -51,6 +50,8 @@ struct AirportAnnotationCalloutView: View {
       }
       
       ScrollView(.vertical) {
+        AirportCalloutInfoView(airport: airport)
+        
         GroupBox("Wx") {
           if !currWx.isEmpty {
             Text(currWx[0].rawOb)
@@ -60,51 +61,7 @@ struct AirportAnnotationCalloutView: View {
           }
         }
         
-        // TWR/Vatsim CTAF
-        GroupBox("Info") {
-          Grid(alignment: .leading) {
-            GridRow {
-              Text("TWR")
-                .font(.subheadline)
-              Text(getCommunicationType(comms: comms, type: "TWR"))
-                .fontWeight(.semibold)
-            }
-            GridRow {
-              Text("\(getATIS(comms: comms).first?.communicationType ?? "ATI n/a")")
-                .font(.subheadline)
-              Text("\(String(format: "%.3f", getATIS(comms: comms).first?.communicationFrequency ?? .zero))")
-                .fontWeight(.semibold)
-            }
-            GridRow {
-              Text("ELEV")
-                .font(.subheadline)
-              Text("\(airport.elevation ?? .zero)'")
-                .fontWeight(.semibold)
-            }
-          }
-        }
-        .task(id: comms) {
-          do {
-            comms = try await grdb.fetchCommunications(for: airport.airportIdentifier)
-            return
-          } catch {
-            print("Error fetching Comms for \(airport.airportIdentifier)")
-          }
-          comms = []
-        }
-        
-        // Calculate best runway based on winds
-        GroupBox("Best Rwy") {
-          if let rwy = bestRwy {
-            Text(rwy.runwayIdentifier)
-          } else {
-            Text("Best Rwy N/A")
-          }
-        }
-        .task(id: bestRwy) {
-          // Fetch runways for icao
-          bestRwy = RunwayTable.mock
-        }
+        AirportCalloutRunwayView(icao: airport.airportIdentifier)
         
         GroupBox("Procedures") {
           Text("Arrivals")
@@ -113,7 +70,7 @@ struct AirportAnnotationCalloutView: View {
       }
       
       HStack {
-        Text("\(String(format: "%.2f", airport.airportRefLat ?? .zero)), \(String(format: "%.2f", airport.airportRefLong ?? .zero))")
+        Text("\(String(format: "%.2f", airport.airportRefLat ?? 0)), \(String(format: "%.2f", airport.airportRefLong ?? 0))")
         .font(.caption2)
         .foregroundStyle(.gray)
         
@@ -164,8 +121,8 @@ struct AirportAnnotationCalloutView: View {
   }
   
   func getTimeZone() async -> TimeZone? {
-    guard let lat = airport.airportRefLat, let long = airport.airportRefLong else { return nil }
-    let location = CLLocation(latitude: lat, longitude: long)
+    guard let lat = airport.airportRefLat, let long = airport.airportRefLong else { return TimeZone.current }
+    let location: CLLocation = .init(latitude: lat, longitude: long)
     
     if let request = MKReverseGeocodingRequest(location: location) {
       let mapitems = try? await request.mapItems
@@ -176,56 +133,20 @@ struct AirportAnnotationCalloutView: View {
     return TimeZone.current
   }
   
-  func calculateBounds(radius: Double) -> (CLLocationCoordinate2D, CLLocationCoordinate2D) {
+  func calculateBounds(radius: Double) -> (CLLocationCoordinate2D, CLLocationCoordinate2D)? {
+    guard let latitude = airport.airportRefLat, let longitude = airport.airportRefLong else { return nil }
+    
     let earthRadius = 6378.0
-    let lat = airport.airportRefLat ?? .zero * Double.pi / 180
+    let lat = latitude * Double.pi / 180
     let latRad = radius / earthRadius
     let longRad = radius / (earthRadius * cos(lat))
     let latOffset = latRad * 180 / Double.pi
     let longOffset = longRad * 180 / Double.pi
     
-    let ne = CLLocationCoordinate2D(latitude: airport.airportRefLat ?? .zero + latOffset, longitude: airport.airportRefLong ?? .zero + longOffset)
-    let sw = CLLocationCoordinate2D(latitude: airport.airportRefLat ?? .zero - latOffset, longitude: airport.airportRefLong ?? .zero - longOffset)
+    let ne = CLLocationCoordinate2D(latitude: lat + latOffset, longitude: longitude + longOffset)
+    let sw = CLLocationCoordinate2D(latitude: lat - latOffset, longitude: longitude - longOffset)
     
     return (ne, sw)
   }
   
-  func getCommunicationType(comms: [AirportCommunicationTable], type: String) -> String {
-    if comms == [] { return "n/a" }
-    if let freq = comms.first(where: { $0.communicationType == type && $0.frequencyUnits == "V"} )?.communicationFrequency?.string {
-      return freq
-    } else {
-      return "n/a"
-    }
-  }
-  
-  func getATIS(comms: [AirportCommunicationTable]) -> [AirportCommunicationTable] {
-    let types = ["ATI", "AWO", "ASO", "AWI", "AWS"]
-    guard !comms.isEmpty else { return [] }
-    
-    let filter = comms.filter { $0.frequencyUnits == "V" && types.contains($0.communicationType ?? "") }
-    guard !filter.isEmpty else { return [] }
-    
-    let sorted = sortWx(wx: filter)
-    return sorted
-  }
-  
-  func sortWx(wx: [AirportCommunicationTable]) -> [AirportCommunicationTable] {
-    let ranking: [String: Int] = [
-      "ATI": 1,
-      "AWO": 2,
-      "ASO": 3,
-      "AWI": 4,
-      "AWS": 5
-    ]
-    
-    return wx.sorted { (a, b) -> Bool in
-      if let a = a.communicationType, let b = b.communicationType {
-        let rankA = ranking[a] ?? Int.max
-        let rankB = ranking[b] ?? Int.max
-        return rankA < rankB
-      }
-      return false
-    }
-  }
 }
