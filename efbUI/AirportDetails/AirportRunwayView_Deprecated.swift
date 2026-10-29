@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AirportRunwayView: View {
+struct AirportRunwayView_Deprecated: View {
   let runway: RunwayTable
   let weather: AirportMETARSchema?
   let optimal: Bool
@@ -84,7 +84,7 @@ struct AirportRunwayView: View {
 }
 
 #Preview(traits: .sizeThatFitsLayout) {
-  AirportRunwayView(
+  AirportRunwayView_Deprecated(
     runway: RunwayTable.mock,
     weather: nil,
     optimal: false,

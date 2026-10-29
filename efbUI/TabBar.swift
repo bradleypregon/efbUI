@@ -26,10 +26,11 @@ enum RouteCategory: Equatable, Hashable {
 }
 
 struct TabBar: View {
-  @Environment(AppCoordinator.self) private var coordinator: AppCoordinator
+  @Environment(AppCoordinator.self) private var appCoordinator: AppCoordinator
   @Environment(SimConnectShipObserver.self) private var ship
   @Environment(RouteManager.self) private var route
-  @Query var userSettings: [UserSettings]
+  @Environment(ToastManager.self) private var toastManager
+  @Environment(ScratchPadManager.self) private var pad
   
   @State private var depTriggered: Bool = false
   @State private var inbTriggered: Bool = false
@@ -37,14 +38,10 @@ struct TabBar: View {
   @State private var shortInbTriggered: Bool = false
   @State private var finalTriggered: Bool = false
   
-  @State private var toasts: [Toast] = []
-  
-//  private let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
-  
   var body: some View {
-    @Bindable var coordinator = coordinator
+    @Bindable var appCoord = appCoordinator
     
-    TabView(selection: $coordinator.tab) {
+    TabView(selection: $appCoord.tab) {
       Tab(value: .search, role: .search) {
         SearchView()
       }
@@ -61,7 +58,7 @@ struct TabBar: View {
       Tab("Map", systemImage: "map", value: .map) {
         MapScreen()
       }
-      Tab("ScratchPad", systemImage: "square.and.pencil", value: .scratchPad) {
+      Tab("Pad", systemImage: "square.and.pencil", value: .scratchPad) {
         ScratchPadView()
       }
       Tab("Route", systemImage: "point.topleft.down.to.point.bottomright.curvepath", value: efbTab.routeCategories(.route)) {
@@ -71,7 +68,11 @@ struct TabBar: View {
         SettingsView()
       }
     }
-    .toast($toasts)
+    .overlay {
+      if pad.isOpen {
+        FloatingPadView()
+      }
+    }
     /*
     .onReceive(ship.ownship) { ship in
       guard
@@ -146,40 +147,6 @@ struct TabBar: View {
     }
   }
   
-  func pushToast(image: String, title: String) {
-    withAnimation(.bouncy) {
-      let toast = Toast { id in
-        ToastView(id, image: image, title: title)
-      }
-      toasts.append(toast)
-    }
-  }
-  
-  @ViewBuilder
-  func ToastView(_ id: String, image: String, title: String) -> some View {
-    HStack(spacing: 12) {
-      Image(systemName: image)
-      Text(title)
-        .font(.callout)
-        .fontWeight(.semibold)
-      
-      Button {
-        $toasts.delete(id)
-      } label: {
-        Image(systemName: "xmark.circle.fill")
-          .font(.title2)
-      }
-    }
-    .foregroundStyle(.primary)
-    .padding(12)
-    .background {
-      Capsule()
-        .fill(.background)
-        .shadow(color: .black.opacity(0.06), radius: 3, x: -1, y: -3)
-        .shadow(color: .black.opacity(0.06), radius: 2, x: 1, y: 3)
-    }
-    .padding(.horizontal, 15)
-  }
 }
 
 //#Preview {

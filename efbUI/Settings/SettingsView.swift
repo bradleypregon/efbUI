@@ -11,24 +11,39 @@ import Observation
 import SwiftData
 import SystemConfiguration.CaptiveNetwork
 
+extension String {
+  static let userSimbriefID = "userSimbriefID"
+  static let userOwnshipRegistration = "userOwnshipRegistration"
+  static let userOutboundDistance = "userOutboundDistance"
+  static let userAtisDistance = "userAtisDistance"
+  static let userInboundDistance = "userInboundDistance"
+  static let userShortInboundDistance = "userShortInboundDistance"
+  static let userFinalDistance = "userFinalDistance"
+}
+
 struct SettingsView: View {
   @Environment(\.modelContext) private var modelContext
-  @Query var userSettings: [UserSettings]
   
-  @State var ownshipRegistration: String = ""
-  @State var simbriefUserIDString: String = ""
-  
-  @State var outboundDistance: Int = 20
-  @State var atisDistance: Int = 40
-  @State var inbDistance: Int = 20
-  @State var shortInbDistance: Int = 10
-  @State var finalDistance: Int = 5
+  @AppStorage(.userSimbriefID) private var simbriefUserID: String = ""
+  @AppStorage(.userOwnshipRegistration) private var ownshipRegistration: String = ""
+  @AppStorage(.userOutboundDistance) private var outboundDistance: Int = 20
+  @AppStorage(.userAtisDistance) private var atisDistance: Int = 40
+  @AppStorage(.userInboundDistance) private var inboundDistance: Int = 20
+  @AppStorage(.userShortInboundDistance) private var shortInboundDistance: Int = 10
+  @AppStorage(.userFinalDistance) private var finalDistance: Int = 5
   
   @State var keepAwake: Bool = false
   
   @State private var calcInput: Int?
   @State private var calcFOutput: Double = .zero
   @State private var calcCOutput: Double = .zero
+  
+  var numberFormatter: NumberFormatter {
+    let nf = NumberFormatter()
+    nf.numberStyle = .decimal
+    nf.usesGroupingSeparator = false // Disables thousands commas
+    return nf
+  }
   
   var body: some View {
     NavigationStack {
@@ -39,71 +54,45 @@ struct SettingsView: View {
               HStack {
                 Text("Ownship Registration")
                 TextField("N123NA", text: $ownshipRegistration)
-                  .onSubmit {
-                    if userSettings.isEmpty {
-                      let settings = UserSettings(ownshipRegistration: ownshipRegistration)
-                      modelContext.insert(settings)
-                    } else {
-                      userSettings.first?.ownshipRegistration = ownshipRegistration
-                    }
-                  }
               }
             }
             Section(header: Text("Simbrief")) {
               HStack {
-                Text("SimBrief User ID")
-                TextField("SimBrief ID (123456)", text: $simbriefUserIDString)
-                  .onSubmit {
-                    userSettings.first?.simbriefUserID = simbriefUserIDString
-                    if userSettings.isEmpty {
-                      let settings = UserSettings(simbriefUserID: simbriefUserIDString)
-                      modelContext.insert(settings)
-                    } else {
-                      userSettings.first?.simbriefUserID = simbriefUserIDString
+                Text("SimBrief User ID (numeric)")
+                TextField("SimBrief ID (123456)", text: $simbriefUserID)
+                  .onChange(of: simbriefUserID) { oldVal, newVal in
+                    let filtered = newVal.filter { "0123456789".contains($0) }
+                    if filtered != newVal {
+                      self.simbriefUserID = filtered
                     }
                   }
               }
             }
-            Section(header: Text("Airport Notification Distances")) {
+            Section(header: Text("Airport Notification Distances (nm)")) {
               HStack {
-                Text("Outbound Final Call Distance")
+                Text("Outbound Final Call")
                 TextField("20 miles final call...", value: $outboundDistance, format: .number)
                   .keyboardType(.decimalPad)
-                  .onSubmit {
-                    userSettings.first?.outboundDistance = outboundDistance
-                  }
               }
               HStack {
-                Text("Inbound Warning Distance")
-                TextField("30 miles inbound...", value: $inbDistance, format: .number)
+                Text("Inbound Warning")
+                TextField("30 miles inbound...", value: $inboundDistance, format: .number)
                   .keyboardType(.decimalPad)
-                  .onSubmit {
-                    userSettings.first?.inboundDistance = inbDistance
-                  }
               }
               HStack {
-                Text("ATIS Distance")
+                Text("ATIS")
                 TextField("ATIS for dest...", value: $atisDistance, format: .number)
                   .keyboardType(.decimalPad)
-                  .onSubmit {
-                    userSettings.first?.atisDistance = atisDistance
-                  }
               }
               HStack {
-                Text("Short Inbound Warning Distance")
-                TextField("10 mile inbound...", value: $shortInbDistance, format: .number)
+                Text("Short Inbound Warning")
+                TextField("10 mile inbound...", value: $shortInboundDistance, format: .number)
                   .keyboardType(.decimalPad)
-                  .onSubmit {
-                    userSettings.first?.shortInboundDistance = shortInbDistance
-                  }
               }
               HStack {
-                Text("Final Warning Distance")
+                Text("Final Warning")
                 TextField("5 mile short final...", value: $finalDistance, format: .number)
                   .keyboardType(.decimalPad)
-                  .onSubmit {
-                    userSettings.first?.finalDistance = finalDistance
-                  }
               }
             }
             
@@ -152,13 +141,6 @@ struct SettingsView: View {
       
       .navigationTitle("Settings")
       .navigationBarTitleDisplayMode(.large)
-    }
-    .onAppear {
-      ownshipRegistration = userSettings.first?.ownshipRegistration ?? ""
-      simbriefUserIDString = userSettings.first?.simbriefUserID ?? ""
-      outboundDistance = userSettings.first?.outboundDistance ?? 20
-      inbDistance = userSettings.first?.inboundDistance ?? 20
-      finalDistance = userSettings.first?.finalDistance ?? 5
     }
   }
   

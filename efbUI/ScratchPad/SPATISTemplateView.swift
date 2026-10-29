@@ -36,86 +36,64 @@ struct SPATISTemplateView: View {
   }
   
   func Card(header: String) -> some View {
-    ZStack {
-      RoundedRectangle(cornerRadius: 20)
-        .foregroundStyle(.secondary)
-      HStack {
-        VStack(alignment: .leading) {
-          Text(header)
-//            .foregroundStyle(.primary)
-            .font(.title)
-            .fontWeight(.semibold)
-            .padding([.leading, .top], 8)
-          Spacer()
-        }
-        Spacer()
+    RoundedRectangle(cornerRadius: 32, style: .continuous)
+      .fill(Color(.secondarySystemBackground))
+      .frame(width: .infinity)
+      .overlay(alignment: .topLeading) {
+        Text(header)
+          .font(.title2)
+          .fontWeight(.semibold)
+          .padding(18)
       }
-    }
-    .frame(maxWidth: .infinity)
   }
   
   func WindCard() -> some View {
-    ZStack {
-      RoundedRectangle(cornerRadius: 20)
-        .foregroundStyle(.secondary)
-      HStack {
-        VStack(alignment: .leading) {
-          Text("Wind")
-//            .foregroundStyle(.primary)
-            .font(.title)
-            .fontWeight(.semibold)
-            .padding([.leading, .top], 8)
-          Spacer()
+    RoundedRectangle(cornerRadius: 32, style: .continuous)
+      .fill(Color(.secondarySystemBackground))
+      .frame(width: .infinity)
+      .overlay(alignment: .topLeading) {
+        Text("Wind")
+          .font(.title2)
+          .fontWeight(.semibold)
+          .padding(18)
+      }
+      .overlay(alignment: .center) {
+        HStack(alignment: .center, spacing: 120) {
+          Text("@")
+          Text("G")
         }
-        Spacer()
+        .padding(.top, 25)
+        .font(.title)
+        .fontWeight(.semibold)
       }
-      HStack {
-        Spacer()
-          .frame(width: 150)
-        Text("@")
-//          .foregroundStyle(.secondary)
-          .font(.title)
-          .fontWeight(.semibold)
-        Spacer()
-        Text("G")
-//          .foregroundStyle(.secondary)
-          .font(.title)
-          .fontWeight(.semibold)
-        Spacer()
-      }
-    }
-    .frame(maxWidth: .infinity)
+
   }
   
   func SkyCard() -> some View {
-    ZStack {
-      RoundedRectangle(cornerRadius: 20)
-        .foregroundStyle(.secondary)
-      HStack {
-        VStack(alignment: .leading) {
-          Text("Sky")
-//            .foregroundStyle(.secondary)
-            .font(.title)
-            .fontWeight(.semibold)
-            .padding([.leading, .top], 8)
-          Spacer()
+    RoundedRectangle(cornerRadius: 32, style: .continuous)
+      .fill(Color(.secondarySystemBackground))
+      .frame(width: .infinity)
+      .overlay(alignment: .topLeading) {
+        Text("Sky Conditions")
+          .font(.title2)
+          .fontWeight(.semibold)
+          .padding(18)
+      }
+      .overlay(alignment: .center) {
+        VStack {
+          SkyCondition()
+            .padding()
+          Divider()
+            .padding([.trailing, .leading], 60)
+          SkyCondition()
+            .padding()
+          Divider()
+            .padding([.trailing, .leading], 60)
+          SkyCondition()
+            .padding()
         }
-        Spacer()
+        .padding([.top, .bottom], 20)
       }
-      VStack {
-        SkyCondition()
-          .padding()
-        Divider()
-          .padding([.trailing, .leading], 60)
-        SkyCondition()
-          .padding()
-        Divider()
-          .padding([.trailing, .leading], 60)
-        SkyCondition()
-          .padding()
-      }
-    }
-    .frame(maxWidth: .infinity)
   }
   
   func SkyCondition() -> some View {
@@ -128,13 +106,11 @@ struct SPATISTemplateView: View {
         Text("FEW")
         Text("@")
       }
-//      .foregroundStyle(.secondary)
       .font(.title2)
       .fontWeight(.semibold)
       Spacer()
       Text("Clear")
         .padding([.trailing], 40)
-//        .foregroundStyle(.secondary)
         .font(.title2)
         .fontWeight(.semibold)
     }

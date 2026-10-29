@@ -23,27 +23,17 @@ struct MapScreen: View {
   @State var proxyMap: MapboxMaps.MapProxy?
 
   @State var vm = MapViewModel()
-
-  @State var canvas = PKCanvasView()
-  @State var selectedTool: PKTool = PKInkingTool(.pen, color: .red, width: 10)
-  @State var drawing: PKDrawing = PKDrawing()
   
   @GestureState private var sigmetLongPress = false
   
-  @State private var splitViewVisibility: NavigationSplitViewVisibility = .detailOnly
+  @State var splitViewVisibility: Bool = false
+  
+  @State var weatherPanelVisible: Bool = false
+  @State var routeVisible: Bool = false
   
   var body: some View {
-    @Bindable var vm = vm
     @Bindable var coordinator = coordinator
-    
-    NavigationSplitView(columnVisibility: $splitViewVisibility) {
-      if let detail = vm.selectionDetail {
-        switch detail {
-        case .airport(let apt):
-          AirportAnnotationCalloutView(airport: apt)
-        }
-      }
-    } detail: {
+    VStack {
       MapReader { proxy in
         Map(viewport: $viewport) {
           
@@ -54,80 +44,11 @@ struct MapScreen: View {
            RasterLayer(id: "VFR-Sectional-Layer", source: "VFR-Sectional")
            */
           
+          // When tapped -> fetch METAR -> Update airport icon?
           GeoJSONSource(id: Id.airportSource)
             .data(.url(Bundle.main.url(forResource: "AirportsMin", withExtension: "geojson")!))
           
-          /*
-           Toggle to turn off IFR-only or VFR-only airports
-           Allow user to change zoom/visible thresholds?
-           */
-          SymbolLayer(id: Id.smAirports, source: Id.airportSource)
-            .filter(Exp(.eq) { Exp(.get) { "size" }; "Small" })
-            .minZoom(8)
-            .iconImage("airportVfr")
-            .iconSize(1.05)
-            .iconColor(.lifr)
-            .textField(Exp(.get) { "icao" })
-            .textOffset(x: 0.0, y: -1.85)
-            .textColor(.white)
-            .textSize(13)
-            .textHaloWidth(1.35)
-            .textHaloColor(.black)
-          
-          SymbolLayer(id: Id.mdAirports, source: Id.airportSource)
-            .filter(Exp(.eq) { Exp(.get) { "size" }; "Medium" })
-            .minZoom(5)
-            .iconImage("airportIfr")
-            .iconSize(1.1)
-            .iconColor(.lifr)
-            .textField(Exp(.get) { "icao" })
-            .textOffset(x: 0.0, y: -1.85)
-            .textColor(.white)
-            .textSize(13)
-            .textHaloWidth(1.35)
-            .textHaloColor(.black)
-          
-          SymbolLayer(id: Id.lgAirports, source: Id.airportSource)
-            .filter(Exp(.eq) { Exp(.get) { "size" }; "Large" })
-            .iconImage("airportIfr")
-            .iconSize(1.15)
-            .iconColor(.lifr)
-            .textField(Exp(.get) { "icao" })
-            .textOffset(x: 0.0, y: -1.85)
-            .textColor(.white)
-            .textSize(13)
-            .textHaloWidth(1.35)
-            .textHaloColor(.icaoHalo)
-          
-          TapInteraction(.layer(Id.lgAirports)) { feature, _ in
-            guard let icao = feature.properties["icao"]??.rawValue as? String else {
-              print("Something went wrong interacting with Lg airport")
-              return false
-            }
-            vm.selection = .airport(icao: icao)
-            splitViewVisibility = .all
-            return true
-          }
-          
-          TapInteraction(.layer(Id.mdAirports)) { feature, _ in
-            guard let icao = feature.properties["icao"]??.rawValue as? String else {
-              print("Something went wrong interacting with Md airport")
-              return false
-            }
-            vm.selection = .airport(icao: icao)
-            splitViewVisibility = .all
-            return true
-          }
-          
-          TapInteraction(.layer(Id.smAirports)) { feature, _ in
-            guard let icao = feature.properties["icao"]??.rawValue as? String else {
-              print("Something went wrong interacting with Sm airport")
-              return false
-            }
-            vm.selection = .airport(icao: icao)
-            splitViewVisibility = .all
-            return true
-          }
+          MapScreenAirports(vm: vm, splitViewVisibility: $splitViewVisibility)
           
           if vm.routeVisible {
             PolylineAnnotation(lineCoordinates: routeManager.waypoints.map { CLLocationCoordinate2DMake($0.lat, $0.long) })
@@ -312,42 +233,42 @@ struct MapScreen: View {
           }
         }
         /* Deprecated, use MapViewAnnotation with LongPressGesture
-        .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
-          let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
-          let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
-          VStack {
-            Text(airport.name)
-            Button {
-              print("View Airport (INOP)")
-            } label: {
-              Text("View Airport")
-            }
-            Menu("View Procedures") {
-              if (!sids.isEmpty) {
-                Button {
-                  let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-                  let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
-                  mapViewModel.sidRoute = Array(grouped.values)
-                  mapViewModel.displaySID.toggle()
-                } label: {
-                  Text("View SIDs")
-                }
-              }
-              if (!stars.isEmpty) {
-                Button {
-                  let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-                  let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
-                  mapViewModel.starRoute = Array(grouped.values)
-                  mapViewModel.displaySTAR.toggle()
-                } label: {
-                  Text("View STARs")
-                }
-              }
-            }
-          }
-          .frame(idealWidth: 150, idealHeight: 300)
-        } */
-
+         .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
+         let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
+         let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
+         VStack {
+         Text(airport.name)
+         Button {
+         print("View Airport (INOP)")
+         } label: {
+         Text("View Airport")
+         }
+         Menu("View Procedures") {
+         if (!sids.isEmpty) {
+         Button {
+         let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+         let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
+         mapViewModel.sidRoute = Array(grouped.values)
+         mapViewModel.displaySID.toggle()
+         } label: {
+         Text("View SIDs")
+         }
+         }
+         if (!stars.isEmpty) {
+         Button {
+         let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+         let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
+         mapViewModel.starRoute = Array(grouped.values)
+         mapViewModel.displaySTAR.toggle()
+         } label: {
+         Text("View STARs")
+         }
+         }
+         }
+         }
+         .frame(idealWidth: 150, idealHeight: 300)
+         } */
+        
         .task(id: vm.selection) {
           vm.selectionDetail = nil
           guard let selection = vm.selection else { return }
@@ -363,157 +284,158 @@ struct MapScreen: View {
         .onTapGesture { _ in vm.selection = nil } // allow tap of map without causing selection to nil
       }
       .ignoresSafeArea()
-      .overlay(alignment: .bottom) {
-        if vm.drawingEnabled {
-          VStack {
-            Spacer()
-            CanvasToolbarView(
-              selTool: $selectedTool,
-              onClear: {
-                drawing = PKDrawing()
-              }
-            )
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            
-            DrawingView(drawing: $drawing, tool: $selectedTool)
-            
-          }
-          .frame(width: .infinity, height: 400, alignment: .bottom)
-          .background(.ultraThinMaterial)
-        }
-      }
       .overlay(alignment: .topLeading) {
-        VStack(spacing: 5) {
-          Button {
-            vm.radarSectionVM.radarPopoverVisible.toggle()
-          } label: {
-            Image(systemName: "cloud.sun")
+        VStack(alignment: .leading) {
+          HStack {
+            Toggle("Weather", systemImage: "cloud.sun", isOn: $weatherPanelVisible)
+              .glassEffect()
+              .toggleStyle(.button)
+              .contentTransition(.symbolEffect)
+              .font(.title3)
+              .fontWeight(.semibold)
+              .tint(weatherPanelVisible ? .primary : .secondary)
+            
+            Toggle("Route", systemImage: vm.routeVisible ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $vm.routeVisible)
+              .font(.title3)
+              .toggleStyle(.button)
+              .contentTransition(.symbolEffect)
+              .font(.title3)
+              .fontWeight(.semibold)
+              .glassEffect()
+              .tint(vm.routeVisible ? .primary : .secondary)
           }
-          .task(id: vm.radarSectionVM.radarPopoverVisible) {
-            guard vm.radarSectionVM.radarPopoverVisible else { return }
-            do {
-              vm.radarSectionVM.currentRadar = try await RainviewerAPI().fetchRadar()
-            } catch {
-              print("Error fetching current radar: \(error)")
-            }
-          }
-          .popover(isPresented: $vm.radarSectionVM.radarPopoverVisible) {
-            VStack {
-              // Weather Radar
-              Button {
-                vm.radarSectionVM.radarVisible.toggle()
-              } label: {
-                Text("Weather Radar")
-              }
-              // Satellite Radar
-              Button {
-                vm.radarSectionVM.satelliteRadarVisible.toggle()
-                vm.radarSectionVM.satelliteRadarVisible ? addSatelliteRadarSource() : removeSatelliteRadarSource()
-              } label: {
-                Text("Satellite Radar")
-              }
-            }
-          }
-          
-          Toggle("Route", systemImage: vm.routeVisible ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "point.topleft.down.to.point.bottomright.curvepath", isOn: $vm.routeVisible)
-            .font(.title2)
-            .tint(.mvfr)
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
-            .contentTransition(.symbolEffect)
-          
-          // TODO: Fix long press gesture not working properly
-          Toggle("Sigmet", systemImage: vm.sigmetsVisible ? "hazardsign.fill" : "hazardsign", isOn: $vm.sigmetsVisible)
-            .font(.title2)
-            .tint(.mvfr)
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
-            .contentTransition(.symbolEffect)
-            .task(id: vm.sigmetsVisible) {
-              if vm.sigmetsVisible {
-                let sigmetAPI = SigmetAPI()
-                do {
-                  vm.sigmets = try await sigmetAPI.fetchSigmet()
-                } catch {
-                  print("Error fetching Sigmet API: \(error)")
-                }
-              } else {
-                vm.sigmets = []
-              }
-            }
-          
-          
-          Toggle("Satellite", systemImage: vm.mapSatelliteVisible ? "globe.americas.fill" : "globe.americas", isOn: $vm.mapSatelliteVisible)
-            .font(.title2)
-            .tint(.mvfr)
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
-            .contentTransition(.symbolEffect)
-            .onChange(of: vm.mapSatelliteVisible) {
-              do {
-                try proxyMap?.map?.updateLayer(withId: "satellite", type: RasterLayer.self) { layer in
-                  layer.visibility = .constant(vm.mapSatelliteVisible ? .visible : .none)
-                }
-              } catch {
-                print("Error changing visibility of Map Satellite layer: \(error)")
-              }
-            }
-          
-          Toggle("Communications", systemImage: vm.enrouteCommsVisible ? "antenna.radiowaves.left.and.right" : "antenna.radiowaves.left.and.right.slash", isOn: $vm.enrouteCommsVisible)
-            .font(.title2)
-            .tint(.mvfr)
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
-            .contentTransition(.symbolEffect)
-          
-          Toggle("Drawing", systemImage: vm.drawingEnabled ? "pencil" : "pencil.slash", isOn: $vm.drawingEnabled)
-            .font(.title2)
-            .tint(.mvfr)
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
-            .contentTransition(.symbolEffect)
-          
-          /*
-          Spacer()
-            .frame(height: 15)
-          Toggle("Large", systemImage: vm.lgAirportsVisible ? "l.square.fill" : "l.square", isOn: $vm.lgAirportsVisible)
-            .font(.title2)
-            .tint(.mvfr)
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
-          Toggle("Medium", systemImage: vm.mdAirportsVisible ? "m.square.fill" : "m.square", isOn: $vm.mdAirportsVisible)
-            .font(.title2)
-            .tint(.mvfr)
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
-          Toggle("Small", systemImage: vm.smAirportsVisible ? "s.square.fill" : "s.square", isOn: $vm.smAirportsVisible)
-            .font(.title2)
-            .tint(.mvfr)
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
-          */
-        }
-      }
-      .overlay(alignment: .bottomTrailing) {
-        if(vm.sigmetsVisible) {
-          Button {
-            vm.sigmetMenuPopoverVisible.toggle()
-          } label: {
-            Image(systemName: "hazardsign.fill")
+          VStack(spacing: 8) {
+            /*
+             Button {
+             vm.radarSectionVM.radarPopoverVisible.toggle()
+             } label: {
+             Image(systemName: "cloud.sun")
+             .font(.title)
+             .foregroundStyle(.secondary)
+             }
+             .buttonStyle(.glass)
+             .task(id: vm.radarSectionVM.radarPopoverVisible) {
+             guard vm.radarSectionVM.radarPopoverVisible else { return }
+             do {
+             vm.radarSectionVM.currentRadar = try await RainviewerAPI().fetchRadar()
+             } catch {
+             print("Error fetching current radar: \(error)")
+             }
+             }
+             .popover(isPresented: $vm.radarSectionVM.radarPopoverVisible) {
+             VStack {
+             // Weather Radar
+             Button {
+             vm.radarSectionVM.radarVisible.toggle()
+             } label: {
+             Text("Composite Radar")
+             }
+             // Satellite Radar
+             Button {
+             vm.radarSectionVM.satelliteRadarVisible.toggle()
+             vm.radarSectionVM.satelliteRadarVisible ? addSatelliteRadarSource() : removeSatelliteRadarSource()
+             } label: {
+             Text("Satellite Radar")
+             }
+             }
+             }
+             */
+            
+            /*
+             Toggle("Sigmet", systemImage: vm.sigmetsVisible ? "hazardsign.fill" : "hazardsign", isOn: $vm.sigmetsVisible)
+             .font(.title)
+             .tint(vm.sigmetsVisible ? .primary : .secondary)
+             .toggleStyle(.button)
+             .labelStyle(.iconOnly)
+             .contentTransition(.symbolEffect)
+             .glassEffect()
+             .task(id: vm.sigmetsVisible) {
+             if vm.sigmetsVisible {
+             let sigmetAPI = SigmetAPI()
+             do {
+             vm.sigmets = try await sigmetAPI.fetchSigmet()
+             } catch {
+             print("Error fetching Sigmet API: \(error)")
+             }
+             } else {
+             vm.sigmets = []
+             }
+             }
+             */
+            
+            
+            Toggle("Satellite", systemImage: vm.mapSatelliteVisible ? "globe.americas.fill" : "globe.americas", isOn: $vm.mapSatelliteVisible)
               .font(.title2)
-              .foregroundStyle(.mvfr)
-          }
-          .popover(isPresented: $vm.sigmetMenuPopoverVisible) {
-            VStack {
-              Text("Sigmet Altitudes")
-              RangedSliderView(value: $vm.sigmetSliderRange, bounds: 0...50000,  step: 1000)
-            }
-            .frame(idealWidth: 250)
-            .padding()
-            .padding([.leading, .trailing, .bottom], 10)
+              .tint(vm.mapSatelliteVisible ? .primary : .secondary)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
+              .glassEffect()
+              .onChange(of: vm.mapSatelliteVisible) {
+                do {
+                  try proxyMap?.map?.updateLayer(withId: "satellite", type: RasterLayer.self) { layer in
+                    layer.visibility = .constant(vm.mapSatelliteVisible ? .visible : .none)
+                  }
+                } catch {
+                  print("Error changing visibility of Map Satellite layer: \(error)")
+                }
+              }
+            
+            Toggle("Communications", systemImage: vm.enrouteCommsVisible ? "antenna.radiowaves.left.and.right" : "antenna.radiowaves.left.and.right.slash", isOn: $vm.enrouteCommsVisible)
+              .font(.title2)
+              .tint(vm.enrouteCommsVisible ? .primary : .secondary)
+              .toggleStyle(.button)
+              .labelStyle(.iconOnly)
+              .contentTransition(.symbolEffect)
+              .glassEffect()
           }
         }
+        .padding()
       }
+//      .overlay(alignment: .bottomTrailing) {
+//        if(vm.sigmetsVisible) {
+//          Button {
+//            vm.sigmetMenuPopoverVisible.toggle()
+//          } label: {
+//            Image(systemName: "hazardsign.fill")
+//              .font(.title2)
+//              .foregroundStyle(.mvfr)
+//          }
+//          .popover(isPresented: $vm.sigmetMenuPopoverVisible) {
+//            VStack {
+//              Text("Sigmet Altitudes")
+//              RangedSliderView(value: $vm.sigmetSliderRange, bounds: 0...50000,  step: 1000)
+//            }
+//            .frame(idealWidth: 250)
+//            .padding()
+//            .padding([.leading, .trailing, .bottom], 10)
+//          }
+//        }
+//      }
+      .inspector(isPresented: $splitViewVisibility) {
+        if let detail = vm.selectionDetail {
+          switch detail {
+          case .airport(let apt):
+            AirportAnnotationCalloutView(airport: apt)
+          }
+        }
+        
+        Button {
+          splitViewVisibility = false
+        } label: {
+          Image(systemName: "arrow.right.to.line")
+        }
+        .buttonStyle(.glass)
+        .frame(width: 15, height: 15)
+      }
+      .ignoresSafeArea()
+      
+      if weatherPanelVisible {
+        Rectangle()
+          .frame(width: .infinity)
+          .background(.lapis)
+      }
+      
     }
     .ignoresSafeArea()
   }
@@ -533,7 +455,7 @@ struct MapScreen: View {
 }
 
 
-private enum Id {
+enum Id {
   static let airportSource = "AirportsSource"
   static let lgAirports = "AirportsLarge"
   static let mdAirports = "AirportsMedium"
@@ -542,4 +464,8 @@ private enum Id {
 
 #Preview {
   MapScreen()
+    .environment(AppCoordinator())
+    .environment(SimConnectShipObserver())
+    .environment(RouteManager())
+    .environment(GRDBManager())
 }

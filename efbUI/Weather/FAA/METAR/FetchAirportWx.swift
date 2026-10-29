@@ -43,7 +43,9 @@ class AirportWxAPI {
     }
     
     do {
-      let metars = try JSONDecoder().decode([AirportMETARSchema].self, from: data)
+      let decoder = JSONDecoder()
+      decoder.dateDecodingStrategy = .iso8601
+      let metars = try decoder.decode([AirportMETARSchema].self, from: data)
       return metars
     } catch {
       throw AirportWxError.invalidDecode(error)

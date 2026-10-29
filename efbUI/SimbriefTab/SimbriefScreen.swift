@@ -9,34 +9,30 @@ import SwiftUI
 import SwiftData
 import CoreLocation
 
+/*
+ todo
+ - build nav/route from simbrief
+ - check sb airac, compare to current downloaded database
+ - need to query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
+ - give error/feedback if waypoint not found
+ 
+ - how to: differentiate multiple waypoints in world with same name
+ */
+
 struct SimbriefScreen: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(SimBriefViewModel.self) var simbrief
   @Environment(RouteManager.self) var routeManager
-  @Query var simbriefID: [UserSettings]
+  @AppStorage(.userSimbriefID) private var simbriefUserID: String = ""
   
   var body: some View {
     VStack {
-      if let sbID = simbriefID.first?.simbriefUserID {
+      if !simbriefUserID.isEmpty {
         Button {
           Task {
-            await simbrief.fetchOFP(for: sbID)
+            await simbrief.fetchOFP(for: simbriefUserID)
             createRoute(navlog: simbrief.ofp?.navlog ?? [])
           }
-          
-          // TODO: Process split variable -> Construct linked list with each route component
-          // TODO: Check airac and compare to current downloaded database
-          
-          // Query: Airports, Enroute (Airways, NBD Navaids, Waypoints, VHF Navaids)
-          // Give error feedback if waypoint not found
-          // HOW TO: Multiple waypoints in world can have same name - how to differentiate?
-          
-          //                  let tempSplit = route.split(separator: " ")
-          //                  let linkedList = LinkedList()
-          //                  for item in tempSplit {
-          //                    linkedList.append(value: String(item))
-          //                  }
-          //                  linkedList.printList()
         } label: {
           Text("Fetch SimBrief")
         }
@@ -61,7 +57,6 @@ struct SimbriefScreen: View {
   
   func createRoute(navlog: [OFPNavlog]) {
     guard !navlog.isEmpty else { return }
-    // query database
     for nav in navlog {
       // TODO: fix this, we dont need to query database
       // keep in mind: how to determine waypoint type

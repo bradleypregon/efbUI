@@ -306,7 +306,7 @@ struct AirportScreenRwyTab: View {
       ScrollView {
         LazyVGrid(columns: columns, spacing: 10) {
           ForEach(runways, id: \.self) { runway in
-            AirportRunwayView(runway: runway, weather: wx?.first, optimal: isOptimal(runway), longest: isLongest(runway))
+            AirportRunwayView_Deprecated(runway: runway, weather: wx?.first, optimal: isOptimal(runway), longest: isLongest(runway))
           }
         }
       }

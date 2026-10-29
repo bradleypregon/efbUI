@@ -8,7 +8,12 @@
 import SwiftUI
 import MapboxMaps
 
-// MARK: Weather and Satellite Radar
+/*
+ todos
+ - radar time slider
+ - get satellite working (and also slider?)
+ */
+
 extension MapScreen {
   @MapContentBuilder
   var radarContent: some MapContent {
@@ -24,46 +29,7 @@ extension MapScreen {
     RasterLayer(id: "RadarLayer", source: "RadarSource")
       .rasterOpacity(0.4)
   }
-  
-  /*
-  func addWeatherRadarSource() {
-    // https://api.rainviewer.com/public/weather-maps.json
-    /// image/mapsize/stringpaths (x,y,z)/mapcolor/options(smooth_snow)/filetype
-    if let currentRadar = vm.radarSectionVM.currentRadar {
-      let radarData = currentRadar.radar?.nowcast?.first?.path ?? ""
-      let stringPaths = "{z}/{x}/{y}"
-      let mapColor = "4"
-      let options = "1_1" // smooth_snow
-      let url = String("https://tilecache.rainviewer.com\(radarData)/512/\(stringPaths)/\(mapColor)/\(options).png")
-      
-      var rasterSource = RasterSource(id: vm.radarSectionVM.wxRadarSourceID)
-      rasterSource.tiles = [url]
-      rasterSource.tileSize = 512
-      
-      var rasterLayer = RasterLayer(id: vm.radarSectionVM.wxRadarSourceID, source: rasterSource.id)
-      rasterLayer.rasterOpacity = .constant(0.4)
-      
-      do {
-        try proxyMap?.map?.addSource(rasterSource)
-        try proxyMap?.map?.addLayer(rasterLayer)
-      } catch {
-        vm.radarSectionVM.rasterRadarAlertVisible = true
-        print("Failed to update map style with Wx Radar: \(error)")
-      }
-    }
-  }
-  */
-  
-  /*
-  func removeWeatherRadarSource() {
-    do {
-      try proxyMap?.map?.removeLayer(withId: vm.radarSectionVM.wxRadarSourceID)
-      try proxyMap?.map?.removeSource(withId: vm.radarSectionVM.wxRadarSourceID)
-    } catch {
-      print("Failed to remove radar source. Error: \(error)")
-    }
-  }
-  */
+
   func addSatelliteRadarSource() {
     if let currentRadar = vm.radarSectionVM.currentRadar {
 

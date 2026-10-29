@@ -9,7 +9,7 @@ import SwiftUI
 import MapKit
 
 struct DiagramView: View {
-  var runways: [RunwayTable] = []
+  let runways: [RunwayTable]
   var towerCoord: CLLocationCoordinate2D?
   
   var body: some View {

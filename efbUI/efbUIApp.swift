@@ -15,23 +15,27 @@ struct efbUIApp: App {
   @State private var routeManager: RouteManager = RouteManager()
   @State private var appCoordinator: AppCoordinator = AppCoordinator()
   @State private var grdbManager: GRDBManager = GRDBManager()
+  @State private var toastManager: ToastManager = ToastManager()
+  @State private var scratchPadManager: ScratchPadManager = ScratchPadManager()
   
   var body: some Scene {
     WindowGroup {
-      TabBar()
-        .overlay(alignment: .bottom) {
-          StatBarView()
-            .frame(width: .infinity, alignment: .leading)
-            .padding([.leading, .trailing, .bottom], 18)
-            .containerShape(.rect(cornerRadius: 32))
-        }
-        .environment(simConnectShip)
-        .environment(appCoordinator)
-        .environment(simbrief)
-        .environment(routeManager)
-        .environment(grdbManager)
+      VStack {
+        TabBar()
+          .overlay(alignment: .topLeading) {
+            ToastsView(toasts: $toastManager.toasts)
+          }
+        StatBarView()
+          .background(.lapis)
+      }
+      .environment(simConnectShip)
+      .environment(appCoordinator)
+      .environment(simbrief)
+      .environment(routeManager)
+      .environment(grdbManager)
+      .environment(toastManager)
+      .environment(scratchPadManager)
     }
-    .modelContainer(for: UserSettings.self)
   }
 }
 

@@ -12,6 +12,7 @@ import MapKit
 struct AirportAnnotationCalloutView: View {
   @Environment(AppCoordinator.self) private var appCoordinator
   @Environment(GRDBManager.self) private var grdb
+  @Environment(ToastManager.self) private var toastMan
   
   var airport: AirportTable
   
@@ -20,10 +21,13 @@ struct AirportAnnotationCalloutView: View {
   @State private var currWx: [AirportMETARSchema] = []
   @State private var wxCat: WxCategory = .NONE
   
-  @State private var comms: [AirportCommunicationTable] = []
+  @State private var weatherLoading: Bool = true
   
-  @State private var wxString: String?
-  
+  private let relativeDate: RelativeDateTimeFormatter = {
+    let df = RelativeDateTimeFormatter()
+    df.unitsStyle = .full
+    return df
+  }()
   
   var body: some View {
     VStack {
@@ -37,10 +41,21 @@ struct AirportAnnotationCalloutView: View {
             .frame(width: 12, height: 12)
           Text(wxCat.rawValue)
             .foregroundStyle(wxCat.color)
+          
+          Button {
+            toastMan.push(icon: "", title: "Hell yeah brother favorite airport here")
+            
+          } label: {
+            Image(systemName: "star.fill")
+              .frame(width: 20, height: 20)
+          }
+          .buttonStyle(.glass)
         }
         .fontWeight(.semibold)
       }
+      
       .task(id: wxCat) {
+        defer { weatherLoading = false }
         do {
           currWx = try await AirportWxAPI().fetchMetar(icao: airport.airportIdentifier)
         } catch {
@@ -52,20 +67,24 @@ struct AirportAnnotationCalloutView: View {
       ScrollView(.vertical) {
         AirportCalloutInfoView(airport: airport)
         
-        GroupBox("Wx") {
+        GroupBox("Weather") {
           if !currWx.isEmpty {
-            Text(currWx[0].rawOb)
-              .monospaced()
-            Text("Last Updated: \(currWx[0].reportTime)")
-              .font(.caption)
+            AirportCalloutWxView(currWx: currWx[0])
           }
         }
         
-        AirportCalloutRunwayView(icao: airport.airportIdentifier)
+        GroupBox("Best Runways") {
+          if !weatherLoading {
+            let wdir = currWx.first?.wdir?.asDouble ?? nil
+            AirportCalloutRunwayView(icao: airport.airportIdentifier, windDir: wdir)
+          } else {
+            EmptyView()
+          }
+        }
         
         GroupBox("Procedures") {
-          Text("Arrivals")
-          Text("Departures")
+          Text("SIDs")
+          Text("STARs")
         }
       }
       

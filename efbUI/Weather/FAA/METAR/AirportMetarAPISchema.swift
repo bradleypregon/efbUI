@@ -9,9 +9,9 @@ import Foundation
 
 struct AirportMETARSchema: Decodable {
   let icaoId: String?
-  let receiptTime: String
+  let receiptTime: Date
   let obsTime: Int
-  let reportTime: String
+  let reportTime: Date
   let temp: Double // min 0
   let dewp: Double?
   let wdir: Poly? // Int>=0 or Str (VRB) (null)

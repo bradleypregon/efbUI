@@ -11,6 +11,9 @@ import SwiftData
 
 struct StatBarView: View {
   @Environment(SimConnectShipObserver.self) var simConnect
+  @Environment(ScratchPadManager.self) private var padManager
+  @Environment(AppCoordinator.self) private var appCoord
+  
   @State private var serverRunning: Bool = false
   @State private var server: ServerListener?
   @State private var telemetryVisible: Bool = false
@@ -23,11 +26,23 @@ struct StatBarView: View {
   }()
   
   var body: some View {
+    @Bindable var coord = appCoord
+    @Bindable var pad = padManager
+    
     HStack(spacing: 12) {
       TimelineView(.periodic(from: .now, by: 1.0)) { ctx in
         Text(utcFormat.string(from: ctx.date))
           .padding(.leading, 10)
+          .fontWeight(.semibold)
       }
+      
+      Toggle("Drawing", systemImage: pad.isOpen ? "scribble.variable" : "scribble", isOn: $pad.isOpen)
+        .font(.title2)
+        .tint(pad.isOpen ? .primary : .secondary)
+        .toggleStyle(.button)
+        .labelStyle(.iconOnly)
+        .contentTransition(.symbolEffect)
+        .glassEffect()
       
       Toggle("SimConnect", systemImage: serverRunning ? "wifi" : "wifi.slash", isOn: $serverRunning)
         .glassEffect()
@@ -68,10 +83,11 @@ struct StatBarView: View {
         .font(.caption)
         .fontWeight(.semibold)
       }
+      
+      Spacer()
     }
     .padding()
-    .background(.ultraThinMaterial)
-    .clipShape(.rect(corners: .concentric, isUniform: true))
+    .frame(alignment: .center)
   }
   
   func headingButton() -> some View {
@@ -86,8 +102,8 @@ struct StatBarView: View {
           Text("\(Int(simConnect.ownship.heading.rounded()))º")
             .font(.title3)
         }
-        .frame(width: 110, height: 40)
-        .padding(4)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 12)
       }
         .buttonStyle(.glass)
         .popover(isPresented: $isTapped) {
@@ -110,8 +126,8 @@ struct StatBarView: View {
           Text("\(Int(simConnect.ownship.altitude.rounded()))º")
             .font(.title3)
         }
-        .frame(width: 110, height: 40)
-        .padding(4)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 12)
       }
         .buttonStyle(.glass)
         .popover(isPresented: $isTapped) {
@@ -134,8 +150,8 @@ struct StatBarView: View {
           Text("\(Int(simConnect.ownship.speed.rounded()))º")
             .font(.title3)
         }
-        .frame(width: 110, height: 40)
-        .padding(4)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 12)
       }
         .buttonStyle(.glass)
         .popover(isPresented: $isTapped) {

@@ -79,126 +79,83 @@ struct AirportDetailView: View {
   @Environment(AppCoordinator.self) private var coordinator
   @Environment(GRDBManager.self) private var grdbMan
   
+  @AppStorage("homeAirportICAO") private var homeICAO: String = "KDSM"
+  @AppStorage("lastAirportICAO") private var lastICAO: String = "KDEN"
+  
   @State private var selectedTab: AirportTab = .Info
-  @State private var airport: AirportTable? = AirportTable.mock
+  @State private var airport: AirportTable?
   @State private var runways: [RunwayTable] = []
   
+  private var startupICAO: String? {
+    if !lastICAO.isEmpty { return lastICAO }
+    if !homeICAO.isEmpty { return homeICAO }
+    return nil
+  }
+  
   var body: some View {
-    VStack(spacing: 12) {
-      // Info
-      VStack {
-        SectionHeader(icon: "info.circle", title: airport?.airportIdentifier ?? "Info")
-          .frame(maxWidth: .infinity, alignment: .leading)
-        
-        // Grid?
-        Text("Sunrise, Sunset, Coordinates, Elevation")
-      }
-      .padding()
-      .background(.thinMaterial)
-      .containerShape(.rect(cornerRadius: 32, style: .continuous))
-      
-      Picker("AirportTab", selection: $selectedTab) {
-        ForEach(AirportTab.allCases) { type in
-          Text(type.rawValue)
+    if let airport {
+      // Move to struct or view
+      VStack(spacing: 12) {
+        // Info
+        VStack {
+          SectionHeader(icon: "info.circle", title: airport.airportIdentifier)
+            .frame(maxWidth: .infinity, alignment: .leading)
+          
+          // Grid?
+          Text("Sunrise, Sunset, Coordinates, Elevation")
         }
-      }
-      .pickerStyle(.segmented)
-      
-      switch selectedTab {
-      case .Info:
-        AirportInfoView(airport: airport, runways: runways)
-      case .Weather:
-        AirportWeatherView()
-      case .Runway:
-        AirportRunwayView2(runways: runways)
-      default:
-        EmptyView()
-      }
-      
-      Spacer()
-    }
-    .padding()
-    .task {
-      if coordinator.selectedICAO == "" {
-        airport = AirportTable.mock
-        coordinator.selectedICAO = airport?.airportIdentifier
-      }
-      await fetchAirportData()
-    }
-  }
-  
-  // doing too much. split per view. RunwayView -> task to fetch runways
-  private func fetchAirportData() async {
-    guard let icao = coordinator.selectedICAO else { return }
-    do {
-      async let airportFetch = grdbMan.fetchAirport(by: icao)
-      async let runwaysFetch = grdbMan.fetchRunways(for: icao)
-      
-      airport = try await airportFetch
-      runways = try await runwaysFetch
-    } catch {
-      print("Error fetching airport data: \(error)")
-      runways = []
-      airport = nil
-    }
-  }
-}
-
-struct AirportInfoView: View {
-  let airport: AirportTable?
-  let runways: [RunwayTable]
-  
-  var body: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text("Some airport info here")
-      
-      DiagramView(runways: RunwayTable.mockKDSM)
-        .frame(width: 400, height: 400)
         .padding()
-      
-    }
-    .frame(width: .infinity)
-  }
-}
-
-struct AirportWeatherView: View {
-  let weatherItems: [WeatherItem] = [
-    .init(icon: "wind", type: "Wind", value: "20", sub: "knot"),
-    .init(icon: "eye", type: "Visibility", value: "10+", sub: "nautical mile"),
-    .init(icon: "cloud", type: "Clouds", value: "25%", sub:"5000ft"),
-    .init(icon: "thermometer.variable", type: "Temp", value: "30", sub: "c | 50 f"),
-    .init(icon: "gauge.with.dots.needle.50percent", type: "Altimeter", value: "29.92", sub: "inHg | 1012mh?")
-  ]
-  
-  @State private var selectedWeatherType: WeatherType = .METAR
-  
-  var body: some View {
-    VStack {
-      Text("`METAR KLAX 152153Z 23013G21KT 10SM FEW020 26/16 A2990 RMK AO2 SLP122 T02610156 $`")
-        .padding()
-        .background(.thickMaterial)
-      
-      ScrollView(.horizontal) {
-        LazyHStack(spacing: 12) {
-          ForEach(weatherItems) { item in
-            WeatherDetailCard(item: item)
+        .background(.thinMaterial)
+        .containerShape(.rect(cornerRadius: 32, style: .continuous))
+        
+        Picker("AirportTab", selection: $selectedTab) {
+          ForEach(AirportTab.allCases) { type in
+            Text(type.rawValue)
           }
         }
-        .fixedSize(horizontal: false, vertical: true)
+        .pickerStyle(.segmented)
+        
+        switch selectedTab {
+        case .Info:
+          AirportInfoView(airport: airport, runways: runways)
+        case .Weather:
+          AirportWeatherView()
+        case .Runway:
+          AirportRunwayView(icao: airport.airportIdentifier, runways: runways)
+        default:
+          EmptyView()
+        }
+        
+        Spacer()
+      }
+      .padding()
+    } else {
+      ContentUnavailableView {
+        Label("No Airport Selected", systemImage: "airplane.circle")
+      } description: {
+        Text("Search for an airport, or set a home airport in Settings.")
+      } actions: {
+        Button("Search Airports") { /* show search */ }
+        Button("Import SimBrief") { /* ... */ }
+      }
+      .task(id: coordinator.selectedICAO) {
+        guard let icao = coordinator.selectedICAO, !icao.isEmpty else { return }
+        await fetchAirportData(icao: icao)
       }
     }
-    .padding()
-    .background(.ultraThinMaterial)
-    .containerShape(.rect(cornerRadius: 32, style: .continuous))
   }
-}
-
-struct AirportRunwayView2: View {
-  let runways: [RunwayTable]
   
-  var body: some View {
-    ForEach(runways, id: \.id) { rwy in
-      Text(rwy.runwayIdentifier)
+  private func fetchAirportData(icao: String) async {
+    do {
+      airport = try await grdbMan.fetchAirport(by: icao)
+      runways = try await grdbMan.fetchRunways(for: icao)
+      
+      lastICAO = icao
+      if airport != nil { lastICAO = icao }
+    } catch {
+      print("Error fetching airport data: \(error)")
+      airport = nil
+      runways = []
     }
   }
 }
