@@ -15,6 +15,9 @@
 		1C3F2A68305A304500F040FD /* GRDBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3F2A67305A304400F040FD /* GRDBManager.swift */; };
 		1C716C18306E91A600E6256C /* AirportsMin.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 1C716C17306E91A600E6256C /* AirportsMin.geojson */; };
 		1C735DAA308AD0A5006A030F /* ToastManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C735DA9308AD0A5006A030F /* ToastManager.swift */; };
+		1C93802B3093BF10002068DF /* MapScreenAirports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9380283093BF10002068DF /* MapScreenAirports.swift */; };
+		1C93802D3094C903002068DF /* MapScreenWeatherPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C93802C3094C903002068DF /* MapScreenWeatherPanel.swift */; };
+		1C93802F3098E7B0002068DF /* MapScreenSigmets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C93802E3098E7B0002068DF /* MapScreenSigmets.swift */; };
 		1CAB6FF330936A200085CCDB /* ScratchPadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CAB6FF230936A200085CCDB /* ScratchPadManager.swift */; };
 		1CAB6FF530936B6E0085CCDB /* FloatingPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CAB6FF430936B6E0085CCDB /* FloatingPadView.swift */; };
 		1CFDA4C7308E3ECD00C8AFCF /* ToastsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFDA4C6308E3ECD00C8AFCF /* ToastsView.swift */; };
@@ -75,8 +78,8 @@
 		A2D13D242BA6361200E5AFEE /* AirportSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D13D232BA6361200E5AFEE /* AirportSchema.swift */; };
 		A2DE93D82B9237390065FEF6 /* SPATISTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D72B9237390065FEF6 /* SPATISTemplateView.swift */; };
 		A2DE93DA2B925E340065FEF6 /* SPCRAFTTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DE93D92B925E340065FEF6 /* SPCRAFTTemplateView.swift */; };
-		A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */; };
-		A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */; };
+		A2EF3F962B6FE1C00096933A /* LibrewxrAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F952B6FE1C00096933A /* LibrewxrAPI.swift */; };
+		A2EF3F982B6FE1CD0096933A /* LibrewxrSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF3F972B6FE1CD0096933A /* LibrewxrSchema.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -89,6 +92,9 @@
 		1C626DC92E9F09DA0088651B /* Keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Keys.xcconfig; sourceTree = "<group>"; };
 		1C716C17306E91A600E6256C /* AirportsMin.geojson */ = {isa = PBXFileReference; lastKnownFileType = text; path = AirportsMin.geojson; sourceTree = "<group>"; };
 		1C735DA9308AD0A5006A030F /* ToastManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastManager.swift; sourceTree = "<group>"; };
+		1C9380283093BF10002068DF /* MapScreenAirports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapScreenAirports.swift; sourceTree = "<group>"; };
+		1C93802C3094C903002068DF /* MapScreenWeatherPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapScreenWeatherPanel.swift; sourceTree = "<group>"; };
+		1C93802E3098E7B0002068DF /* MapScreenSigmets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapScreenSigmets.swift; sourceTree = "<group>"; };
 		1CAB6FF230936A200085CCDB /* ScratchPadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadManager.swift; sourceTree = "<group>"; };
 		1CAB6FF430936B6E0085CCDB /* FloatingPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPadView.swift; sourceTree = "<group>"; };
 		1CFDA4C6308E3ECD00C8AFCF /* ToastsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastsView.swift; sourceTree = "<group>"; };
@@ -145,8 +151,8 @@
 		A2D13D232BA6361200E5AFEE /* AirportSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportSchema.swift; sourceTree = "<group>"; };
 		A2DE93D72B9237390065FEF6 /* SPATISTemplateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SPATISTemplateView.swift; sourceTree = "<group>"; };
 		A2DE93D92B925E340065FEF6 /* SPCRAFTTemplateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SPCRAFTTemplateView.swift; sourceTree = "<group>"; };
-		A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerAPI.swift; sourceTree = "<group>"; };
-		A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainviewerSchema.swift; sourceTree = "<group>"; };
+		A2EF3F952B6FE1C00096933A /* LibrewxrAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrewxrAPI.swift; sourceTree = "<group>"; };
+		A2EF3F972B6FE1CD0096933A /* LibrewxrSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrewxrSchema.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -214,8 +220,10 @@
 			children = (
 				1C1B8F72307A8DB100389F26 /* MapScreen+Extensions */,
 				3AE11B2A27319450005974E5 /* MapScreen.swift */,
-				A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */,
 				A21B5C252CD973F40017778C /* MapScreenWaypointView.swift */,
+				1C93802E3098E7B0002068DF /* MapScreenSigmets.swift */,
+				1C93802C3094C903002068DF /* MapScreenWeatherPanel.swift */,
+				1C9380283093BF10002068DF /* MapScreenAirports.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -342,7 +350,6 @@
 		A26E17AD2B9EA30C002B4090 /* Sigmet */ = {
 			isa = PBXGroup;
 			children = (
-				A26E17AE2B9EA39E002B4090 /* SigmetSchema.swift */,
 				A26E17B02B9EA3A5002B4090 /* SigmetAPI.swift */,
 			);
 			path = Sigmet;
@@ -412,9 +419,11 @@
 		A2EC6FD72B49AF9A00F31364 /* Deprecated */ = {
 			isa = PBXGroup;
 			children = (
+				A26E17AE2B9EA39E002B4090 /* SigmetSchema.swift */,
 				1C31A65E2EBCFC0D00E25772 /* NotePadView.swift */,
 				1C31A6602EBD009F00E25772 /* CurveView.swift */,
 				1C31A6682EBD4CAF00E25772 /* MainOptionsView.swift */,
+				A26E17B62BA1F1B8002B4090 /* RangedSliderView.swift */,
 			);
 			path = Deprecated;
 			sourceTree = "<group>";
@@ -438,8 +447,8 @@
 		A2EF3F942B6FE1B10096933A /* Radar */ = {
 			isa = PBXGroup;
 			children = (
-				A2EF3F952B6FE1C00096933A /* RainviewerAPI.swift */,
-				A2EF3F972B6FE1CD0096933A /* RainviewerSchema.swift */,
+				A2EF3F952B6FE1C00096933A /* LibrewxrAPI.swift */,
+				A2EF3F972B6FE1CD0096933A /* LibrewxrSchema.swift */,
 			);
 			path = Radar;
 			sourceTree = "<group>";
@@ -541,11 +550,12 @@
 				A257E1B62B2AB514003B1859 /* DBTableStructs.swift in Sources */,
 				A283DBC32CDE88680022CFF8 /* RouteScreen.swift in Sources */,
 				A23B5BB92BCDDA0100DA5A08 /* PilotedgeAPI.swift in Sources */,
-				A2EF3F962B6FE1C00096933A /* RainviewerAPI.swift in Sources */,
+				A2EF3F962B6FE1C00096933A /* LibrewxrAPI.swift in Sources */,
 				A2C6ED152B2E3DA400856381 /* OpenMeteoAPI.swift in Sources */,
 				A2710D052BCEB1BB0034889B /* IvaoAPI.swift in Sources */,
 				A23B5BB52BC309BB00DA5A08 /* AtisAPISchema.swift in Sources */,
 				1C31A6612EBD009F00E25772 /* CurveView.swift in Sources */,
+				1C93802B3093BF10002068DF /* MapScreenAirports.swift in Sources */,
 				1CAB6FF330936A200085CCDB /* ScratchPadManager.swift in Sources */,
 				A22322D52B20B74E001274CA /* Extensions.swift in Sources */,
 				1C3F2A68305A304500F040FD /* GRDBManager.swift in Sources */,
@@ -557,8 +567,9 @@
 				A25CC0612B97A25D00716E1A /* RouteManager.swift in Sources */,
 				A20620262B49DC890034D902 /* AirportScreenViewModel.swift in Sources */,
 				1C735DAA308AD0A5006A030F /* ToastManager.swift in Sources */,
-				A2EF3F982B6FE1CD0096933A /* RainviewerSchema.swift in Sources */,
+				A2EF3F982B6FE1CD0096933A /* LibrewxrSchema.swift in Sources */,
 				A207E90A2C78ED8400E4C4EE /* SimbriefTabDetails.swift in Sources */,
+				1C93802F3098E7B0002068DF /* MapScreenSigmets.swift in Sources */,
 				A2A243682B00368B00245A0F /* SettingsView.swift in Sources */,
 				3A24A78D27321C15000D98E5 /* TabBar.swift in Sources */,
 				A2B98D6E2B9BBFF600A91977 /* ToastTestContentView.swift in Sources */,
@@ -567,6 +578,7 @@
 				A283DBC72CE51B620022CFF8 /* SimbriefTabRoute.swift in Sources */,
 				1C31A6692EBD4CAF00E25772 /* MainOptionsView.swift in Sources */,
 				A24692F32B8E3A6B00A10A7F /* DrawingView.swift in Sources */,
+				1C93802D3094C903002068DF /* MapScreenWeatherPanel.swift in Sources */,
 				A22696062CB8686F006CE148 /* OpenMeteoSchema.swift in Sources */,
 				A247DE4E2DE21E9400949A13 /* CanvasToolbarView.swift in Sources */,
 				A26E17AF2B9EA39E002B4090 /* SigmetSchema.swift in Sources */,

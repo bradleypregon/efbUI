@@ -169,3 +169,43 @@ struct AirportAnnotationCalloutView: View {
   }
   
 }
+
+/*
+ Procedures
+ /* Deprecated, use MapViewAnnotation with LongPressGesture
+  .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
+  let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
+  let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
+  VStack {
+  Text(airport.name)
+  Button {
+  print("View Airport (INOP)")
+  } label: {
+  Text("View Airport")
+  }
+  Menu("View Procedures") {
+  if (!sids.isEmpty) {
+  Button {
+  let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+  let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
+  mapViewModel.sidRoute = Array(grouped.values)
+  mapViewModel.displaySID.toggle()
+  } label: {
+  Text("View SIDs")
+  }
+  }
+  if (!stars.isEmpty) {
+  Button {
+  let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
+  let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
+  mapViewModel.starRoute = Array(grouped.values)
+  mapViewModel.displaySTAR.toggle()
+  } label: {
+  Text("View STARs")
+  }
+  }
+  }
+  }
+  .frame(idealWidth: 150, idealHeight: 300)
+  } */
+ */

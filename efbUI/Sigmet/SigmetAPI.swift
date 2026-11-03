@@ -6,50 +6,36 @@
 //
 
 import Foundation
+import Turf
 
 enum SigmetAPIError: Error, LocalizedError {
-  case badURL
-  case badResponse
-  case badDecode
+  case badURL, badResponse, badDecode
   
   var errorDescription: String? {
     switch self {
-    case .badURL:
-      return "Sigmet API Error: Invalid URL."
-    case .badResponse:
-      return "Sigmet API Error: Invalid Response."
-    case .badDecode:
-      return "Sigmet API Error: Invalid Decode."
+    case .badURL:      return "Sigmet API Error: Invalid URL."
+    case .badResponse: return "Sigmet API Error: Invalid Response."
+    case .badDecode:   return "Sigmet API Error: Invalid Decode."
     }
   }
 }
 
 class SigmetAPI {
-  func fetchSigmet() async throws -> SigmetSchema {
-    let url = "https://aviationweather.gov/api/data/airsigmet?format=json&type=sigmet&hazard=conv,turb,ice,ifr&date=\(getDate())"
+  func fetchSigmet() async throws -> FeatureCollection {
+    let url = "https://aviationweather.gov/api/data/sigmet?format=geojson&date=\(getDate())"
     
     guard let url = URL(string: url) else { throw SigmetAPIError.badURL }
-    
     let (data, response) = try await URLSession.shared.data(from: url)
-    
     guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw SigmetAPIError.badResponse }
-    
-    guard let sigmetData = try? JSONDecoder().decode(SigmetSchema.self, from: data) else {
-      throw SigmetAPIError.badDecode
-    }
-    
-    return sigmetData
+    return try JSONDecoder().decode(FeatureCollection.self, from: data)
   }
   
-  // 20240309_171800Z
-  // yyyymmdd_hhmmssZ
-  private func getDate() -> String {
+  // 20240309_171800 date_time OR ISO8601
+  func getDate() -> String {
     let df = DateFormatter()
-    df.dateFormat = "YYYYMMdd_HHmmss"
-    df.timeZone = TimeZone(identifier: "UTC")
-    let currentDate = Date()
-    let zulu = df.string(from: currentDate)
-    return "\(zulu)Z"
+    df.dateFormat = "yyyyMMdd_HHmm"
+    df.timeZone = .gmt
+    return df.string(from: Date())
   }
   
 }

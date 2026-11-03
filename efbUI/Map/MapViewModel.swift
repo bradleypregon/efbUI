@@ -13,17 +13,13 @@ import MapKit
 
 @Observable
 class RadarSectionViewModel {
-  var rasterRadarAlertVisible: Bool = false
-  
-  var radarVisible: Bool = false
+  var compositeRadarVisible: Bool = false
   var satelliteRadarVisible: Bool = false
   
-  var wxRadarSourceID: String = "wx-radar-source"
+  var compositeRadarSourceID: String = "composite-radar-source"
   var satelliteRadarSourceID: String = "satellite-radar-source"
   
-  var radarPopoverVisible: Bool = false
-  
-  var currentRadar: RainviewerSchema?
+  var currentRadar: LibrewxrSchema?
 }
 
 @Observable
@@ -35,11 +31,10 @@ class ProcedureSectionViewModel {
 }
 
 @Observable
-class MapViewModel {
-  var radarSectionVM = RadarSectionViewModel()
+final class MapViewModel: Sendable {
+  var radarVM = RadarSectionViewModel()
   var procedureVM = ProcedureSectionViewModel()
   
-  var drawingEnabled: Bool = false
   var waypointPopoverVisible: Bool = false
   var routeVisible: Bool = false
   
@@ -66,9 +61,6 @@ class MapViewModel {
   
   var displayRoute: Bool = false
   
-  var lgAirportsVisible: Bool = true
-  var mdAirportsVisible: Bool = false
-  var smAirportsVisible: Bool = false
   // Future: instead of Lg, Md, Sm visibility
   // let user control IFR vs. VFR airport visibility
   var ifrAirportsVisible: Bool = true
@@ -80,7 +72,7 @@ class MapViewModel {
   var visibleGates: [GateTable] = []
   
   var sigmetsVisible: Bool = false
-  var sigmets: SigmetSchema = []
+  var sigmets: FeatureCollection = FeatureCollection(features: [])
   
   var sidsVisible: Bool = false
   var starsVisible: Bool = false

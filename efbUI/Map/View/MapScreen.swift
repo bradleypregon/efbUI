@@ -61,35 +61,8 @@ struct MapScreen: View {
             }
           }
           
-          // MARK: Sigmet Data
-          // CONVECTIVE: orange, IFR: blue, MTN OBSCN: gray, TURB: red
           if vm.sigmetsVisible {
-            PolygonAnnotationGroup(vm.sigmets.filter { !$0.coords.isEmpty }, id: \.airSigmetId) { sigmet in
-              var polyCoords: [CLLocationCoordinate2D] = []
-              
-              for coord in sigmet.coords {
-                if let hiAlt = sigmet.altitudeHi2, let loAlt = sigmet.altitudeLow1 {
-                  if hiAlt < Int(vm.sigmetSliderRange.upperBound) && loAlt > Int(vm.sigmetSliderRange.lowerBound) {
-                    polyCoords.append(CLLocationCoordinate2DMake(coord.lat, coord.lon))
-                  }
-                }
-                
-              }
-              
-              let polygon = Polygon([polyCoords])
-              return PolygonAnnotation(polygon: polygon, isDraggable: false)
-                .fillOpacity(0.09)
-                .fillColor(getSigmetFillColor(sigmet: sigmet.hazard))
-                .onTapGesture {
-                  // testing purposes
-                  print("hz: \(sigmet.hazard)")
-                  print("low alt: \(sigmet.altitudeLow1 ?? .zero)")
-                  print("low alt2: \(sigmet.altitudeLow2 ?? .zero)")
-                  print("hi alt: \(sigmet.altitudeHi1 ?? .zero)")
-                  print("hi alt2: \(sigmet.altitudeHi2 ?? .zero)")
-                }
-              
-            }
+            MapScreenSigmets(vm: vm)
           }
           
           if vm.sidsVisible {
@@ -145,8 +118,12 @@ struct MapScreen: View {
             }
           }
           
-          if vm.radarSectionVM.radarVisible {
-            radarContent
+          if vm.radarVM.compositeRadarVisible {
+            compositeRadarContent
+          }
+          
+          if vm.radarVM.satelliteRadarVisible {
+            satelliteRadarContent
           }
           
           trafficContent
@@ -184,27 +161,6 @@ struct MapScreen: View {
             print("Error adding image to map: \(error)")
           }
         }
-        .onCameraChanged { context in
-          /*
-           if context.cameraState.zoom >= 6 {
-           // TODO: This will be taxing. We don't really need to query *every* time the camera changes
-           if vm.enrouteCommsVisible {
-           guard let bounds = proxy.map?.cameraBounds.bounds else { return }
-           Task {
-           mapViewModel.enrouteComms = await SQLiteManager.shared.getEnrouteComms(in: bounds)
-           }
-           }
-           }
-           */
-          /*
-           if context.cameraState.zoom >= 7.5 {
-           mapViewModel.gatesVisible = true
-           mapViewModel.fetchVisibleGates()
-           } else {
-           mapViewModel.gatesVisible = false
-           }
-           */
-        }
         .onAppear {
           proxyMap = proxy
         }
@@ -226,49 +182,6 @@ struct MapScreen: View {
           }
           coordinator.focusMap = false
         }
-        .alert("Radar Error", isPresented: $vm.radarSectionVM.rasterRadarAlertVisible) {
-          Button("Ok") {
-            // TODO: Handle retrying radar
-            vm.radarSectionVM.radarVisible = false
-          }
-        }
-        /* Deprecated, use MapViewAnnotation with LongPressGesture
-         .popover(item: $mapPopoverSelectedAirport, attachmentAnchor: PopoverAttachmentAnchor.point(mapPopoverSelectedPoint)) { airport in
-         let sids = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_sids")
-         let stars = SQLiteManager.shared.getAirportProcedures(airport.icao, procedure: "tbl_stars")
-         VStack {
-         Text(airport.name)
-         Button {
-         print("View Airport (INOP)")
-         } label: {
-         Text("View Airport")
-         }
-         Menu("View Procedures") {
-         if (!sids.isEmpty) {
-         Button {
-         let filteredSIDs = sids.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-         let grouped = Dictionary(grouping: filteredSIDs, by: { $0.procedureIdentifier })
-         mapViewModel.sidRoute = Array(grouped.values)
-         mapViewModel.displaySID.toggle()
-         } label: {
-         Text("View SIDs")
-         }
-         }
-         if (!stars.isEmpty) {
-         Button {
-         let filteredSTARs = stars.filter{!$0.transitionIdentifier.starts(with: "RW") && $0.transitionIdentifier != "ALL" }
-         let grouped = Dictionary(grouping: filteredSTARs, by: { $0.procedureIdentifier })
-         mapViewModel.starRoute = Array(grouped.values)
-         mapViewModel.displaySTAR.toggle()
-         } label: {
-         Text("View STARs")
-         }
-         }
-         }
-         }
-         .frame(idealWidth: 150, idealHeight: 300)
-         } */
-        
         .task(id: vm.selection) {
           vm.selectionDetail = nil
           guard let selection = vm.selection else { return }
@@ -281,7 +194,7 @@ struct MapScreen: View {
             }
           }
         }
-        .onTapGesture { _ in vm.selection = nil } // allow tap of map without causing selection to nil
+        .onTapGesture { _ in vm.selection = nil }
       }
       .ignoresSafeArea()
       .overlay(alignment: .topLeading) {
@@ -341,29 +254,6 @@ struct MapScreen: View {
              }
              */
             
-            /*
-             Toggle("Sigmet", systemImage: vm.sigmetsVisible ? "hazardsign.fill" : "hazardsign", isOn: $vm.sigmetsVisible)
-             .font(.title)
-             .tint(vm.sigmetsVisible ? .primary : .secondary)
-             .toggleStyle(.button)
-             .labelStyle(.iconOnly)
-             .contentTransition(.symbolEffect)
-             .glassEffect()
-             .task(id: vm.sigmetsVisible) {
-             if vm.sigmetsVisible {
-             let sigmetAPI = SigmetAPI()
-             do {
-             vm.sigmets = try await sigmetAPI.fetchSigmet()
-             } catch {
-             print("Error fetching Sigmet API: \(error)")
-             }
-             } else {
-             vm.sigmets = []
-             }
-             }
-             */
-            
-            
             Toggle("Satellite", systemImage: vm.mapSatelliteVisible ? "globe.americas.fill" : "globe.americas", isOn: $vm.mapSatelliteVisible)
               .font(.title2)
               .tint(vm.mapSatelliteVisible ? .primary : .secondary)
@@ -421,6 +311,7 @@ struct MapScreen: View {
         }
         
         Button {
+          vm.selectionDetail = nil
           splitViewVisibility = false
         } label: {
           Image(systemName: "arrow.right.to.line")
@@ -431,26 +322,13 @@ struct MapScreen: View {
       .ignoresSafeArea()
       
       if weatherPanelVisible {
-        Rectangle()
+        MapScreenWeatherPanel(vm: $vm)
           .frame(width: .infinity)
-          .background(.lapis)
+          .padding()
       }
       
     }
     .ignoresSafeArea()
-  }
-  
-  func getSigmetFillColor(sigmet: String) -> StyleColor {
-    switch sigmet {
-    case "ICE":
-      return .init(.blue)
-    case "TURB":
-      return .init(.red)
-    case "CONVECTIVE":
-      return .init(.orange)
-    default:
-      return .init(.gray)
-    }
   }
 }
 

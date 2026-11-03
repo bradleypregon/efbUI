@@ -7,8 +7,7 @@
 
 import Foundation
 
-// MARK: - RainviewerSchema
-struct RainviewerSchema: Codable {
+struct LibrewxrSchema: Codable {
     let version: String?
     let generated: Int?
     let host: String?
@@ -16,18 +15,15 @@ struct RainviewerSchema: Codable {
     let satellite: Satellite?
 }
 
-// MARK: - Radar
 struct Radar: Codable {
     let past, nowcast: [Nowcast]?
 }
 
-// MARK: - Nowcast
 struct Nowcast: Codable {
     let time: Int
     let path: String?
 }
 
-// MARK: - Satellite
 struct Satellite: Codable {
     let infrared: [Nowcast]?
 }

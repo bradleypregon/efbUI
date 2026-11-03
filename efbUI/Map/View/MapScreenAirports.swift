@@ -42,8 +42,8 @@ struct MapScreenAirports: MapContent {
     return SymbolLayer(id: id, source: Id.airportSource)
       .filter(Exp(.eq) { Exp(.get) { "size" }; size })
       .minZoom(minZoom)
-      .iconImage(icon) // airportVfr/Ifr
-      .iconSize(iconSize) // 1.05, 1.1, 1.15
+      .iconImage(icon)
+      .iconSize(iconSize)
       .iconColor(.lifr)
       .textField(Exp(.get) { "icao" })
       .textOffset(x: 0.0, y: -1.85)
@@ -51,6 +51,7 @@ struct MapScreenAirports: MapContent {
       .textSize(13)
       .textHaloWidth(1.35)
       .textHaloColor(.black)
+      .slot(.top)
   }
   
   func tapInteraction(feature: FeaturesetFeature) {
