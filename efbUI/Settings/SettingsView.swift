@@ -11,32 +11,38 @@ import Observation
 import SwiftData
 import SystemConfiguration.CaptiveNetwork
 
-extension String {
-  static let userSimbriefID = "userSimbriefID"
-  static let userOwnshipRegistration = "userOwnshipRegistration"
-  static let userOutboundDistance = "userOutboundDistance"
-  static let userAtisDistance = "userAtisDistance"
-  static let userInboundDistance = "userInboundDistance"
-  static let userShortInboundDistance = "userShortInboundDistance"
-  static let userFinalDistance = "userFinalDistance"
+@Model
+class Reminder {
+  var id: Int
+  var label: String
+  var subLabel: String
+  var distance: Int
+  
+  init(id: Int, label: String = "", subLabel: String = "", distance: Int = 20) {
+    self.id = id
+    self.label = label
+    self.subLabel = subLabel
+    self.distance = distance
+  }
 }
 
 struct SettingsView: View {
   @Environment(\.modelContext) private var modelContext
+  @Query(sort: \Reminder.id) var reminders: [Reminder]
   
   @AppStorage(.userSimbriefID) private var simbriefUserID: String = ""
   @AppStorage(.userOwnshipRegistration) private var ownshipRegistration: String = ""
-  @AppStorage(.userOutboundDistance) private var outboundDistance: Int = 20
-  @AppStorage(.userAtisDistance) private var atisDistance: Int = 40
-  @AppStorage(.userInboundDistance) private var inboundDistance: Int = 20
-  @AppStorage(.userShortInboundDistance) private var shortInboundDistance: Int = 10
-  @AppStorage(.userFinalDistance) private var finalDistance: Int = 5
+  @AppStorage(.userNotificationsEnabled) private var notisEnabled: Bool = true
+  @AppStorage(.distanceListSeedRequired) private var seedRequired: Bool = true
   
   @State var keepAwake: Bool = false
   
   @State private var calcInput: Int?
-  @State private var calcFOutput: Double = .zero
-  @State private var calcCOutput: Double = .zero
+  @State private var calcOutput: (Double, Double) = (0, 0) // (F,C)
+  
+  @State private var distanceNotificationsExpanded: Bool = false
+  
+  @State private var ipRevealed: Bool = false
   
   var numberFormatter: NumberFormatter {
     let nf = NumberFormatter()
@@ -47,98 +53,126 @@ struct SettingsView: View {
   
   var body: some View {
     NavigationStack {
-      HStack {
-        VStack {
-          Form {
-            Section(header: Text("Map")) {
-              HStack {
-                Text("Ownship Registration")
-                TextField("N123NA", text: $ownshipRegistration)
-              }
+      Form {
+        Section {
+          Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 12) {
+            GridRow {
+              Text("Ownship Reg")
+                .fontWeight(.semibold)
+              TextField("N123NA", text: $ownshipRegistration)
             }
-            Section(header: Text("Simbrief")) {
-              HStack {
-                Text("SimBrief User ID (numeric)")
-                TextField("SimBrief ID (123456)", text: $simbriefUserID)
-                  .onChange(of: simbriefUserID) { oldVal, newVal in
-                    let filtered = newVal.filter { "0123456789".contains($0) }
-                    if filtered != newVal {
-                      self.simbriefUserID = filtered
-                    }
-                  }
+            Divider()
+            GridRow {
+              Text("Simbrief ID")
+                .fontWeight(.semibold)
+              TextField("SimBrief ID (123456)", text: $simbriefUserID)
+                .onChange(of: simbriefUserID) { _, newVal in
+                  validateInput(for: newVal)
+                }
+              Button {
+                print("Launch Browser & Simbrief")
+              } label: {
+                Image(systemName: "arrow.up.forward.square")
+                  .tint(.primary)
               }
+              .buttonStyle(.glass)
             }
-            Section(header: Text("Airport Notification Distances (nm)")) {
-              HStack {
-                Text("Outbound Final Call")
-                TextField("20 miles final call...", value: $outboundDistance, format: .number)
-                  .keyboardType(.decimalPad)
+            Divider()
+            GridRow {
+              Text("Device IP")
+                .fontWeight(.semibold)
+              TextField("DeviceIP", text: .constant(getDeviceIPAddress()))
+                .disabled(true)
+                .blur(radius: ipRevealed ? 0 : 6)
+                .animation(.easeInOut, value: ipRevealed)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                  ipRevealed.toggle()
+                }
+              Button {
+                print("Copy IP")
+              } label: {
+                Image(systemName: "document.on.document")
+                  .font(.system(size: 16))
+                  .tint(.primary)
               }
-              HStack {
-                Text("Inbound Warning")
-                TextField("30 miles inbound...", value: $inboundDistance, format: .number)
-                  .keyboardType(.decimalPad)
-              }
-              HStack {
-                Text("ATIS")
-                TextField("ATIS for dest...", value: $atisDistance, format: .number)
-                  .keyboardType(.decimalPad)
-              }
-              HStack {
-                Text("Short Inbound Warning")
-                TextField("10 mile inbound...", value: $shortInboundDistance, format: .number)
-                  .keyboardType(.decimalPad)
-              }
-              HStack {
-                Text("Final Warning")
-                TextField("5 mile short final...", value: $finalDistance, format: .number)
-                  .keyboardType(.decimalPad)
-              }
+              .buttonStyle(.glass)
             }
-            
-            Section {
-              HStack {
-                Toggle("Keep Awake", systemImage: keepAwake ? "bolt.fill" : "bolt.slash", isOn: $keepAwake)
-                  .font(.title2)
-                  .toggleStyle(.button)
-                  .contentTransition(.symbolEffect)
-                  .onChange(of: keepAwake) {
-                    UIApplication.shared.isIdleTimerDisabled = keepAwake
-                  }
-              }
-            } header: {
-              Text("Misc Settings")
-            }
-            
           }
+        } header: {
+          Text("Flight")
         }
-        VStack {
-          VStack {
-            Text("Celsius/Fahrenheit Converter")
-            HStack {
+        
+        Section {
+          Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 12) {
+            GridRow {
+              Text("Cº/Fº Converter")
+                .fontWeight(.semibold)
               TextField("Celsius/Fahrenheitº", value: $calcInput, format: .number, prompt: Text("C/Fº"))
-                .textFieldStyle(.roundedBorder)
                 .keyboardType(.decimalPad)
                 .onChange(of: calcInput) {
-                  if let calc = calcInput {
-                    calcFOutput = (Double(calc)*1.8) + 32
-                    calcCOutput = (Double(calc)-32) / 1.8
-                  }
+                  calcTemp(for: calcInput)
                 }
-                .frame(width: 125)
-              Text("º")
             }
-            
-            Text("\(String(format: "%.1f", calcFOutput))ºF")
-            Text("\(String(format: "%.1f", calcCOutput))ºC")
+            HStack {
+              Text("\(String(format: "%.1f", calcOutput.0))ºF")
+                .padding()
+                .glassEffect()
+              Text("\(String(format: "%.1f", calcOutput.1))ºC")
+                .padding()
+                .glassEffect()
+            }
+            .fontWeight(.semibold)
           }
-          VStack {
-            Text("Device IP")
-            Text(getDeviceIPAddress())
+          
+          
+        } header: {
+          Text("Tools")
+        }
+        
+        Section {
+          Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 12) {
+            GridRow {
+              Text("Keep Device Awake")
+                .fontWeight(.semibold)
+              Spacer()
+              Toggle("", isOn: $keepAwake)
+                .onChange(of: keepAwake) {
+                  UIApplication.shared.isIdleTimerDisabled = keepAwake
+                }
+            }
+            GridRow {
+              Text("Enable Distance Notifications")
+                .fontWeight(.semibold)
+              Spacer()
+              Toggle("", isOn: $notisEnabled)
+            }
           }
+        } header: {
+          Text("Preferences")
+        }
+        
+        Section {
+          DisclosureGroup(isExpanded: $distanceNotificationsExpanded) {
+            List {
+              ForEach(reminders) { reminder in
+                Text(reminder.label)
+              }
+            }
+          } label: {
+            Text("Expand to Modify")
+              .fontWeight(.semibold)
+          }
+        } header: {
+          Text("Flight Notification Distances (nm)")
         }
       }
-      
+      .onAppear {
+        if seedRequired {
+          addInitialItems()
+          seedRequired = false
+        }
+      }
       .navigationTitle("Settings")
       .navigationBarTitleDisplayMode(.large)
     }
@@ -170,4 +204,46 @@ struct SettingsView: View {
     
     return address
   }
+  
+  func validateInput(for input: String) {
+    let filtered = input.filter { "0123456789".contains($0) }
+    if filtered != input {
+      self.simbriefUserID = filtered
+    }
+  }
+  
+  func calcTemp(for temp: Int?) {
+    guard let temp = temp else { return }
+    let F = (Double(temp)*1.8) + 32
+    let C = (Double(temp)-32) / 1.8
+    calcOutput = (F,C)
+  }
+  
+  func addInitialItems() {
+    let items: [Reminder] = [
+      .init(id: 1, label: "Outbound", subLabel: "Final Call", distance: 10),
+      .init(id: 2, label: "Inbound", subLabel: "Initial Call", distance: 20),
+      .init(id: 3, label: "ATIS", subLabel: "", distance: 40),
+      .init(id: 4, label: "Inbound Call", subLabel: "", distance: 10),
+      .init(id: 5, label: "Final", subLabel: "Approach Call", distance: 5)
+    ]
+    for item in items {
+      modelContext.insert(item)
+    }
+  }
+}
+
+#Preview {
+  let mock: UserDefaults = {
+    let store = UserDefaults(suiteName: "settings_preview")!
+    store.set("", forKey: .userSimbriefID)
+    store.set("", forKey: .userOwnshipRegistration)
+    store.set(true, forKey: .userNotificationsEnabled)
+    store.set(true, forKey: .distanceListSeedRequired)
+    return store
+  }()
+  
+  SettingsView()
+    .defaultAppStorage(mock)
+    .modelContainer(for: Reminder.self)
 }

@@ -161,13 +161,13 @@ struct AirportScreen: View {
         await vm.fetchFaaMetar(icao: vm.selectedAirportICAO)
       }
     }
-    .onAppear {
-      vm.selectedAirportICAO = coordinator.selectedICAO ?? ""
-      if coordinator.selectedICAO != "" && vm.selectedAirportICAO != vm.prevICAO {
-        vm.selectedAirportICAO = coordinator.selectedICAO ?? ""
-        //vm.selectedAirport = SQLiteManager.shared.selectAirport(vm.selectedAirportICAO)
-      }
-    }
+//    .onAppear {
+//      vm.selectedAirportICAO = coordinator.selectedICAO
+//      if coordinator.selectedICAO != "" && vm.selectedAirportICAO != vm.prevICAO {
+//        vm.selectedAirportICAO = coordinator.selectedICAO
+//        vm.selectedAirport = SQLiteManager.shared.selectAirport(vm.selectedAirportICAO)
+//      }
+//    }
   }
   
 }

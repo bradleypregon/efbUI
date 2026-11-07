@@ -171,9 +171,9 @@ struct MapScreen: View {
           vm.traffic = simConnect.traffic
         }
         .task(id: coordinator.focusMap) {
-          guard coordinator.focusMap, let icao = coordinator.selectedICAO else { return }
+          guard coordinator.focusMap, !coordinator.icao.isEmpty else { return }
           do {
-            if let apt = try await grdb.fetchAirport(by: icao), let lat = apt.airportRefLat, let long = apt.airportRefLong {
+            if let apt = try await grdb.fetchAirport(by: coordinator.icao), let lat = apt.airportRefLat, let long = apt.airportRefLong {
               let coords: CLLocationCoordinate2D = .init(latitude: lat, longitude: long)
               proxy.camera?.ease(to: .init(center: coords, zoom: 13), duration: 1.25)
             }

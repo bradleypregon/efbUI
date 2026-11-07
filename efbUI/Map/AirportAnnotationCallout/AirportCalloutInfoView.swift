@@ -50,8 +50,8 @@ struct AirportCalloutInfoView: View {
   
   func getCommunicationType(comms: [AirportCommunicationTable], type: String) -> String {
     if comms == [] { return "n/a" }
-    if let freq = comms.first(where: { $0.communicationType == type && $0.frequencyUnits == "V"} )?.communicationFrequency?.string {
-      return freq
+    if let freq = comms.first(where: { $0.communicationType == type && $0.frequencyUnits == "V"} )?.communicationFrequency {
+      return String(freq)
     } else {
       return "n/a"
     }

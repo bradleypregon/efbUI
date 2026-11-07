@@ -79,69 +79,70 @@ struct AirportDetailView: View {
   @Environment(AppCoordinator.self) private var coordinator
   @Environment(GRDBManager.self) private var grdbMan
   
-  @AppStorage("homeAirportICAO") private var homeICAO: String = "KDSM"
-  @AppStorage("lastAirportICAO") private var lastICAO: String = "KDEN"
-  
   @State private var selectedTab: AirportTab = .Info
   @State private var airport: AirportTable?
   @State private var runways: [RunwayTable] = []
   
-  private var startupICAO: String? {
-    if !lastICAO.isEmpty { return lastICAO }
-    if !homeICAO.isEmpty { return homeICAO }
-    return nil
-  }
-  
   var body: some View {
-    if let airport {
-      // Move to struct or view
-      VStack(spacing: 12) {
-        // Info
-        VStack {
-          SectionHeader(icon: "info.circle", title: airport.airportIdentifier)
-            .frame(maxWidth: .infinity, alignment: .leading)
+    Group {
+      if let airport {
+        // Move to struct or view
+        VStack(spacing: 12) {
+          // Info
+          VStack {
+            SectionHeader(icon: "info.circle", title: airport.airportIdentifier)
+              .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Grid?
+            Text("Sunrise, Sunset, Coordinates, Elevation")
+          }
+          .padding()
+          .background(.thinMaterial)
+          .containerShape(.rect(cornerRadius: 32, style: .continuous))
           
-          // Grid?
-          Text("Sunrise, Sunset, Coordinates, Elevation")
+          Picker("AirportTab", selection: $selectedTab) {
+            ForEach(AirportTab.allCases) { type in
+              Text(type.rawValue)
+            }
+          }
+          .pickerStyle(.segmented)
+          
+          Group {
+            switch selectedTab {
+            case .Info:
+              AirportInfoView(airport: airport, runways: runways)
+            case .Weather:
+              AirportWeatherView()
+            case .Runway:
+              AirportRunwayView(icao: airport.airportIdentifier, runways: runways)
+            default:
+              EmptyView()
+            }
+          }
+          
+          Spacer()
         }
         .padding()
-        .background(.thinMaterial)
-        .containerShape(.rect(cornerRadius: 32, style: .continuous))
-        
-        Picker("AirportTab", selection: $selectedTab) {
-          ForEach(AirportTab.allCases) { type in
-            Text(type.rawValue)
+      }
+      else {
+        ContentUnavailableView {
+          Label("No Airport Selected", systemImage: "airplane.circle")
+        } description: {
+          Text("Search for an airport")
+        } actions: {
+          Button("Search Airports") {
+            coordinator.tab = .search
+          }
+          Button("Import SimBrief") {
+            // uhh
           }
         }
-        .pickerStyle(.segmented)
         
-        switch selectedTab {
-        case .Info:
-          AirportInfoView(airport: airport, runways: runways)
-        case .Weather:
-          AirportWeatherView()
-        case .Runway:
-          AirportRunwayView(icao: airport.airportIdentifier, runways: runways)
-        default:
-          EmptyView()
-        }
-        
-        Spacer()
       }
-      .padding()
-    } else {
-      ContentUnavailableView {
-        Label("No Airport Selected", systemImage: "airplane.circle")
-      } description: {
-        Text("Search for an airport, or set a home airport in Settings.")
-      } actions: {
-        Button("Search Airports") { /* show search */ }
-        Button("Import SimBrief") { /* ... */ }
-      }
-      .task(id: coordinator.selectedICAO) {
-        guard let icao = coordinator.selectedICAO, !icao.isEmpty else { return }
-        await fetchAirportData(icao: icao)
-      }
+    } // end group
+    .task(id: coordinator.icao) {
+      guard !coordinator.icao.isEmpty else { return }
+      await fetchAirportData(icao: coordinator.icao)
     }
   }
   
@@ -149,9 +150,6 @@ struct AirportDetailView: View {
     do {
       airport = try await grdbMan.fetchAirport(by: icao)
       runways = try await grdbMan.fetchRunways(for: icao)
-      
-      lastICAO = icao
-      if airport != nil { lastICAO = icao }
     } catch {
       print("Error fetching airport data: \(error)")
       airport = nil
