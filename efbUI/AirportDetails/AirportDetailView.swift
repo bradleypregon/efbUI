@@ -114,7 +114,7 @@ struct AirportDetailView: View {
             case .Weather:
               AirportWeatherView()
             case .Runway:
-              AirportRunwayView(icao: airport.airportIdentifier, runways: runways)
+              AirportRunwayView(runways: runways)
             default:
               EmptyView()
             }

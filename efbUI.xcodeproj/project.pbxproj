@@ -22,7 +22,7 @@
 		1CAB6FF530936B6E0085CCDB /* FloatingPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CAB6FF430936B6E0085CCDB /* FloatingPadView.swift */; };
 		1CFDA4C7308E3ECD00C8AFCF /* ToastsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFDA4C6308E3ECD00C8AFCF /* ToastsView.swift */; };
 		1CFDA4C9308E3F0500C8AFCF /* ToastPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFDA4C8308E3F0500C8AFCF /* ToastPill.swift */; };
-		3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0111CC2737253C001CFDC5 /* AirportScreen.swift */; };
+		3A0111CD2737253C001CFDC5 /* AirportScreen_Deprecated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0111CC2737253C001CFDC5 /* AirportScreen_Deprecated.swift */; };
 		3A24A78D27321C15000D98E5 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A24A78C27321C15000D98E5 /* TabBar.swift */; };
 		3A24A79227324259000D98E5 /* ScratchPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A24A79127324259000D98E5 /* ScratchPadView.swift */; };
 		3A81763F27339AA100445CDA /* StatBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A81763E27339AA100445CDA /* StatBarView.swift */; };
@@ -99,7 +99,7 @@
 		1CAB6FF430936B6E0085CCDB /* FloatingPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPadView.swift; sourceTree = "<group>"; };
 		1CFDA4C6308E3ECD00C8AFCF /* ToastsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastsView.swift; sourceTree = "<group>"; };
 		1CFDA4C8308E3F0500C8AFCF /* ToastPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPill.swift; sourceTree = "<group>"; };
-		3A0111CC2737253C001CFDC5 /* AirportScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportScreen.swift; sourceTree = "<group>"; };
+		3A0111CC2737253C001CFDC5 /* AirportScreen_Deprecated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirportScreen_Deprecated.swift; sourceTree = "<group>"; };
 		3A24A78C27321C15000D98E5 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
 		3A24A79127324259000D98E5 /* ScratchPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPadView.swift; sourceTree = "<group>"; };
 		3A81763E27339AA100445CDA /* StatBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatBarView.swift; sourceTree = "<group>"; };
@@ -160,7 +160,6 @@
 		1C672BA230640E20003AA395 /* GRDBModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = GRDBModels; sourceTree = "<group>"; };
 		1C6811413091265800017B9B /* View */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = View; sourceTree = "<group>"; };
 		1C716C16306D63C800E6256C /* AirportAnnotationCallout */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AirportAnnotationCallout; sourceTree = "<group>"; };
-		1CA2666F307141000097E6F1 /* Diagram */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Diagram; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,11 +204,7 @@
 			isa = PBXGroup;
 			children = (
 				1C6811413091265800017B9B /* View */,
-				1CA2666F307141000097E6F1 /* Diagram */,
-				A20620252B49DC890034D902 /* AirportScreenViewModel.swift */,
-				3A0111CC2737253C001CFDC5 /* AirportScreen.swift */,
 				A21B02362B5034850041D60B /* PDFKitView.swift */,
-				A26E17AB2B9C11D9002B4090 /* AirportRunwayView_Deprecated.swift */,
 				1C3F2A633052298C00F040FD /* AirportDetailView.swift */,
 			);
 			path = AirportDetails;
@@ -419,6 +414,9 @@
 		A2EC6FD72B49AF9A00F31364 /* Deprecated */ = {
 			isa = PBXGroup;
 			children = (
+				A20620252B49DC890034D902 /* AirportScreenViewModel.swift */,
+				3A0111CC2737253C001CFDC5 /* AirportScreen_Deprecated.swift */,
+				A26E17AB2B9C11D9002B4090 /* AirportRunwayView_Deprecated.swift */,
 				A26E17AE2B9EA39E002B4090 /* SigmetSchema.swift */,
 				1C31A65E2EBCFC0D00E25772 /* NotePadView.swift */,
 				1C31A6602EBD009F00E25772 /* CurveView.swift */,
@@ -473,7 +471,6 @@
 				1C672BA230640E20003AA395 /* GRDBModels */,
 				1C6811413091265800017B9B /* View */,
 				1C716C16306D63C800E6256C /* AirportAnnotationCallout */,
-				1CA2666F307141000097E6F1 /* Diagram */,
 			);
 			name = efbUI;
 			packageProductDependencies = (
@@ -602,7 +599,7 @@
 				1C31A65F2EBCFC0D00E25772 /* NotePadView.swift in Sources */,
 				A21B5C262CD973F40017778C /* MapScreenWaypointView.swift in Sources */,
 				1CFDA4C7308E3ECD00C8AFCF /* ToastsView.swift in Sources */,
-				3A0111CD2737253C001CFDC5 /* AirportScreen.swift in Sources */,
+				3A0111CD2737253C001CFDC5 /* AirportScreen_Deprecated.swift in Sources */,
 				A2DE93D82B9237390065FEF6 /* SPATISTemplateView.swift in Sources */,
 				A26E17B12B9EA3A5002B4090 /* SigmetAPI.swift in Sources */,
 				A2DE93DA2B925E340065FEF6 /* SPCRAFTTemplateView.swift in Sources */,
